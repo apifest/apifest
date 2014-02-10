@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2013-2014, ApiFest project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<mappings>
+    <actions>
+        <action name="ReplaceCustomerId" class="com.apifest.example.ReplaceCustomerIdAction"/>
+        <action name="AddSenderIdInBody" class="com.apifest.example.AddSenderIdInBody"/>
+    </actions>
+    <filters>
+        <filter name="RemoveBalance" class="com.apifest.example.RemoveBalanceFilter"/>
+    </filters>
+    <endpoints>
+        <endpoint external="/me" internal="/customer/{customerId}" method="GET">
+            <action name="ReplaceCustomerId"/>
+            <filter name="RemoveBalance" />
+        </endpoint>
+        <endpoint external="/payments/{paymentId}" internal="/payments/{paymentId}" method="GET" varExpression="\d*" varName="paymentId"/>
+    </endpoints>
+    <errors>
+    	<error status="201" message='{"message":"resource created"}' />
+        <error status="300" message='{"error":"further actions required"}' />
+        <error status="404" message='{"error":"resource not found"}' />
+        <error status="500" message='{"error":"ops...something wrong"}' />
+    </errors>
+</mappings>
+

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~ Copyright 2013-2014, ApiFest project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="mappings" type="mapping"/>
+
+  <xs:complexType name="endpointsWrapper">
+    <xs:sequence>
+      <xs:element name="endpoint" type="endpoint" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="endpoint">
+    <xs:sequence>
+      <xs:element name="action" type="action" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="filter" type="filter" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="external" type="xs:string" use="required"/>
+    <xs:attribute name="internal" type="xs:string" use="required"/>
+    <xs:attribute name="method" type="xs:string" use="required"/>
+    <xs:attribute name="varExpression" type="xs:string"/>
+    <xs:attribute name="varName" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="action">
+    <xs:sequence/>
+    <xs:attribute name="name" type="xs:string"/>
+    <xs:attribute name="class" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="filter">
+    <xs:sequence/>
+    <xs:attribute name="name" type="xs:string"/>
+    <xs:attribute name="class" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="actionsWrapper">
+    <xs:sequence>
+      <xs:element name="action" type="action" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="filtersWrapper">
+    <xs:sequence>
+      <xs:element name="filter" type="filter" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="errorsWrapper">
+    <xs:sequence>
+      <xs:element name="error" type="error" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="error">
+    <xs:sequence/>
+    <xs:attribute name="status" type="xs:string"/>
+    <xs:attribute name="message" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="mapping">
+    <xs:sequence>
+      <xs:element name="actions" type="actionsWrapper" minOccurs="0"/>
+      <xs:element name="filters" type="filtersWrapper" minOccurs="0"/>
+      <xs:element name="endpoints" type="endpointsWrapper" minOccurs="0"/>
+      <xs:element name="errors" type="errorsWrapper" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="mappingConfig" final="extension restriction">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="mappingConfigValidator">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="mappingPattern">
+    <xs:sequence/>
+  </xs:complexType>
+</xs:schema>
+
