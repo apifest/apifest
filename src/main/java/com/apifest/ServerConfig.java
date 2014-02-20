@@ -41,6 +41,7 @@ public final class ServerConfig {
     protected static Integer backendPort;
     protected static String tokenValidateEndpoint;
     protected static Integer connectTimeout;
+    protected static String customJarPath;
 
     private ServerConfig() {
     }
@@ -73,6 +74,7 @@ public final class ServerConfig {
         backendPort = Integer.valueOf(props.getProperty("backend.port"));
         tokenValidateEndpoint = props.getProperty("token.validate.endpoint");
         connectTimeout = Integer.valueOf(props.getProperty("connect.timeout", "10"));
+        customJarPath = props.getProperty("custom.jar");
     }
 
     public static String getHost() {
@@ -101,5 +103,9 @@ public final class ServerConfig {
 
     public static Integer getConnectTimeout() {
         return connectTimeout;
+    }
+
+    public static String getCustomJarPath() {
+        return customJarPath;
     }
 }

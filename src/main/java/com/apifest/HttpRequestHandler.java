@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
  */
 public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
-    //TODO: REVISIT: Change endpoint
     protected static final String RELOAD_URI = "/apifest-reload";
 
     protected Logger log = LoggerFactory.getLogger(HttpRequestHandler.class);
@@ -70,13 +69,13 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             MappingEndpoint mapping = config.getMappingEndpoint(uri, method.toString());
             String userId = null;
             if (mapping != null) {
-                log.info("authRequired: {}", mapping.getAuthRequired());
+                log.debug("authRequired: {}", mapping.getAuthRequired());
                 if("true".equals(mapping.getAuthRequired())) {
                     AccessTokenValidator tokenValidator = new AccessTokenValidator();
                     HttpResponse tokenCheckResponse = tokenValidator.checkAcessToken(req, mapping.getScope());
                     if(!HttpResponseStatus.OK.equals(tokenCheckResponse.getStatus())) {
                         ChannelFuture future = channel.write(tokenCheckResponse);
-                        log.info(tokenCheckResponse.getContent().toString());
+                        log.debug(tokenCheckResponse.getContent().toString());
                         future.addListener(ChannelFutureListener.CLOSE);
                         return;
                     }
@@ -86,7 +85,15 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 // if several filters, create them all
                 BasicFilter filter = null;
                 if (mapping.getFilters() != null && mapping.getFilters().size() > 0 ){
-                    filter = config.getFilter(mapping.getFilters().get(0));
+                    try {
+                        filter = config.getFilter(mapping.getFilters().get(0));
+                    } catch (MappingException e1) {
+                        log.error("cannot map request", e1);
+                        HttpResponse response = HttpResponseFactory.createISEResponse();
+                        ChannelFuture future = channel.write(response);
+                        future.addListener(ChannelFutureListener.CLOSE);
+                        return;
+                    }
                 }
 
                 ResponseListener responseListener = new ResponseListener(filter) {
@@ -116,8 +123,17 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
                 if(mapping.getActions() != null) {
                     for(MappingAction mappingAction : mapping.getActions()) {
-                        BasicAction action = config.getAction(mappingAction);
-                        req = action.execute(req, mapping.getInternalEndpoint(), userId);
+                        BasicAction action;
+                        try {
+                            action = config.getAction(mappingAction);
+                            req = action.execute(req, mapping.getInternalEndpoint(), userId);
+                        } catch (MappingException e1) {
+                            log.error("cannot map request", e1);
+                            HttpResponse response = HttpResponseFactory.createISEResponse();
+                            ChannelFuture future = channel.write(response);
+                            future.addListener(ChannelFutureListener.CLOSE);
+                            return;
+                        }
                     }
                 }
                 client.send(req, ServerConfig.getBackendHost(), ServerConfig.getBackendPort(), responseListener);

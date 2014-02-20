@@ -118,14 +118,14 @@ ApiFest Mapping Server will get the mappings file from apifest.properties file -
 
 ***apifest.mappings***
 
-* ** Setup connection timeout**
+* **Setup connection timeout**
 
 In order to setup connection timeout(in ms) to the backend, use the following property in apifest.properties file -
 
 ***connect.timeout***
 
 
-** 2. Hazelcast config**
+**2. Hazelcast config**
 
 As ApiFest Mapping Server uses Hazelcast for its mapping configurations, you should create hazelcast configuration 
 file with Map named "mappings".
@@ -134,7 +134,7 @@ The path to the hazelcast configuration file should be passed as system variable
 
 ***-Dhazelcast.config.file***
 
-** 3. Start ApiFest Mapping Server **
+**3. Start ApiFest Mapping Server**
 
 You can start AMS with the following command:
 

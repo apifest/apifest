@@ -4,3 +4,4 @@ backend.host=192.168.1.144
 backend.port=3000
 apifest.mappings=
 connect.timeout=
+custom.jar=

@@ -128,7 +128,7 @@ public class MappingConfig implements Serializable {
      * @param mappingAction <code>MappingAction</code>
      * @return instance of <code>BasicAction</code>
      */
-    public BasicAction getAction(MappingAction mappingAction) {
+    public BasicAction getAction(MappingAction mappingAction) throws MappingException {
         BasicAction action = null;
         String actionClass;
         if (mappingAction.getActionClassName() != null) {
@@ -136,15 +136,22 @@ public class MappingConfig implements Serializable {
         } else {
             actionClass = getActions().get(mappingAction.getName());
         }
+        if(actionClass == null) {
+            throw new MappingException("action " + mappingAction.getName() + " not mapped to class");
+        }
+        Class<?> clazz;
         try {
-            Class<?> cl = Class.forName(actionClass);
-            action = (BasicAction) cl.newInstance();
+             clazz = Class.forName(actionClass);
         } catch (ClassNotFoundException e) {
-            log.error("action class {} not found", actionClass);
+            // load class from custom jar
+            clazz = MappingConfigLoader.loadCustomClass(actionClass);
+        }
+        try {
+            action = (BasicAction) clazz.newInstance();
         } catch (InstantiationException e) {
-            log.error("action class {} does not extend BasicAction class", actionClass);
+            throw new MappingException("cannot instantiate action class " + actionClass, e);
         } catch (IllegalAccessException e) {
-            log.error("action class {} not loaded", actionClass);
+            throw new MappingException("cannot instantiate action class " + actionClass, e);
         }
         return action;
     }
@@ -154,7 +161,7 @@ public class MappingConfig implements Serializable {
      * @param responseFilter response filter
      * @return BasicFilter instance
      */
-    public BasicFilter getFilter(ResponseFilter responseFilter) {
+    public BasicFilter getFilter(ResponseFilter responseFilter) throws MappingException {
         BasicFilter filter = null;
         String filterClass;
         if (responseFilter.getFilterClassName() != null) {
@@ -162,15 +169,22 @@ public class MappingConfig implements Serializable {
         } else {
             filterClass = getFilters().get(responseFilter.getName());
         }
+        if(filterClass == null) {
+            throw new MappingException("filter " + responseFilter.getName() + " not mapped to class");
+        }
+        Class<?> clazz;
         try {
-            Class<?> cl = Class.forName(filterClass);
-            filter = (BasicFilter) cl.newInstance();
+             clazz = Class.forName(filterClass);
         } catch (ClassNotFoundException e) {
-            log.error("action class {} not found", filterClass);
+            // load class from custom jar
+            clazz = MappingConfigLoader.loadCustomClass(filterClass);
+        }
+        try{
+            filter = (BasicFilter) clazz.newInstance();
         } catch (InstantiationException e) {
-            log.error("action class {} does not extend BasicFilter class", filterClass);
+            throw new MappingException("cannot instantiate filter class " + filterClass, e);
         } catch (IllegalAccessException e) {
-            log.error("action class {} not loaded", filterClass);
+            throw new MappingException("cannot instantiate filter class " + filterClass, e);
         }
         return filter;
     }

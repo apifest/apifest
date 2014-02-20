@@ -17,6 +17,10 @@
 package com.apifest;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +41,8 @@ import org.slf4j.LoggerFactory;
 public final class MappingConfigLoader {
 
     private static Logger log = LoggerFactory.getLogger(MappingConfigLoader.class);
+
+    protected static URLClassLoader jarClassLoader;
 
     private MappingConfigLoader() {
     }
@@ -70,6 +76,51 @@ public final class MappingConfigLoader {
             log.error("Cannot load mapping configuration, file {}", mappingFileDir);
             throw new IllegalArgumentException(e);
         }
+        //load all actions and filters plus custom ones
+        if(ServerConfig.getCustomJarPath() != null && ServerConfig.getCustomJarPath().length() > 0) {
+            try {
+                loadCustomClasses(config.getActions().values());
+            } catch (MalformedURLException e) {
+                log.error("Cannot load custom jar file", e);
+                throw new IllegalArgumentException(e);
+            }
+        }
+    }
+
+    public static Class<?> loadCustomClass(String className) throws MappingException{
+        if(jarClassLoader == null) {
+            try {
+                createJarClassLoader();
+            } catch (MalformedURLException e) {
+                throw new MappingException("cannot load custom class", e);
+            }
+        }
+
+        try {
+            return jarClassLoader.loadClass(className);
+        } catch (ClassNotFoundException e) {
+            throw new MappingException("cannot load custom class", e);
+        }
+    }
+
+    private static void createJarClassLoader() throws MalformedURLException {
+        File file = new File(ServerConfig.getCustomJarPath());
+        URL jarfile = file.toURI().toURL();
+        jarClassLoader = URLClassLoader.newInstance(new URL[] {jarfile}, MappingConfigLoader.class.getClassLoader());
+    }
+
+    private static void loadCustomClasses(Collection<String> actionClasses) throws MalformedURLException {
+        if(jarClassLoader == null) {
+            createJarClassLoader();
+        }
+        for (String className : actionClasses) {
+            try {
+                jarClassLoader.loadClass(className);
+            } catch (ClassNotFoundException e) {
+                log.error("cannot load custom class {}", className, e);
+            }
+        }
+
     }
 
 

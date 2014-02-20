@@ -97,7 +97,7 @@ public class MappingConfigTest {
     }
 
     @Test
-    public void when_actionClassname_is_null_get_className_from_actions_config() {
+    public void when_actionClassname_is_null_get_className_from_actions_config() throws MappingException {
         // GIVEN
         MappingEndpoint endpoint = new MappingEndpoint();
         List<MappingAction> actions = new ArrayList<MappingAction>();

@@ -44,11 +44,11 @@ public class RemoveBalanceFilter extends BasicFilter {
             log.info("response body: " + json.toString());
             json.remove("balance");
             log.info("modified response body: " + json.toString());
-            byte [] newContent = json.toString().getBytes();
+            byte [] newContent = json.toString().getBytes(CharsetUtil.UTF_8);
             response.setContent(ChannelBuffers.copiedBuffer(newContent));
             HttpHeaders.setContentLength(response, newContent.length);
         } catch (JSONException e) {
-            log.error("Cannot parse JSON");
+            log.error("Cannot parse JSON", e);
         }
         return response;
     }
