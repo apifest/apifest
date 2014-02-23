@@ -1,6 +1,11 @@
+/.project
+*/.project
 .classpath
-.project
+*/.classpath
 .settings/*
+*/.settings/*
 target/*
-test-output/*
+*/target/*
+*/test-output/*
 *.log
+
