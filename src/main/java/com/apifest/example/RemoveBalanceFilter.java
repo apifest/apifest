@@ -25,7 +25,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.apifest.BasicFilter;
+import com.apifest.api.BasicFilter;
+
 
 /**
  * Filter that removes balance field from response.

@@ -18,6 +18,8 @@ package com.apifest;
 
 import org.jboss.netty.handler.codec.http.HttpMessage;
 
+import com.apifest.api.BasicFilter;
+
 /**
  * Interface for listeners that handle the response received.
  *

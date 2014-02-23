@@ -27,6 +27,12 @@ import java.util.regex.Matcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.apifest.api.BasicAction;
+import com.apifest.api.BasicFilter;
+import com.apifest.api.MappingAction;
+import com.apifest.api.MappingEndpoint;
+import com.apifest.api.ResponseFilter;
+
 /**
  * Holds the configuration for a mapping version.
  *

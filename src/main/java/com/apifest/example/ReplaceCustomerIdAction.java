@@ -18,7 +18,9 @@ package com.apifest.example;
 
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
-import com.apifest.BasicAction;
+import com.apifest.api.BasicAction;
+
+
 
 /**
  * Action that replaces {customerId} with actual customer id value.

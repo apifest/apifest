@@ -34,6 +34,11 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.apifest.api.BasicAction;
+import com.apifest.api.BasicFilter;
+import com.apifest.api.MappingAction;
+import com.apifest.api.MappingEndpoint;
+
 
 /**
  * Handler for requests received on the server.

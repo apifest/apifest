@@ -34,8 +34,12 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.mockito.*;
 
-import com.apifest.Mapping.ActionsWrapper;
-import com.apifest.Mapping.EndpointsWrapper;
+import com.apifest.api.BasicAction;
+import com.apifest.api.Mapping;
+import com.apifest.api.Mapping.ActionsWrapper;
+import com.apifest.api.Mapping.EndpointsWrapper;
+import com.apifest.api.MappingAction;
+import com.apifest.api.MappingEndpoint;
 import com.apifest.example.AddSenderIdInBodyAction;
 import com.apifest.example.RemoveBalanceFilter;
 import com.apifest.example.ReplaceCustomerIdAction;

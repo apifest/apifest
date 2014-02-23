@@ -33,6 +33,12 @@ import javax.xml.bind.Unmarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.apifest.api.Mapping;
+import com.apifest.api.MappingAction;
+import com.apifest.api.MappingEndpoint;
+import com.apifest.api.MappingError;
+import com.apifest.api.ResponseFilter;
+
 /**
  * Loads/reloads all mapping configurations.
  *
