@@ -93,7 +93,7 @@ public final class MappingConfigLoader {
         }
     }
 
-    public static Class<?> loadCustomClass(String className) throws MappingException{
+    public static Class<?> loadCustomClass(String className) throws MappingException, ClassNotFoundException {
         if(jarClassLoader == null) {
             try {
                 createJarClassLoader();
@@ -101,12 +101,7 @@ public final class MappingConfigLoader {
                 throw new MappingException("cannot load custom class", e);
             }
         }
-
-        try {
-            return jarClassLoader.loadClass(className);
-        } catch (ClassNotFoundException e) {
-            throw new MappingException("cannot load custom class", e);
-        }
+        return jarClassLoader.loadClass(className);
     }
 
     private static void createJarClassLoader() throws MalformedURLException {
@@ -195,6 +190,8 @@ public final class MappingConfigLoader {
      */
     public static void reloadConfigs() {
         // TODO: Think about how to switch between old and new version of the mapping configs (use version?)
+        jarClassLoader = null;
         load();
+
     }
 }

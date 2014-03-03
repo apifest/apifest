@@ -147,10 +147,14 @@ public class MappingConfig implements Serializable {
         }
         Class<?> clazz;
         try {
-             clazz = Class.forName(actionClass);
-        } catch (ClassNotFoundException e) {
             // load class from custom jar
             clazz = MappingConfigLoader.loadCustomClass(actionClass);
+        } catch (ClassNotFoundException e) {
+            try {
+                clazz = Class.forName(actionClass);
+            } catch (ClassNotFoundException e1) {
+                throw new MappingException("cannot instantiate action class " + actionClass, e1);
+            }
         }
         try {
             action = (BasicAction) clazz.newInstance();
@@ -180,11 +184,16 @@ public class MappingConfig implements Serializable {
         }
         Class<?> clazz;
         try {
-             clazz = Class.forName(filterClass);
-        } catch (ClassNotFoundException e) {
             // load class from custom jar
             clazz = MappingConfigLoader.loadCustomClass(filterClass);
+        } catch (ClassNotFoundException e) {
+            try {
+                clazz = Class.forName(filterClass);
+            } catch (ClassNotFoundException e1) {
+                throw new MappingException("cannot instantiate filter class " + filterClass, e1);
+            }
         }
+
         try{
             filter = (BasicFilter) clazz.newInstance();
         } catch (InstantiationException e) {
