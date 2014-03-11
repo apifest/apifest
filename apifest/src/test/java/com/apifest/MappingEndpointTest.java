@@ -34,13 +34,13 @@ public class MappingEndpointTest {
     public void create_uniqueKey_of_method_and_uri() throws Exception {
         // GIVEN
         MappingEndpoint endpoint = new MappingEndpoint();
-        endpoint.setExternalEndpoint("/countries");
+        endpoint.setExternalEndpoint("/v0.1/countries");
         endpoint.setMethod("GET");
 
         // WHEN
         String key = endpoint.getUniqueKey();
 
         // THEN
-        assertEquals(key, "GET/countries");
+        assertEquals(key, "GET/v0.1/countries");
     }
 }

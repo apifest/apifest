@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<mappings>
+<mappings version="v0.1">
     <actions>
         <action name="ReplaceCustomerId" class="com.apifest.example.ReplaceCustomerIdAction"/>
         <action name="AddSenderIdInBody" class="com.apifest.example.AddSenderIdInBody"/>
@@ -22,12 +22,13 @@
     <filters>
         <filter name="RemoveBalance" class="com.apifest.example.RemoveBalanceFilter"/>
     </filters>
+    <backend host="127.0.0.1" port="5000"/>
     <endpoints>
-        <endpoint external="/me" internal="/customer/{customerId}" method="GET">
+        <endpoint external="/v0.1/me" internal="/customer/{customerId}" method="GET">
             <action name="ReplaceCustomerId"/>
             <filter name="RemoveBalance" />
         </endpoint>
-        <endpoint external="/payments/{paymentId}" internal="/payments/{paymentId}" method="GET" varExpression="\d*" varName="paymentId"/>
+        <endpoint external="/v0.1/payments/{paymentId}" internal="/payments/{paymentId}" method="GET" varExpression="\d*" varName="paymentId"/>
     </endpoints>
     <errors>
     	<error status="201" message='{"message":"resource created"}' />

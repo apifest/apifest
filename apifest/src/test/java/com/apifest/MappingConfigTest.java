@@ -54,12 +54,16 @@ import static org.testng.Assert.*;
 public class MappingConfigTest {
 
     @BeforeTest
-    public void setup() {
+    public void setup() throws Exception {
         String hzPath = getClass().getClassLoader().getResource("test_mapping.xml").getPath();
-        ServerConfig.mappingsPath = hzPath;
+        ServerConfig.mappingsPath = hzPath.replace("/test_mapping.xml", "");
+        ServerConfig.customJarPath = null;
 
         HazelcastConfigInstance.configInstance = mock(HazelcastConfigInstance.class);
         Map<String, com.apifest.MappingConfig> map = new HashMap<String, MappingConfig>();
+        MappingConfig config = mock(MappingConfig.class);
+        doReturn(mock(BasicAction.class)).when(config).getAction(any(MappingAction.class));
+        map.put("v0.1", config);
         doReturn(map).when(HazelcastConfigInstance.configInstance).getMappingConfigs();
 
         // mock loggers
@@ -76,12 +80,12 @@ public class MappingConfigTest {
         MappingConfigLoader.load();
 
         // THEN
-        MappingConfig config = MappingConfigLoader.getConfig();
-        Map<String, String> actions = config.getActions();
+        List<MappingConfig> config = MappingConfigLoader.getConfig();
+        Map<String, String> actions = config.get(0).getActions();
         assertEquals(actions.get("ReplaceCustomerId"), "com.apifest.example.ReplaceCustomerIdAction");
         assertEquals(actions.get("AddSenderIdInBody"), "com.apifest.example.AddSenderIdInBody");
 
-        MappingEndpoint endpoint = config.getMappingEndpoint("/me", "GET");
+        MappingEndpoint endpoint = config.get(0).getMappingEndpoint("/v0.1/me", "GET");
         assertEquals(endpoint.getInternalEndpoint(), "/customer/{customerId}");
         assertEquals(endpoint.getActions().get(0).getName(), "ReplaceCustomerId");
     }
@@ -110,10 +114,15 @@ public class MappingConfigTest {
         actions.add(mappingAction);
         endpoint.setActions(actions);
 
-        MappingConfigLoader.load();
+        HazelcastConfigInstance.configInstance = mock(HazelcastConfigInstance.class);
+        Map<String, com.apifest.MappingConfig> map = new HashMap<String, MappingConfig>();
+        MappingConfig config = mock(MappingConfig.class);
+        doReturn(new ReplaceCustomerIdAction()).when(config).getAction(mappingAction);
+        map.put("v0.1", config);
+        doReturn(map).when(HazelcastConfigInstance.configInstance).getMappingConfigs();
 
         // WHEN
-        BasicAction action = MappingConfigLoader.getConfig().getAction(mappingAction);
+        BasicAction action = MappingConfigLoader.getConfig().get(0).getAction(mappingAction);
 
         // THEN
         assertTrue(action instanceof ReplaceCustomerIdAction);
@@ -124,8 +133,8 @@ public class MappingConfigTest {
     public void when_mapping_with_RE_construct_Pattern() throws Exception {
         // GIVEN
         MappingEndpoint endpoint = new MappingEndpoint();
-        endpoint.setExternalEndpoint("/payments/{paymentId}");
-        endpoint.setInternalEndpoint("/payments/{paymentId}");
+        endpoint.setExternalEndpoint("/v0.1/payments/{paymentId}");
+        endpoint.setInternalEndpoint("/v0.1/payments/{paymentId}");
         endpoint.setVarExpression("\\d*");
         endpoint.setVarName("paymentId");
 
@@ -133,7 +142,7 @@ public class MappingConfigTest {
         Pattern p = MappingConfigLoader.constructPattern(endpoint);
 
         // THEN
-        assertEquals(p.toString(), "/payments/(\\d*)");
+        assertEquals(p.toString(), "/v0.1/payments/(\\d*)");
     }
 
     @Test
@@ -142,7 +151,7 @@ public class MappingConfigTest {
         MappingConfigLoader.load();
 
         // WHEN
-        MappingEndpoint endpoint = MappingConfigLoader.getConfig().getMappingEndpoint("/payments/12345", "GET");
+        MappingEndpoint endpoint = MappingConfigLoader.getConfig().get(0).getMappingEndpoint("/v0.1/payments/12345", "GET");
 
         // THEN
         assertEquals(endpoint.getInternalEndpoint(), "/payments/12345");
@@ -155,10 +164,10 @@ public class MappingConfigTest {
         MappingConfigLoader.load();
 
         // WHEN
-        MappingEndpoint meEndpoint = MappingConfigLoader.getConfig().getMappingEndpoint("/me", "GET");
+        MappingEndpoint meEndpoint = MappingConfigLoader.getConfig().get(0).getMappingEndpoint("/v0.1/me", "GET");
 
         // THEN
-        assertEquals(meEndpoint.getExternalEndpoint(), "/me");
+        assertEquals(meEndpoint.getExternalEndpoint(), "/v0.1/me");
         assertEquals(meEndpoint.getMethod(), "GET");
     }
 
@@ -167,11 +176,18 @@ public class MappingConfigTest {
     public void when_action_class_is_not_null_do_not_invoke_getAction_from_actions_map() throws Exception {
         // GIVEN
         MappingAction action = new MappingAction();
-        action.setName("/testAction");
+        action.setName("testAction");
         action.setActionClassName("com.apifest.example.AddSenderIdInBodyAction");
 
+        HazelcastConfigInstance.configInstance = mock(HazelcastConfigInstance.class);
+        Map<String, com.apifest.MappingConfig> map = new HashMap<String, MappingConfig>();
+        MappingConfig config = mock(MappingConfig.class);
+        doReturn(new AddSenderIdInBodyAction()).when(config).getAction(action);
+        map.put("v0.1", config);
+        doReturn(map).when(HazelcastConfigInstance.configInstance).getMappingConfigs();
+
         // WHEN
-        BasicAction actionClass = MappingConfigLoader.getConfig().getAction(action);
+        BasicAction actionClass = MappingConfigLoader.getConfig().get(0).getAction(action);
 
         // THEN
         assertTrue(actionClass instanceof AddSenderIdInBodyAction);
@@ -209,8 +225,8 @@ public class MappingConfigTest {
             addAction.setName("ReplaceCustomerId");
             acts.add(addAction);
             endpoint.setActions(acts);
-            endpoint.setInternalEndpoint("/customer/{customerId}");
-            endpoint.setExternalEndpoint("/me");
+            endpoint.setInternalEndpoint("/v0.1/customer/{customerId}");
+            endpoint.setExternalEndpoint("/v0.1/me");
 
             EndpointsWrapper endpointWrapper = new EndpointsWrapper();
             List<MappingEndpoint> endpoints = new ArrayList<MappingEndpoint>();

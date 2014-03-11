@@ -44,8 +44,9 @@ public class HttpResponseHandler extends SimpleChannelUpstreamHandler {
         if(e.getMessage() instanceof HttpResponse){
             response = (HttpResponse) e.getMessage();
             int statusCode = response.getStatus().getCode();
-            if (statusCode >= HTTP_STATUS_300 && (MappingConfigLoader.getConfig().getErrorMessage(statusCode) != null)) {
-                String content = MappingConfigLoader.getConfig().getErrorMessage(statusCode);
+            // TODO: check which verion error response to use
+            if (statusCode >= HTTP_STATUS_300 && (MappingConfigLoader.getConfig().get(0).getErrorMessage(statusCode) != null)) {
+                String content = MappingConfigLoader.getConfig().get(0).getErrorMessage(statusCode);
                 if (content != null) {
                     response.setContent(ChannelBuffers.copiedBuffer(content.getBytes()));
                     response.setHeader("Content-Length", content.getBytes().length);

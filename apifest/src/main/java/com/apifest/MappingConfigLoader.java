@@ -1,18 +1,18 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest;
 
@@ -20,6 +20,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.apifest.api.Mapping;
+import com.apifest.api.Mapping.Backend;
 import com.apifest.api.MappingAction;
 import com.apifest.api.MappingEndpoint;
 import com.apifest.api.MappingError;
@@ -55,46 +57,55 @@ public final class MappingConfigLoader {
 
     protected static void load() {
         String mappingFileDir = ServerConfig.getMappingsPath();
-        MappingConfig config = new MappingConfig();
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(Mapping.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            File configFile = new File(mappingFileDir);
-            Mapping configs = (Mapping) unmarshaller.unmarshal(configFile);
-
-            config.setActions(getActionsMap(configs));
-
-            if (configs.getFiltersWrapper() != null) {
-                config.setFilters(getFiltersMap(configs));
-            }
-
-            if (configs.getErrorsWrapper() != null) {
-                config.setErrors(getErrorsMap(configs));
-            }
-
-            List<MappingEndpoint> mappingEndpoints = configs.getEndpointsWrapper().getEndpoints();
-            config.setMappings(getMappingsMap(mappingEndpoints));
-
-            // TODO: Create different Config objects for each supported version
+            File configPath = new File(mappingFileDir);
             Map<String, MappingConfig> map = getHazelcastConfig();
-            map.put("v0.1", config);
-        } catch (JAXBException e) {
-            log.error("Cannot load mapping configuration, file {}", mappingFileDir);
-            throw new IllegalArgumentException(e);
-        }
-        //load all actions and filters plus custom ones
-        if(ServerConfig.getCustomJarPath() != null && ServerConfig.getCustomJarPath().length() > 0) {
-            try {
-                loadCustomClasses(config.getActions().values());
-            } catch (MalformedURLException e) {
-                log.error("Cannot load custom jar file", e);
-                throw new IllegalArgumentException(e);
+            if (configPath.isDirectory()) {
+                File[] files = configPath.listFiles();
+                // load all config files
+                for (File mappingFile : files) {
+                    if (!mappingFile.isFile() || !mappingFile.getName().endsWith(".xml")) {
+                        continue;
+                    }
+                    MappingConfig config = new MappingConfig();
+                    Mapping mappings = (Mapping) unmarshaller.unmarshal(mappingFile);
+                    config.setActions(getActionsMap(mappings));
+                    if (mappings.getFiltersWrapper() != null) {
+                        config.setFilters(getFiltersMap(mappings));
+                    }
+
+                    if (mappings.getErrorsWrapper() != null) {
+                        config.setErrors(getErrorsMap(mappings));
+                    }
+
+                    List<MappingEndpoint> mappingEndpoints = mappings.getEndpointsWrapper().getEndpoints();
+                    config.setMappings(getMappingsMap(mappingEndpoints, mappings.getBackend()));
+
+                    // load all actions and filters plus custom ones
+                    if (ServerConfig.getCustomJarPath() != null && ServerConfig.getCustomJarPath().length() > 0) {
+                        try {
+                            loadCustomClasses(config.getActions().values());
+                        } catch (MalformedURLException e) {
+                            log.error("Cannot load custom jar file", e);
+                            throw new IllegalArgumentException(e);
+                        }
+                    }
+                    map.put(mappings.getVersion(), config);
+                }
+            } else {
+                log.error("Cannot load mapping configuration from directory {}", mappingFileDir);
+                throw new IllegalArgumentException();
             }
+        } catch (JAXBException e) {
+            log.error("Cannot load mapping configuration, directory {}", mappingFileDir);
+            throw new IllegalArgumentException(e);
         }
     }
 
     public static Class<?> loadCustomClass(String className) throws MappingException, ClassNotFoundException {
-        if(jarClassLoader == null) {
+        if (jarClassLoader == null) {
             try {
                 createJarClassLoader();
             } catch (MalformedURLException e) {
@@ -107,11 +118,11 @@ public final class MappingConfigLoader {
     private static void createJarClassLoader() throws MalformedURLException {
         File file = new File(ServerConfig.getCustomJarPath());
         URL jarfile = file.toURI().toURL();
-        jarClassLoader = URLClassLoader.newInstance(new URL[] {jarfile}, MappingConfigLoader.class.getClassLoader());
+        jarClassLoader = URLClassLoader.newInstance(new URL[] { jarfile }, MappingConfigLoader.class.getClassLoader());
     }
 
     private static void loadCustomClasses(Collection<String> actionClasses) throws MalformedURLException {
-        if(jarClassLoader == null) {
+        if (jarClassLoader == null) {
             createJarClassLoader();
         }
         for (String className : actionClasses) {
@@ -124,10 +135,9 @@ public final class MappingConfigLoader {
 
     }
 
-
-    public static MappingConfig getConfig() {
+    public static List<MappingConfig> getConfig() {
         Map<String, MappingConfig> map = HazelcastConfigInstance.instance().getMappingConfigs();
-        return map.get("v0.1");
+        return new ArrayList<MappingConfig>(map.values());
     }
 
     private static Map<String, String> getActionsMap(Mapping configs) {
@@ -157,12 +167,16 @@ public final class MappingConfigLoader {
         return errors;
     }
 
-    protected static Map<MappingPattern, MappingEndpoint> getMappingsMap(List<MappingEndpoint> mappingEndpoints) {
+    protected static Map<MappingPattern, MappingEndpoint> getMappingsMap(List<MappingEndpoint> mappingEndpoints, Backend backend) {
         Map<MappingPattern, MappingEndpoint> mappings = new HashMap<MappingPattern, MappingEndpoint>();
         for (MappingEndpoint endpoint : mappingEndpoints) {
             // construct regular expression
             Pattern p = constructPattern(endpoint);
             MappingPattern pattern = new MappingPattern(p, endpoint.getMethod());
+            if(endpoint.getBackendHost() == null) {
+                endpoint.setBackendHost(backend.getBackendHost());
+                endpoint.setBackendPort(backend.getBackendPort());
+            }
             mappings.put(pattern, endpoint);
         }
         return mappings;
@@ -170,7 +184,7 @@ public final class MappingConfigLoader {
 
     protected static Pattern constructPattern(MappingEndpoint endpoint) {
         String path = endpoint.getExternalEndpoint();
-        if (endpoint.getExternalEndpoint().contains("{")){
+        if (endpoint.getExternalEndpoint().contains("{")) {
             String varExpr = "(" + endpoint.getVarExpression() + ")";
             String varName = "{" + endpoint.getVarName() + "}";
             path = path.replace(varName, varExpr);

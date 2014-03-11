@@ -37,8 +37,6 @@ public final class ServerConfig {
     protected static String host;
     protected static Integer port;
     protected static String mappingsPath;
-    protected static String backendHost;
-    protected static Integer backendPort;
     protected static String tokenValidateEndpoint;
     protected static Integer connectTimeout;
     protected static String customJarPath;
@@ -70,8 +68,6 @@ public final class ServerConfig {
         port = Integer.valueOf(props.getProperty("apifest.port", "8080"));
         mappingsPath = props.getProperty("apifest.mappings");
 
-        backendHost = props.getProperty("backend.host");
-        backendPort = Integer.valueOf(props.getProperty("backend.port"));
         tokenValidateEndpoint = props.getProperty("token.validate.endpoint");
         connectTimeout = Integer.valueOf(props.getProperty("connect.timeout", "10"));
         customJarPath = props.getProperty("custom.jar");
@@ -87,14 +83,6 @@ public final class ServerConfig {
 
     public static String getMappingsPath() {
         return mappingsPath;
-    }
-
-    public static String getBackendHost() {
-        return backendHost;
-    }
-
-    public static Integer getBackendPort() {
-        return backendPort;
     }
 
     public static String getTokenValidateEndpoint() {

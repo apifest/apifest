@@ -38,8 +38,6 @@ Here is a template of apifest.properties file:
 ```
 apifest.host=
 apifest.port=
-backend.host=
-backend.port=
 apifest.mappings=
 connect.timeout=
 ```
@@ -56,22 +54,15 @@ You can define AMS host and port in apifest.properties file -
 
 By default, AMS will start on localhost:8080.
 
-* **Setup your API host and port**
-
-ApiFest Mapping Server should know where your API is running so it could translate the request to it.
-In order to define them, set the following properties values in apifest.properties file:
-
-***backend.host*** and ***backend.port***
-
 * **Setup mappings**
 
 ApiFest Mapping Server needs information how to translate requests between the outside world and your internal system.
-That should be done in a mapping configuration file.
+That should be done in a mapping configuration file. 
 The mapping configuration file is XML with schema accessible in the project under resources folder - *schema.xsd*.
 
 Here is an example mapping file:
 ```
-<mappings>
+<mappings version="v0.1">
     <actions>
         <action name="ReplaceCustomerId" class="com.apifest.example.ReplaceCustomerIdAction"/>
         <action name="AddSenderIdInBody" class="com.apifest.example.AddSenderIdInBodyAction"/>
@@ -79,17 +70,18 @@ Here is an example mapping file:
     <filters>
         <filter name="RemoveBalance" class="com.apifest.example.RemoveBalanceFilter"/>
     </filters>
+    <backend host="127.0.0.1" port="8080"/>
     <endpoints>
-        <endpoint external="/me" internal="/customers/{customerId}" method="GET" authRequired="true" scope="basic">
+        <endpoint external="/v0.1/me" internal="/customers/{customerId}" method="GET" authRequired="true" scope="basic">
             <action name="ReplaceCustomerId" />
             <filter name="RemoveBalance" />
         </endpoint>
-        <endpoint external="/me/friends" internal="/customers/{customerId}/friends" method="GET" authRequired="true" scope="basic">
+        <endpoint external="/v0.1/me/friends" internal="/customers/{customerId}/friends" method="GET" authRequired="true" scope="basic">
             <action name="ReplaceCustomerId" />
         </endpoint>
-        <endpoint external="/countries/{countryId}" internal="/countries/{countryId}" method="GET" varExpression="\w{3}$" varName="countryId"/>
-        <endpoint external="/mobile-auth/{mobileId}" internal="/mobile-auth/{mobileId}" method="GET" varExpression="\d{6,15}$" varName="mobileId"/>
-        <endpoint external="/mobile-auth/{mobileId}" internal="/mobile-auth/{mobileId}" method="POST" varExpression="\d{6,15}$" varName="mobileId"/>
+        <endpoint external="/v0.1/countries/{countryId}" internal="/countries/{countryId}" method="GET" varExpression="\w{3}$" varName="countryId"/>
+        <endpoint external="/v0.1/mobile-auth/{mobileId}" internal="/mobile-auth/{mobileId}" method="GET" varExpression="\d{6,15}$" varName="mobileId"/>
+        <endpoint external="/v0.1/mobile-auth/{mobileId}" internal="/mobile-auth/{mobileId}" method="POST" varExpression="\d{6,15}$" varName="mobileId"/>
     </endpoints>
     <errors>
         <error status="404" message='{"error":"resource not found"}' />
@@ -101,6 +93,10 @@ Here is an example mapping file:
 
 XML specific tags explained:
 
+- version - is the version of your API this mapping file describes
+- actions - defines actions with name and class
+- filters - defines filters with name and class
+- backend - defines where your API is running, requests should be translated to that backend 
 - endpoint - is a mapping between outer ednpoint and your API endpoint;
 - external - the endpoint visible to the world;
 - internal - your API endpoint;
@@ -113,8 +109,8 @@ XML specific tags explained:
 - varExpression - varName regular expression;
 - error - customize error responses - *status* attribute value defines the HTTP status for which *message* attribute value will be returned;
 
-
-ApiFest Mapping Server will get the mappings file from apifest.properties file - 
+You can define as many mapping configuration files as many versions your API supports.
+ApiFest Mapping Server will get all mappings files from the directory defined in apifest.properties as 
 
 ***apifest.mappings***
 

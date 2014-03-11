@@ -39,6 +39,13 @@ public class MappingEndpoint implements  Serializable {
 
     private static final long serialVersionUID = -1013670420032412311L;
 
+    // TODO: make it Int
+    @XmlAttribute(name = "backendPort", required = false)
+    private String backendPort;
+
+    @XmlAttribute(name = "backendHost", required = false)
+    private String backendHost;
+
     @XmlAttribute(name = "authRequired", required = false)
     private String authRequired;
 
@@ -71,7 +78,8 @@ public class MappingEndpoint implements  Serializable {
     }
 
     public MappingEndpoint(String external, String internal, String method, String authRequired, String scope,
-            List<MappingAction> actions, List<ResponseFilter> filters, String varExpr, String varName) {
+            List<MappingAction> actions, List<ResponseFilter> filters, String varExpr, String varName,
+            String backendHost, String backendPort) {
         this.externalEndpoint = external;
         this.internalEndpoint = internal;
         this.method = method;
@@ -81,6 +89,8 @@ public class MappingEndpoint implements  Serializable {
         this.filters = filters;
         this.varExpression = varExpr;
         this.varName = varName;
+        this.backendHost = backendHost;
+        this.backendPort = backendPort;
     }
 
     public String getExternalEndpoint() {
@@ -153,6 +163,22 @@ public class MappingEndpoint implements  Serializable {
 
     public void setVarName(String varName) {
         this.varName = varName;
+    }
+
+    public String getBackendPort() {
+        return backendPort;
+    }
+
+    public void setBackendPort(String backendPort) {
+        this.backendPort = backendPort;
+    }
+
+    public String getBackendHost() {
+        return backendHost;
+    }
+
+    public void setBackendHost(String backendHost) {
+        this.backendHost = backendHost;
     }
 
     /**

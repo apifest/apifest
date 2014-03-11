@@ -21,6 +21,7 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -36,17 +37,31 @@ public class Mapping implements  Serializable {
 
     private static final long serialVersionUID = 6087428073230165216L;
 
+    @XmlAttribute(name = "version")
+    private String version;
+
     @XmlElement(name = "actions", type = ActionsWrapper.class)
     private ActionsWrapper actionsWrapper;
 
     @XmlElement(name = "filters", type = FiltersWrapper.class)
     private FiltersWrapper filtersWrapper;
 
+    @XmlElement(name = "backend", type = Backend.class)
+    private Backend backend;
+
     @XmlElement(name = "endpoints", type = EndpointsWrapper.class, required = true)
     private EndpointsWrapper endpointsWrapper;
 
     @XmlElement(name = "errors", type = ErrorsWrapper.class)
     private ErrorsWrapper errorsWrapper;
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
 
     public ActionsWrapper getActionsWrapper() {
         return actionsWrapper;
@@ -62,6 +77,14 @@ public class Mapping implements  Serializable {
 
     public void setFiltersWrapper(FiltersWrapper filtersWrapper) {
         this.filtersWrapper = filtersWrapper;
+    }
+
+    public Backend getBackend() {
+        return backend;
+    }
+
+    public void setBackend(Backend backend) {
+        this.backend = backend;
     }
 
     public EndpointsWrapper getEndpointsWrapper() {
@@ -129,6 +152,34 @@ public class Mapping implements  Serializable {
         @XmlElement(name = "filter", type = ResponseFilter.class)
         public List<ResponseFilter> getFilters() {
             return filters;
+        }
+    }
+
+    @XmlType
+    public static class Backend implements Serializable {
+
+        private static final long serialVersionUID = -629932484949029609L;
+
+        private String backendHost;
+        // TODO: change port to Int
+        private String backendPort;
+
+        @XmlAttribute(name = "host")
+        public String getBackendHost() {
+            return backendHost;
+        }
+
+        public void setBackendHost(String backendHost) {
+            this.backendHost = backendHost;
+        }
+
+        @XmlAttribute(name = "port")
+        public String getBackendPort() {
+            return backendPort;
+        }
+
+        public void setBackendPort(String backendPort) {
+            this.backendPort = backendPort;
         }
     }
 

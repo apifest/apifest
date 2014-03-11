@@ -59,7 +59,7 @@ public class HttpResponseHandlerTest {
         doNothing().when(listener).responseReceived(response);
 
         String path = getClass().getClassLoader().getResource("test_mapping.xml").getPath();
-        System.setProperty(ServerConfig.getMappingsPath(), path);
+        ServerConfig.mappingsPath = path.replace("/test_mapping.xml","");
 
         HazelcastConfigInstance.configInstance = mock(HazelcastConfigInstance.class);
         Map<String, com.apifest.MappingConfig> map = new HashMap<String, MappingConfig>();
@@ -86,8 +86,6 @@ public class HttpResponseHandlerTest {
         response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
         doReturn(response).when(e).getMessage();
 
-        String path = getClass().getClassLoader().getResource("test_mapping.xml").getPath();
-        System.setProperty(ServerConfig.getMappingsPath(), path);
         MappingConfigLoader.load();
 
         // WHEN
@@ -103,8 +101,6 @@ public class HttpResponseHandlerTest {
         response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
         doReturn(response).when(e).getMessage();
 
-        String path = getClass().getClassLoader().getResource("test_mapping.xml").getPath();
-        System.setProperty(ServerConfig.getMappingsPath(), path);
         MappingConfigLoader.load();
 
         // WHEN
@@ -120,8 +116,6 @@ public class HttpResponseHandlerTest {
         response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.MULTIPLE_CHOICES);
         doReturn(response).when(e).getMessage();
 
-        String path = getClass().getClassLoader().getResource("test_mapping.xml").getPath();
-        System.setProperty(ServerConfig.getMappingsPath(), path);
         MappingConfigLoader.load();
 
         // WHEN

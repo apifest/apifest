@@ -16,6 +16,8 @@
 
 package com.apifest;
 
+import java.util.List;
+
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
@@ -70,8 +72,16 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 return;
             }
 
-            MappingConfig config = MappingConfigLoader.getConfig();
-            MappingEndpoint mapping = config.getMappingEndpoint(uri, method.toString());
+            List<MappingConfig> configList = MappingConfigLoader.getConfig();
+            MappingEndpoint mapping = null;
+            MappingConfig config = null;
+            for(MappingConfig mconfig : configList){
+                mapping = mconfig.getMappingEndpoint(uri, method.toString());
+                if(mapping != null) {
+                    config = mconfig;
+                    break;
+                }
+            }
             String userId = null;
             if (mapping != null) {
                 log.debug("authRequired: {}", mapping.getAuthRequired());
@@ -141,7 +151,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                         }
                     }
                 }
-                client.send(req, ServerConfig.getBackendHost(), ServerConfig.getBackendPort(), responseListener);
+                client.send(req, mapping.getBackendHost(), Integer.valueOf(mapping.getBackendPort()), responseListener);
             } else {
                 // if no mapping found
                 HttpResponse response = HttpResponseFactory.createNotFoundResponse();
