@@ -41,7 +41,7 @@ public class MappingEndpoint implements  Serializable {
 
     // TODO: make it Int
     @XmlAttribute(name = "backendPort", required = false)
-    private String backendPort;
+    private Integer backendPort;
 
     @XmlAttribute(name = "backendHost", required = false)
     private String backendHost;
@@ -79,7 +79,7 @@ public class MappingEndpoint implements  Serializable {
 
     public MappingEndpoint(String external, String internal, String method, String authRequired, String scope,
             List<MappingAction> actions, List<ResponseFilter> filters, String varExpr, String varName,
-            String backendHost, String backendPort) {
+            String backendHost, Integer backendPort) {
         this.externalEndpoint = external;
         this.internalEndpoint = internal;
         this.method = method;
@@ -165,11 +165,11 @@ public class MappingEndpoint implements  Serializable {
         this.varName = varName;
     }
 
-    public String getBackendPort() {
+    public Integer getBackendPort() {
         return backendPort;
     }
 
-    public void setBackendPort(String backendPort) {
+    public void setBackendPort(Integer backendPort) {
         this.backendPort = backendPort;
     }
 

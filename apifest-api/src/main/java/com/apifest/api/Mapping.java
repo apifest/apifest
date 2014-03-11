@@ -162,7 +162,7 @@ public class Mapping implements  Serializable {
 
         private String backendHost;
         // TODO: change port to Int
-        private String backendPort;
+        private Integer backendPort;
 
         @XmlAttribute(name = "host")
         public String getBackendHost() {
@@ -174,11 +174,11 @@ public class Mapping implements  Serializable {
         }
 
         @XmlAttribute(name = "port")
-        public String getBackendPort() {
+        public Integer getBackendPort() {
             return backendPort;
         }
 
-        public void setBackendPort(String backendPort) {
+        public void setBackendPort(Integer backendPort) {
             this.backendPort = backendPort;
         }
     }

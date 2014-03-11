@@ -83,7 +83,7 @@ public final class MappingConfigLoader {
                     List<MappingEndpoint> mappingEndpoints = mappings.getEndpointsWrapper().getEndpoints();
                     config.setMappings(getMappingsMap(mappingEndpoints, mappings.getBackend()));
 
-                    // load all actions and filters plus custom ones
+                    // load all actions and filters
                     if (ServerConfig.getCustomJarPath() != null && ServerConfig.getCustomJarPath().length() > 0) {
                         try {
                             loadCustomClasses(config.getActions().values());
@@ -132,7 +132,6 @@ public final class MappingConfigLoader {
                 log.error("cannot load custom class {}", className, e);
             }
         }
-
     }
 
     public static List<MappingConfig> getConfig() {

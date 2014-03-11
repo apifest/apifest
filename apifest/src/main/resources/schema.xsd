@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-  ~ Copyright 2013-2014, ApiFest project
+  ~ Copyright 2014, ApiFest project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -18,6 +18,14 @@
 
   <xs:element name="mappings" type="mapping"/>
 
+  <xs:complexType name="basicAction" abstract="true">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="basicFilter" abstract="true">
+    <xs:sequence/>
+  </xs:complexType>
+
   <xs:complexType name="endpointsWrapper">
     <xs:sequence>
       <xs:element name="endpoint" type="endpoint" minOccurs="0" maxOccurs="unbounded"/>
@@ -29,22 +37,26 @@
       <xs:element name="action" type="action" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="filter" type="filter" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
-    <xs:attribute name="external" type="xs:string" use="required"/>
-    <xs:attribute name="internal" type="xs:string" use="required"/>
+    <xs:attribute name="backendPort" type="xs:string"/>
+    <xs:attribute name="backendHost" type="xs:string"/>
+    <xs:attribute name="authRequired" type="xs:string"/>
+    <xs:attribute name="scope" type="xs:string"/>
     <xs:attribute name="method" type="xs:string" use="required"/>
+    <xs:attribute name="internal" type="xs:string" use="required"/>
+    <xs:attribute name="external" type="xs:string" use="required"/>
     <xs:attribute name="varExpression" type="xs:string"/>
     <xs:attribute name="varName" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="action">
     <xs:sequence/>
-    <xs:attribute name="name" type="xs:string"/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
     <xs:attribute name="class" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="filter">
     <xs:sequence/>
-    <xs:attribute name="name" type="xs:string"/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
     <xs:attribute name="class" type="xs:string"/>
   </xs:complexType>
 
@@ -60,6 +72,12 @@
     </xs:sequence>
   </xs:complexType>
 
+  <xs:complexType name="backend">
+    <xs:sequence/>
+    <xs:attribute name="host" type="xs:string"/>
+    <xs:attribute name="port" type="xs:string"/>
+  </xs:complexType>
+
   <xs:complexType name="errorsWrapper">
     <xs:sequence>
       <xs:element name="error" type="error" minOccurs="0" maxOccurs="unbounded"/>
@@ -68,29 +86,19 @@
 
   <xs:complexType name="error">
     <xs:sequence/>
-    <xs:attribute name="status" type="xs:string"/>
-    <xs:attribute name="message" type="xs:string"/>
+    <xs:attribute name="status" type="xs:string" use="required"/>
+    <xs:attribute name="message" type="xs:string" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="mapping">
     <xs:sequence>
       <xs:element name="actions" type="actionsWrapper" minOccurs="0"/>
       <xs:element name="filters" type="filtersWrapper" minOccurs="0"/>
-      <xs:element name="endpoints" type="endpointsWrapper" minOccurs="0"/>
+      <xs:element name="backend" type="backend" minOccurs="0"/>
+      <xs:element name="endpoints" type="endpointsWrapper"/>
       <xs:element name="errors" type="errorsWrapper" minOccurs="0"/>
     </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="mappingConfig" final="extension restriction">
-    <xs:sequence/>
-  </xs:complexType>
-
-  <xs:complexType name="mappingConfigValidator">
-    <xs:sequence/>
-  </xs:complexType>
-
-  <xs:complexType name="mappingPattern">
-    <xs:sequence/>
+    <xs:attribute name="version" type="xs:string"/>
   </xs:complexType>
 </xs:schema>
 

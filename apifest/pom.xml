@@ -144,66 +144,11 @@
                 <configuration>
                   <mainClass>com.apifest.MappingConfigValidator</mainClass>
                   <arguments>
-                    <argument>${basedir}\src\main\resources\mapping.xml</argument>
+                    <argument>${basedir}\src\test\resources\mapping.xml</argument>
                   </arguments>
                 </configuration>
               </execution>
             </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <profile>
-      <id>generate-schema</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>com.sun.tools.jxc.maven2</groupId>
-            <artifactId>maven-jaxb-schemagen-plugin</artifactId>
-            <version>1.2</version>
-            <executions>
-              <execution>
-                <phase>generate-resources</phase>
-                <goals>
-                  <goal>generate</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <!-- <project>apifest</project> -->
-              <destdir>target/schemas</destdir>
-              <srcdir>src/main/java/com/apifest</srcdir>
-              <includes>
-                <include>com/apifest/Mapping*</include>
-                <include>com/apifest/ResponseFilter.java</include>
-              </includes>
-              <!-- <schemas> <schema> <namespace>http://www.jordeu.net/XSDCREATOR/1.0.0</namespace> 
-                <file>xsdcreator-v1_0_0.xsd</file> </schema> </schemas> -->
-              <verbose>true</verbose>
-            </configuration>
-            <dependencies>
-              <dependency>
-                <groupId>javax.xml.bind</groupId>
-                <artifactId>jaxb-api</artifactId>
-                <version>2.2</version>
-              </dependency>
-              <dependency>
-                <groupId>com.sun.xml.bind</groupId>
-                <artifactId>jaxb-xjc</artifactId>
-                <version>2.2</version>
-              </dependency>
-              <dependency>
-                <groupId>com.sun.xml.bind</groupId>
-                <artifactId>jaxb-impl</artifactId>
-                <version>2.2</version>
-              </dependency>
-              <dependency>
-                <groupId>com.sun.xml.bind</groupId>
-                <artifactId>jaxb-xjc</artifactId>
-                <version>2.2</version>
-              </dependency>
-            </dependencies>
           </plugin>
         </plugins>
       </build>
