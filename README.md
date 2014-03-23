@@ -39,6 +39,7 @@ Here is a template of apifest.properties file:
 apifest.host=
 apifest.port=
 apifest.mappings=
+token.validate.endpoint=
 connect.timeout=
 ```
 
@@ -113,6 +114,12 @@ You can define as many mapping configuration files as many versions your API sup
 ApiFest Mapping Server will get all mappings files from the directory defined in apifest.properties as 
 
 ***apifest.mappings***
+
+* **Setup connection timeout**
+
+If access token is required for an endpoint, it should be validated first. The endpoint that validates access tokens is setup  by the following property in apifest.properties file -
+
+***token.validate.endpoint***
 
 * **Setup connection timeout**
 

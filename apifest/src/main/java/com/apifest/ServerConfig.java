@@ -69,6 +69,9 @@ public final class ServerConfig {
         mappingsPath = props.getProperty("apifest.mappings");
 
         tokenValidateEndpoint = props.getProperty("token.validate.endpoint");
+        if(tokenValidateEndpoint == null || tokenValidateEndpoint.isEmpty()) {
+            log.warn("token.validate.endpoint property is not defined in properties file");
+        }
         connectTimeout = Integer.valueOf(props.getProperty("connect.timeout", "10"));
         customJarPath = props.getProperty("custom.jar");
     }
