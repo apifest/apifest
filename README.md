@@ -115,9 +115,9 @@ ApiFest Mapping Server will get all mappings files from the directory defined in
 
 ***apifest.mappings***
 
-* **Setup connection timeout**
+* **Setup token validation URL**
 
-If access token is required for an endpoint, it should be validated first. The endpoint that validates access tokens is setup  by the following property in apifest.properties file -
+If access token is required for an endpoint, first it should be validated. The endpoint(URL) that validates access tokens is setup by the following property in apifest.properties file -
 
 ***token.validate.endpoint***
 
