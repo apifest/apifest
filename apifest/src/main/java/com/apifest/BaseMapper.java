@@ -16,7 +16,13 @@
 
 package com.apifest;
 
+import java.util.List;
+import java.util.Map;
+
+import org.apache.http.client.utils.URIBuilder;
 import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.QueryStringDecoder;
+import org.jboss.netty.handler.codec.http.QueryStringEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,9 +36,20 @@ public class BaseMapper {
     protected Logger log = LoggerFactory.getLogger(BaseMapper.class);
 
     public HttpRequest map(HttpRequest req, String internalURI) {
-        req.setUri(internalURI);
-        log.info("map the request to {}", internalURI);
+        // pass all query params and headers
+        String newUri = constructNewUri(req.getUri(), internalURI);
+        req.setUri(newUri);
+        log.info("map the request to {}", newUri);
         return req;
     }
 
+    protected String constructNewUri(String uri, String newUri) {
+        QueryStringDecoder decoder = new QueryStringDecoder(uri);
+        Map<String, List<String>> queryParams = decoder.getParameters();
+        QueryStringEncoder encoder = new QueryStringEncoder(newUri);
+        for(String key : queryParams.keySet()) {
+            encoder.addParam(key, queryParams.get(key).get(0));
+        }
+        return encoder.toString();
+    }
 }

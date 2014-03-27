@@ -202,7 +202,6 @@ public final class MappingConfigLoader {
      * Reloads all mapping configs.
      */
     public static void reloadConfigs() {
-        // TODO: Think about how to switch between old and new version of the mapping configs (use version?)
         jarClassLoader = null;
         load();
 
