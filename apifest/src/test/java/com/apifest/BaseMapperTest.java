@@ -53,4 +53,29 @@ public class BaseMapperTest {
         // THEN
         assertEquals(res.getUri(), internalUri);
     }
+
+    @Test
+    public void when_query_params_add_it_to_internal_uri() throws Exception {
+        // GIVEN
+        String uri = "/validation/mobile?mobile=89343430&code=359";
+        String newUri = "/user/validation/mobile";
+
+        // WHEN
+        String resultUri = mapper.constructNewUri(uri, newUri);
+
+        // THEN
+        assertEquals(resultUri, "/user/validation/mobile?mobile=89343430&code=359");
+    }
+
+    @Test
+    public void when_map_invoke_constructUri() throws Exception {
+        String internalUri = "http://api.example.com/customer/1234";
+        HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://api.example.com/me");
+
+        // WHEN
+        HttpRequest res = mapper.map(req, internalUri);
+
+        // THEN
+        verify(mapper).constructNewUri("http://api.example.com/me", internalUri);
+    }
 }
