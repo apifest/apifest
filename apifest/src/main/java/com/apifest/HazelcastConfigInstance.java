@@ -26,8 +26,8 @@ import org.slf4j.LoggerFactory;
 
 import com.hazelcast.config.Config;
 import com.hazelcast.config.XmlConfigBuilder;
+import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.impl.FactoryImpl;
 
 /**
  * Responsible for creating Hazelcast node in JVM.
@@ -53,7 +53,7 @@ public class HazelcastConfigInstance {
             XmlConfigBuilder cfgBuilder = new XmlConfigBuilder(xml);
             Config cfg = cfgBuilder.build();
             log.debug("Hazelcast instance created");
-            hzInstance = FactoryImpl.newHazelcastInstanceProxy(cfg);
+            hzInstance = Hazelcast.newHazelcastInstance(cfg);
         } catch (FileNotFoundException e) {
             log.error("hazelcast.config.file {} not found", hazelcastConfig);
         }
