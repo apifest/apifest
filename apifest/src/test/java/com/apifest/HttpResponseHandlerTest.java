@@ -34,6 +34,8 @@ import org.slf4j.Logger;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.hazelcast.core.IMap;
+
 /**
  * @author Rossitsa Borissova
  */
@@ -62,7 +64,7 @@ public class HttpResponseHandlerTest {
         ServerConfig.mappingsPath = path.replace("/test_mapping.xml","");
 
         HazelcastConfigInstance.configInstance = mock(HazelcastConfigInstance.class);
-        Map<String, com.apifest.MappingConfig> map = new HashMap<String, MappingConfig>();
+        IMap<String, com.apifest.MappingConfig> map = mock(IMap.class);
         doReturn(map).when(HazelcastConfigInstance.configInstance).getMappingConfigs();
     }
 

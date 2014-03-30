@@ -1,23 +1,24 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +44,7 @@ import com.apifest.api.MappingEndpoint;
 import com.apifest.example.AddSenderIdInBodyAction;
 import com.apifest.example.RemoveBalanceFilter;
 import com.apifest.example.ReplaceCustomerIdAction;
+import com.hazelcast.core.IMap;
 
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
@@ -60,7 +62,7 @@ public class MappingConfigTest {
         ServerConfig.customJarPath = null;
 
         HazelcastConfigInstance.configInstance = mock(HazelcastConfigInstance.class);
-        Map<String, com.apifest.MappingConfig> map = new HashMap<String, MappingConfig>();
+        IMap<String, com.apifest.MappingConfig> map = mock(IMap.class);
         MappingConfig config = mock(MappingConfig.class);
         doReturn(mock(BasicAction.class)).when(config).getAction(any(MappingAction.class));
         map.put("v0.1", config);
@@ -105,21 +107,18 @@ public class MappingConfigTest {
     }
 
     @Test
-    public void when_actionClassname_is_null_get_className_from_actions_config() throws MappingException {
+    public void when_actionClassname_is_null_get_className_from_actions_config() throws Exception {
         // GIVEN
-        MappingEndpoint endpoint = new MappingEndpoint();
-        List<MappingAction> actions = new ArrayList<MappingAction>();
+        MappingConfigLoader.load();
         MappingAction mappingAction = new MappingAction();
+        List<MappingAction> actions = new ArrayList<MappingAction>();
         mappingAction.setName("ReplaceCustomerId");
         actions.add(mappingAction);
+        MappingEndpoint endpoint = new MappingEndpoint();
         endpoint.setActions(actions);
 
-        HazelcastConfigInstance.configInstance = mock(HazelcastConfigInstance.class);
-        Map<String, com.apifest.MappingConfig> map = new HashMap<String, MappingConfig>();
-        MappingConfig config = mock(MappingConfig.class);
-        doReturn(new ReplaceCustomerIdAction()).when(config).getAction(mappingAction);
-        map.put("v0.1", config);
-        doReturn(map).when(HazelcastConfigInstance.configInstance).getMappingConfigs();
+        MappingConfigLoader.jarClassLoader = mock(URLClassLoader.class);
+        doReturn(ReplaceCustomerIdAction.class).when(MappingConfigLoader.jarClassLoader).loadClass(ReplaceCustomerIdAction.class.getCanonicalName());
 
         // WHEN
         BasicAction action = MappingConfigLoader.getConfig().get(0).getAction(mappingAction);
@@ -127,7 +126,6 @@ public class MappingConfigTest {
         // THEN
         assertTrue(action instanceof ReplaceCustomerIdAction);
     }
-
 
     @Test
     public void when_mapping_with_RE_construct_Pattern() throws Exception {
@@ -157,7 +155,6 @@ public class MappingConfigTest {
         assertEquals(endpoint.getInternalEndpoint(), "/payments/12345");
     }
 
-
     @Test
     public void when_mapping_list_contains_method_and_uri_return_that_mapping_endpoint() throws Exception {
         // GIVEN
@@ -171,20 +168,16 @@ public class MappingConfigTest {
         assertEquals(meEndpoint.getMethod(), "GET");
     }
 
-
     @Test
     public void when_action_class_is_not_null_do_not_invoke_getAction_from_actions_map() throws Exception {
         // GIVEN
+        MappingConfigLoader.load();
         MappingAction action = new MappingAction();
         action.setName("testAction");
         action.setActionClassName("com.apifest.example.AddSenderIdInBodyAction");
 
-        HazelcastConfigInstance.configInstance = mock(HazelcastConfigInstance.class);
-        Map<String, com.apifest.MappingConfig> map = new HashMap<String, MappingConfig>();
-        MappingConfig config = mock(MappingConfig.class);
-        doReturn(new AddSenderIdInBodyAction()).when(config).getAction(action);
-        map.put("v0.1", config);
-        doReturn(map).when(HazelcastConfigInstance.configInstance).getMappingConfigs();
+        MappingConfigLoader.jarClassLoader = mock(URLClassLoader.class);
+        doReturn(AddSenderIdInBodyAction.class).when(MappingConfigLoader.jarClassLoader).loadClass(action.getActionClassName());
 
         // WHEN
         BasicAction actionClass = MappingConfigLoader.getConfig().get(0).getAction(action);

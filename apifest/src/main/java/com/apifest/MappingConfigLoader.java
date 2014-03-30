@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBContext;
@@ -40,6 +41,7 @@ import com.apifest.api.MappingAction;
 import com.apifest.api.MappingEndpoint;
 import com.apifest.api.MappingError;
 import com.apifest.api.ResponseFilter;
+import com.hazelcast.core.IMap;
 
 /**
  * Loads/reloads all mapping configurations.
@@ -52,16 +54,18 @@ public final class MappingConfigLoader {
 
     protected static URLClassLoader jarClassLoader;
 
+    private static Map<String, MappingConfig> localConfigMap = new HashMap<String, MappingConfig>();
+
     private MappingConfigLoader() {
     }
 
     protected static void load() {
         String mappingFileDir = ServerConfig.getMappingsPath();
+        Map<String, MappingConfig> local = new HashMap<String, MappingConfig>();
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(Mapping.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             File configPath = new File(mappingFileDir);
-            Map<String, MappingConfig> map = getHazelcastConfig();
             if (configPath.isDirectory()) {
                 File[] files = configPath.listFiles();
                 // load all config files
@@ -92,8 +96,11 @@ public final class MappingConfigLoader {
                             throw new IllegalArgumentException(e);
                         }
                     }
-                    map.put(mappings.getVersion(), config);
+                    local.put(mappings.getVersion(), config);
                 }
+                IMap<String, MappingConfig> map = getHazelcastConfig();
+                map.putAll(local);
+                localConfigMap = local;
             } else {
                 log.error("Cannot load mapping configuration from directory {}", mappingFileDir);
                 throw new IllegalArgumentException();
@@ -105,38 +112,44 @@ public final class MappingConfigLoader {
     }
 
     public static Class<?> loadCustomClass(String className) throws MappingException, ClassNotFoundException {
-        if (jarClassLoader == null) {
-            try {
-                createJarClassLoader();
-            } catch (MalformedURLException e) {
-                throw new MappingException("cannot load custom class", e);
+        Class<?> clazz = null;
+        try {
+            if (jarClassLoader != null || createJarClassLoader()) {
+                clazz = jarClassLoader.loadClass(className);
+            } else {
+                throw new MappingException("cannot load custom jar");
             }
+        }catch (MalformedURLException e) {
+            throw new MappingException("cannot load custom class", e);
         }
-        return jarClassLoader.loadClass(className);
+        return clazz;
     }
 
-    private static void createJarClassLoader() throws MalformedURLException {
-        File file = new File(ServerConfig.getCustomJarPath());
-        URL jarfile = file.toURI().toURL();
-        jarClassLoader = URLClassLoader.newInstance(new URL[] { jarfile }, MappingConfigLoader.class.getClassLoader());
+    private static boolean createJarClassLoader() throws MalformedURLException {
+        boolean created = false;
+        if(ServerConfig.getCustomJarPath() != null) {
+            File file = new File(ServerConfig.getCustomJarPath());
+            URL jarfile = file.toURI().toURL();
+            jarClassLoader = URLClassLoader.newInstance(new URL[] { jarfile }, MappingConfigLoader.class.getClassLoader());
+            created = true;
+        }
+        return created;
     }
 
     private static void loadCustomClasses(Collection<String> actionClasses) throws MalformedURLException {
-        if (jarClassLoader == null) {
-            createJarClassLoader();
-        }
-        for (String className : actionClasses) {
-            try {
-                jarClassLoader.loadClass(className);
-            } catch (ClassNotFoundException e) {
-                log.error("cannot load custom class {}", className, e);
+        if (jarClassLoader != null || createJarClassLoader()) {
+            for (String className : actionClasses) {
+                try {
+                    jarClassLoader.loadClass(className);
+                } catch (ClassNotFoundException e) {
+                    log.error("cannot load custom class {}", className, e);
+                }
             }
         }
     }
 
     public static List<MappingConfig> getConfig() {
-        Map<String, MappingConfig> map = HazelcastConfigInstance.instance().getMappingConfigs();
-        return new ArrayList<MappingConfig>(map.values());
+        return new ArrayList<MappingConfig>(localConfigMap.values());
     }
 
     private static Map<String, String> getActionsMap(Mapping configs) {
@@ -194,8 +207,32 @@ public final class MappingConfigLoader {
         }
     }
 
-    protected static Map<String, MappingConfig> getHazelcastConfig() {
+    protected static IMap<String, MappingConfig> getHazelcastConfig() {
         return HazelcastConfigInstance.instance().getMappingConfigs();
+    }
+
+    protected static Map<String, MappingConfig> getLocalConfig() {
+        return localConfigMap;
+    }
+
+    /**
+     * Reads mappings config from Hazelcast Distributed Map.
+     */
+    public static void updateMapping(String name, MappingConfig value) {
+        // TODO: check if custom classes are OK
+        reloadCustomClasses(value);
+        localConfigMap.put(name, value);
+    }
+
+    private static void reloadCustomClasses(MappingConfig config) {
+        jarClassLoader = null;
+        if(ServerConfig.getCustomJarPath() != null) {
+            try {
+                loadCustomClasses(config.getActions().values());
+            } catch (MalformedURLException e) {
+                log.error("cannot load custom jar ", e);
+            }
+        }
     }
 
     /**
@@ -204,6 +241,5 @@ public final class MappingConfigLoader {
     public static void reloadConfigs() {
         jarClassLoader = null;
         load();
-
     }
 }

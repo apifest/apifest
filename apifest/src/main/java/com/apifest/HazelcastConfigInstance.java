@@ -19,7 +19,6 @@ package com.apifest;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +27,7 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.XmlConfigBuilder;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IMap;
 
 /**
  * Responsible for creating Hazelcast node in JVM.
@@ -54,6 +54,9 @@ public class HazelcastConfigInstance {
             Config cfg = cfgBuilder.build();
             log.debug("Hazelcast instance created");
             hzInstance = Hazelcast.newHazelcastInstance(cfg);
+            ConfigChangeListener listener = new ConfigChangeListener();
+            IMap<String, MappingConfig> map= hzInstance.getMap("mappings");
+            map.addEntryListener(listener, true);
         } catch (FileNotFoundException e) {
             log.error("hazelcast.config.file {} not found", hazelcastConfig);
         }
@@ -67,7 +70,7 @@ public class HazelcastConfigInstance {
         return configInstance;
     }
 
-    public Map<String, com.apifest.MappingConfig> getMappingConfigs() {
+    public IMap<String, com.apifest.MappingConfig> getMappingConfigs() {
       return hzInstance.getMap("mappings");
     }
 
