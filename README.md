@@ -104,7 +104,7 @@ XML specific tags explained:
 - method - HTTP method;
 - scope - scope(s) of the endpoint;
 - authRequired - whether user authorization is required;
-- action - defines action(s) that will be executed before requests hit the platrom;
+- action - defines action(s) that will be executed before requests hit your API;
 - filter - defines filter(s) that will be executed before responses from API are returned back;
 - varName - the name of a variable used in internal/external path;
 - varExpression - varName regular expression;

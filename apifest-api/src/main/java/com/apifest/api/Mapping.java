@@ -161,8 +161,15 @@ public class Mapping implements  Serializable {
         private static final long serialVersionUID = -629932484949029609L;
 
         private String backendHost;
-        // TODO: change port to Int
         private Integer backendPort;
+
+        public Backend() {
+        }
+
+        public Backend(String backendHost, Integer backendPort) {
+            this.backendHost = backendHost;
+            this.backendPort = backendPort;
+        }
 
         @XmlAttribute(name = "host")
         public String getBackendHost() {
