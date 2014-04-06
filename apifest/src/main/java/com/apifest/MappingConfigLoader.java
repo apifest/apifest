@@ -75,7 +75,11 @@ public final class MappingConfigLoader {
                     }
                     MappingConfig config = new MappingConfig();
                     Mapping mappings = (Mapping) unmarshaller.unmarshal(mappingFile);
-                    config.setActions(getActionsMap(mappings));
+
+                    if(mappings.getActionsWrapper() != null) {
+                        config.setActions(getActionsMap(mappings));
+                    }
+
                     if (mappings.getFiltersWrapper() != null) {
                         config.setFilters(getFiltersMap(mappings));
                     }
