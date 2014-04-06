@@ -37,7 +37,8 @@ public final class ServerConfig {
     protected static String host;
     protected static Integer port;
     protected static String mappingsPath;
-    protected static String tokenValidateEndpoint;
+    protected static String tokenValidateHost;
+    protected static Integer tokenValidatePort;
     protected static Integer connectTimeout;
     protected static String customJarPath;
 
@@ -68,10 +69,12 @@ public final class ServerConfig {
         port = Integer.valueOf(props.getProperty("apifest.port", "8080"));
         mappingsPath = props.getProperty("apifest.mappings");
 
-        tokenValidateEndpoint = props.getProperty("token.validate.endpoint");
-        if(tokenValidateEndpoint == null || tokenValidateEndpoint.isEmpty()) {
-            log.warn("token.validate.endpoint property is not defined in properties file");
+        tokenValidateHost = props.getProperty("token.validate.host");
+        if(tokenValidateHost == null || tokenValidateHost.isEmpty()) {
+            log.warn("token.validate.host property is not defined in properties file");
         }
+        tokenValidatePort = Integer.valueOf(props.getProperty("token.validate.port"));
+
         connectTimeout = Integer.valueOf(props.getProperty("connect.timeout", "10"));
         customJarPath = props.getProperty("custom.jar");
     }
@@ -88,8 +91,12 @@ public final class ServerConfig {
         return mappingsPath;
     }
 
-    public static String getTokenValidateEndpoint() {
-        return tokenValidateEndpoint;
+    public static String getTokenValidateHost() {
+        return tokenValidateHost;
+    }
+
+    public static Integer getTokenValidatePort() {
+        return tokenValidatePort;
     }
 
     public static Integer getConnectTimeout() {

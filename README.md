@@ -39,7 +39,8 @@ Here is a template of apifest.properties file:
 apifest.host=
 apifest.port=
 apifest.mappings=
-token.validate.endpoint=
+token.validate.host=
+token.validate.port=
 connect.timeout=
 ```
 
@@ -117,9 +118,9 @@ ApiFest Mapping Server will get all mappings files from the directory defined in
 
 * **Setup token validation URL**
 
-If access token is required for an endpoint, first it should be validated. The endpoint(URL) that validates access tokens is setup by the following property in apifest.properties file -
+If access token is required for an endpoint, first it should be validated. The host and port where ApiFest OAuth 2.0 Server runs are set by the following properties in apifest.properties file -
 
-***token.validate.endpoint***
+***token.validate.host*** and ***token.validate.port*** 
 
 * **Setup connection timeout**
 

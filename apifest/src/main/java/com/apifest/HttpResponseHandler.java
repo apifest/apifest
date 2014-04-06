@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 public class HttpResponseHandler extends SimpleChannelUpstreamHandler {
 
     protected Logger log = LoggerFactory.getLogger(HttpResponseHandler.class);
-    private static final int  HTTP_STATUS_300 = 300;
+    private static final int HTTP_STATUS_300 = 300;
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
@@ -56,8 +56,13 @@ public class HttpResponseHandler extends SimpleChannelUpstreamHandler {
         }
         Channel channel = ctx.getChannel();
         channel.close();
-        ResponseListener listener = (ResponseListener) ctx.getAttachment();
-        listener.responseReceived(response);
+        if(ctx.getAttachment() instanceof TokenValidationListener) {
+            TokenValidationListener listener = (TokenValidationListener) ctx.getAttachment();
+            listener.responseReceived(response);
+        } else {
+            ResponseListener listener = (ResponseListener) ctx.getAttachment();
+            listener.responseReceived(response);
+        }
     }
 
     @Override

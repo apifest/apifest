@@ -112,4 +112,34 @@ public final class MappingClient {
             }
         });
     }
+
+    public void sendValidation(final HttpRequest request, String host, int port, final TokenValidationListener validatorListener) {
+        ChannelFuture future = bootstrap.connect(new InetSocketAddress(host, port));
+        future.addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) {
+                final Channel channel = future.getChannel();
+                channel.getConfig().setConnectTimeoutMillis(ServerConfig.getConnectTimeout());
+                if(channel.isConnected()) {
+                    channel.getPipeline().getContext("handler").setAttachment(validatorListener);
+                    if (future.isSuccess() && channel.isOpen()){
+                       channel.write(request);
+                    } else {
+                        //if cannot connect
+                        channel.disconnect();
+                        channel.close();
+                        HttpResponse response = HttpResponseFactory.createISEResponse();
+                        // HttpResponse response = HttpResponseFactory.createNotFoundResponse();
+                        validatorListener.responseReceived(response);
+                    }
+                } else {
+                    channel.disconnect();
+                    channel.close();
+                    HttpResponse response = HttpResponseFactory.createISEResponse();
+                    // HttpResponse response = HttpResponseFactory.createNotFoundResponse();
+                    validatorListener.responseReceived(response);
+                }
+            }
+        });
+    }
 }

@@ -1,6 +1,7 @@
 apifest.host=
 apifest.port=
 apifest.mappings=
-token.validate.endpoint=
+token.validate.host=
+token.validate.port=
 connect.timeout=
 custom.jar=

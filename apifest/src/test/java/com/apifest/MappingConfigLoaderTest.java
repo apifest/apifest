@@ -20,6 +20,7 @@ import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
+import org.testng.annotations.ExpectedExceptions;
 import org.testng.annotations.Test;
 
 import com.apifest.example.AddSenderIdInBodyAction;
@@ -31,11 +32,18 @@ public class MappingConfigLoaderTest {
 
 
     @Test
-    public void when_no_custom_jar_do_not_load_custom_classes() throws Exception {
+    public void when_no_custom_jar_do_not_load_custom_class_and_throw_exception() throws Exception {
         // GIVEN
 
         // WHEN
-//        MappingConfigLoader.loadCustomClass(AddSenderIdInBodyAction.class.getCanonicalName());
+        String errorMsg = null;
+        try {
+            MappingConfigLoader.loadCustomClass(AddSenderIdInBodyAction.class.getCanonicalName());
+        } catch(MappingException e) {
+            errorMsg = e.getMessage();
+        }
+
         // THEN
+        assertEquals(errorMsg, "cannot load custom jar");
     }
 }
