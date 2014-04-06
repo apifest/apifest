@@ -116,7 +116,7 @@ ApiFest Mapping Server will get all mappings files from the directory defined in
 
 ***apifest.mappings***
 
-* **Setup token validation URL**
+* **Setup token validation host and port**
 
 If access token is required for an endpoint, first it should be validated. The host and port where ApiFest OAuth 2.0 Server runs are set by the following properties in apifest.properties file -
 
