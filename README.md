@@ -74,16 +74,16 @@ Here is an example mapping file:
     </filters>
     <backend host="127.0.0.1" port="8080"/>
     <endpoints>
-        <endpoint external="/v0.1/me" internal="/customers/{customerId}" method="GET" authRequired="true" scope="basic">
+        <endpoint external="/v0.1/me" internal="/customers/{customerId}" method="GET" authType="user" scope="basic">
             <action name="ReplaceCustomerId" />
             <filter name="RemoveBalance" />
         </endpoint>
-        <endpoint external="/v0.1/me/friends" internal="/customers/{customerId}/friends" method="GET" authRequired="true" scope="basic">
+        <endpoint external="/v0.1/me/friends" internal="/customers/{customerId}/friends" method="GET" authType="user" scope="basic">
             <action name="ReplaceCustomerId" />
         </endpoint>
-        <endpoint external="/v0.1/countries/{countryId}" internal="/countries/{countryId}" method="GET" varExpression="\w{3}$" varName="countryId"/>
-        <endpoint external="/v0.1/mobile-auth/{mobileId}" internal="/mobile-auth/{mobileId}" method="GET" varExpression="\d{6,15}$" varName="mobileId"/>
-        <endpoint external="/v0.1/mobile-auth/{mobileId}" internal="/mobile-auth/{mobileId}" method="POST" varExpression="\d{6,15}$" varName="mobileId"/>
+        <endpoint external="/v0.1/countries/{countryId}" internal="/countries/{countryId}" method="GET" authType="client-app" varExpression="\w{3}$" varName="countryId"/>
+        <endpoint external="/v0.1/mobile-auth/{mobileId}" internal="/mobile-auth/{mobileId}" method="GET" authType="user" varExpression="\d{6,15}$" varName="mobileId"/>
+        <endpoint external="/v0.1/mobile-auth/{mobileId}" internal="/mobile-auth/{mobileId}" method="POST" authType="user" varExpression="\d{6,15}$" varName="mobileId"/>
     </endpoints>
     <errors>
         <error status="404" message='{"error":"resource not found"}' />
@@ -104,7 +104,7 @@ XML specific tags explained:
 - internal - your API endpoint;
 - method - HTTP method;
 - scope - scope(s) of the endpoint;
-- authRequired - whether user authorization is required;
+- authType - *user* for tokens obtained with user credentials, *client-app* for tokens obtained for client application;
 - action - defines action(s) that will be executed before requests hit your API;
 - filter - defines filter(s) that will be executed before responses from API are returned back;
 - varName - the name of a variable used in internal/external path;
