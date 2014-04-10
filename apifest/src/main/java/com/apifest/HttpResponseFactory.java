@@ -40,7 +40,7 @@ public class HttpResponseFactory {
      */
     public static HttpResponse createISEResponse() {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
-        response.setHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
+        response.headers().add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
         return response;
     }
 
@@ -51,7 +51,7 @@ public class HttpResponseFactory {
      */
     public static HttpResponse createUnauthorizedResponse(String message) {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
-        response.setHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
+        response.headers().add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes());
         response.setContent(buf);
         return response;
@@ -63,7 +63,7 @@ public class HttpResponseFactory {
      */
     public static HttpResponse createNotFoundResponse() {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
-        response.setHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
+        response.headers().add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(NOT_FOUND_CONTENT.getBytes());
         response.setContent(buf);
         return response;
@@ -76,7 +76,7 @@ public class HttpResponseFactory {
      */
     public static HttpResponse createOKResponse(String message) {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-        response.setHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
+        response.headers().add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes());
         response.setContent(buf);
         return response;
@@ -90,7 +90,7 @@ public class HttpResponseFactory {
      */
     public static HttpResponse createResponse(HttpResponseStatus httpStatus, String message) {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, httpStatus);
-        response.setHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
+        response.headers().add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes());
         response.setContent(buf);
         return response;

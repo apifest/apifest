@@ -35,7 +35,7 @@ public class HttpResponseFactoryTest {
 
         // THEN
         assertEquals(response.getStatus(), HttpResponseStatus.INTERNAL_SERVER_ERROR);
-        assertEquals(response.getHeader(HttpHeaders.CONTENT_TYPE), HttpResponseFactory.APPLICATION_JSON);
+        assertEquals(response.headers().get(HttpHeaders.CONTENT_TYPE), HttpResponseFactory.APPLICATION_JSON);
         String error = new String (response.getContent().array());
         assertEquals(error, "");
     }
@@ -48,7 +48,7 @@ public class HttpResponseFactoryTest {
 
         // THEN
         assertEquals(response.getStatus(), HttpResponseStatus.UNAUTHORIZED);
-        assertEquals(response.getHeader(HttpHeaders.CONTENT_TYPE), HttpResponseFactory.APPLICATION_JSON);
+        assertEquals(response.headers().get(HttpHeaders.CONTENT_TYPE), HttpResponseFactory.APPLICATION_JSON);
         String error = new String (response.getContent().array());
         assertEquals(error, errorMsg);
     }
@@ -60,7 +60,7 @@ public class HttpResponseFactoryTest {
 
         // THEN
         assertEquals(response.getStatus(), HttpResponseStatus.NOT_FOUND);
-        assertEquals(response.getHeader(HttpHeaders.CONTENT_TYPE), HttpResponseFactory.APPLICATION_JSON);
+        assertEquals(response.headers().get(HttpHeaders.CONTENT_TYPE), HttpResponseFactory.APPLICATION_JSON);
         String error = new String (response.getContent().array());
         assertEquals(error, HttpResponseFactory.NOT_FOUND_CONTENT);
     }
@@ -73,7 +73,7 @@ public class HttpResponseFactoryTest {
 
         // THEN
         assertEquals(response.getStatus(), HttpResponseStatus.OK);
-        assertEquals(response.getHeader(HttpHeaders.CONTENT_TYPE), HttpResponseFactory.APPLICATION_JSON);
+        assertEquals(response.headers().get(HttpHeaders.CONTENT_TYPE), HttpResponseFactory.APPLICATION_JSON);
         String responseMsg = new String (response.getContent().array());
         assertEquals(responseMsg, message);
     }

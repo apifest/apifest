@@ -99,7 +99,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             if (mapping != null) {
                 if (mapping.getAuthType() != null) {
                     String accessToken = null;
-                    List<String> authorizationHeaders = req.getHeaders(HttpHeaders.Names.AUTHORIZATION);
+                    List<String> authorizationHeaders = req.headers().getAll(HttpHeaders.Names.AUTHORIZATION);
                     for (String header : authorizationHeaders) {
                         accessToken = AccessTokenValidator.extractAccessToken(header);
                         if (accessToken != null) {

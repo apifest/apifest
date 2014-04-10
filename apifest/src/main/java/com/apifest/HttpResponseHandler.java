@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 public class HttpResponseHandler extends SimpleChannelUpstreamHandler {
 
     protected Logger log = LoggerFactory.getLogger(HttpResponseHandler.class);
-    private static final int HTTP_STATUS_300 = 300;
+    private static final int  HTTP_STATUS_300 = 300;
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
@@ -49,7 +49,7 @@ public class HttpResponseHandler extends SimpleChannelUpstreamHandler {
                 String content = MappingConfigLoader.getConfig().get(0).getErrorMessage(statusCode);
                 if (content != null) {
                     response.setContent(ChannelBuffers.copiedBuffer(content.getBytes()));
-                    response.setHeader("Content-Length", content.getBytes().length);
+                    response.headers().add("Content-Length", content.getBytes().length);
                 }
             }
             log.info("response: {}", new String(ChannelBuffers.copiedBuffer(response.getContent()).array()));
