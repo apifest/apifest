@@ -81,4 +81,18 @@ public class HttpResponseFactory {
         response.setContent(buf);
         return response;
     }
+
+    /**
+     * Create HTTP response with a given HTTP status and message.
+     * @param httpStatus HTTP response status
+     * @param message response message
+     * @return HTTP response created
+     */
+    public static HttpResponse createResponse(HttpResponseStatus httpStatus, String message) {
+        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, httpStatus);
+        response.setHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes());
+        response.setContent(buf);
+        return response;
+    }
 }

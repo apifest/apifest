@@ -37,17 +37,19 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "endpoint")
 public class MappingEndpoint implements  Serializable {
 
+    public static final String AUTH_TYPE_USER = "user";
+    public static final String AUTH_TYPE_CLIENT_APP = "client-app";
+
     private static final long serialVersionUID = -1013670420032412311L;
 
-    // TODO: make it Int
     @XmlAttribute(name = "backendPort", required = false)
     private Integer backendPort;
 
     @XmlAttribute(name = "backendHost", required = false)
     private String backendHost;
 
-    @XmlAttribute(name = "authRequired", required = false)
-    private String authRequired;
+    @XmlAttribute(name = "authType", required = false)
+    private String authType;
 
     @XmlAttribute(name = "scope", required = false)
     private String scope;
@@ -67,7 +69,7 @@ public class MappingEndpoint implements  Serializable {
     @XmlElement(name = "filter", type = ResponseFilter.class)
     private List<ResponseFilter> filters;
 
-    // Do we need a support for multiple vars?
+    // support for multiple vars?
     @XmlAttribute(name = "varExpression")
     private String varExpression;
 
@@ -83,7 +85,7 @@ public class MappingEndpoint implements  Serializable {
         this.externalEndpoint = external;
         this.internalEndpoint = internal;
         this.method = method;
-        this.authRequired = authRequired;
+        this.authType = authRequired;
         this.scope = scope;
         this.actions = actions;
         this.filters = filters;
@@ -117,12 +119,12 @@ public class MappingEndpoint implements  Serializable {
         this.method = method;
     }
 
-    public String getAuthRequired() {
-        return authRequired;
+    public String getAuthType() {
+        return authType;
     }
 
-    public void setAuthRequired(String authRequired) {
-        this.authRequired = authRequired;
+    public void setAuthType(String authType) {
+        this.authType = authType;
     }
 
     public String getScope() {

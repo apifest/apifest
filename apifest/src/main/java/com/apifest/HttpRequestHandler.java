@@ -56,8 +56,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     protected static final String RELOAD_URI = "/apifest-reload";
 
     protected static final String ACCESS_TOKEN_REQUIRED = "{\"error\":\"access token required\"}";
-    protected static final String INVALID_ACCESS_TOKEN_SCOPE = "{\"error\":\"scope not valid\"}";
+    protected static final String INVALID_ACCESS_TOKEN_SCOPE = "{\"error\":\"access token scope not valid\"}";
     protected static final String INVALID_ACCESS_TOKEN = "{\"error\":\"access token not valid\"}";
+    protected static final String INVALID_ACCESS_TOKEN_TYPE = "{\"error\":\"access token type not valid\"}";
+
     protected static final String OAUTH_TOKEN_VALIDATE_URI = "/oauth20/token/validate";
 
     protected static Logger log = LoggerFactory.getLogger(HttpRequestHandler.class);
@@ -95,8 +97,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             }
             String userId = null;
             if (mapping != null) {
-                log.debug("authRequired: {}", mapping.getAuthRequired());
-                if ("true".equals(mapping.getAuthRequired())) {
+                if (mapping.getAuthType() != null) {
                     String accessToken = null;
                     List<String> authorizationHeaders = req.getHeaders(HttpHeaders.Names.AUTHORIZATION);
                     for (String header : authorizationHeaders) {
@@ -107,9 +108,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                     }
 
                     if(accessToken == null) {
-                        HttpResponse response = HttpResponseFactory.createUnauthorizedResponse(ACCESS_TOKEN_REQUIRED);
-                        ChannelFuture future = channel.write(response);
-                        future.addListener(ChannelFutureListener.CLOSE);
+                        writeResponseToChannel(channel, HttpResponseFactory.createUnauthorizedResponse(ACCESS_TOKEN_REQUIRED));
                         return;
                     }
 
@@ -118,9 +117,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                         filter = getMappingFilter(mapping, config, channel);
                     } catch (MappingException e2) {
                         log.error("cannot map request", e2);
-                        HttpResponse response = HttpResponseFactory.createISEResponse();
-                        ChannelFuture future = channel.write(response);
-                        future.addListener(ChannelFutureListener.CLOSE);
+                        writeResponseToChannel(channel, HttpResponseFactory.createISEResponse());
                         return;
                     }
 
@@ -138,35 +135,33 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                             if (response instanceof HttpResponse) {
                                 HttpResponse res = (HttpResponse) response;
                                 if (!HttpResponseStatus.OK.equals(res.getStatus())) {
-                                    HttpResponse unauthRes = HttpResponseFactory.createUnauthorizedResponse(INVALID_ACCESS_TOKEN);
-                                    ChannelFuture future = channel.write(unauthRes);
-                                    log.debug(res.getContent().toString());
-                                    future.addListener(ChannelFutureListener.CLOSE);
+                                    writeResponseToChannel(channel, HttpResponseFactory.createUnauthorizedResponse(INVALID_ACCESS_TOKEN));
                                     return;
                                 }
                                 String tokenContent = new String(ChannelBuffers.copiedBuffer(res.getContent()).array());
                                 boolean scopeOk = AccessTokenValidator.validateTokenScope(tokenContent, endpoint.getScope());
                                 if(!scopeOk) {
-                                     HttpResponse unauthRes = HttpResponseFactory.createUnauthorizedResponse(INVALID_ACCESS_TOKEN_SCOPE);
-                                     ChannelFuture future = channel.write(unauthRes);
                                      log.debug("access token scope not valid");
-                                     future.addListener(ChannelFutureListener.CLOSE);
+                                     writeResponseToChannel(channel, HttpResponseFactory.createUnauthorizedResponse(INVALID_ACCESS_TOKEN_SCOPE));
                                      return;
                                 }
 
                                 String userId = getUserId(res);
-                                try {
-                                    HttpRequest mappedReq = mapRequest(request, endpoint, conf, userId);
-                                    channel.getPipeline().getContext("handler").setAttachment(responseListener);
-                                    client.send(mappedReq, endpoint.getBackendHost(), Integer.valueOf(endpoint.getBackendPort()), responseListener);
-                                } catch (MappingException e) {
-                                    log.error("cannot map request", e);
-                                    HttpResponse resp= HttpResponseFactory.createISEResponse();
-                                    ChannelFuture future = channel.write(resp);
-                                    future.addListener(ChannelFutureListener.CLOSE);
+                                if((MappingEndpoint.AUTH_TYPE_USER.equals(endpoint.getAuthType()) && (userId != null && userId.length() > 0)) ||
+                                        MappingEndpoint.AUTH_TYPE_CLIENT_APP.equals(endpoint.getAuthType())) {
+                                    try {
+                                        HttpRequest mappedReq = mapRequest(request, endpoint, conf, userId);
+                                        channel.getPipeline().getContext("handler").setAttachment(responseListener);
+                                        client.send(mappedReq, endpoint.getBackendHost(), Integer.valueOf(endpoint.getBackendPort()), responseListener);
+                                    } catch (MappingException e) {
+                                        log.error("cannot map request", e);
+                                        writeResponseToChannel(channel, HttpResponseFactory.createISEResponse());
+                                        return;
+                                    }
+                                } else {
+                                    writeResponseToChannel(channel, HttpResponseFactory.createUnauthorizedResponse(INVALID_ACCESS_TOKEN_TYPE));
                                     return;
                                 }
-
                             } else {
                                 ChannelFuture future = channel.write(tokenResponse);
                                 setConnectTimeout(channel);
@@ -189,9 +184,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                         client.send(mappedReq, mapping.getBackendHost(), Integer.valueOf(mapping.getBackendPort()), responseListener);
                     } catch (MappingException e2) {
                         log.error("cannot map request", e2);
-                        HttpResponse response = HttpResponseFactory.createISEResponse();
-                        ChannelFuture future = channel.write(response);
-                        future.addListener(ChannelFutureListener.CLOSE);
+                        writeResponseToChannel(channel, HttpResponseFactory.createISEResponse());
                         return;
                     }
                 }
@@ -203,7 +196,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 return;
             }
         } else {
-            log.info("write response here from the BE");
+            log.debug("write response here from the BE");
         }
     }
 
@@ -248,6 +241,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             filter = config.getFilter(mapping.getFilters().get(0));
         }
         return filter;
+    }
+
+    protected void writeResponseToChannel(Channel channel, HttpResponse response) {
+        ChannelFuture future = channel.write(response);
+        future.addListener(ChannelFutureListener.CLOSE);
     }
 
     protected void setConnectTimeout(final Channel channel) {
