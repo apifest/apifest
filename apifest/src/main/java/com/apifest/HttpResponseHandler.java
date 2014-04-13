@@ -67,9 +67,10 @@ public class HttpResponseHandler extends SimpleChannelUpstreamHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-     if(e.getCause() instanceof ConnectException) {
+        if (e.getCause() instanceof ConnectException) {
             log.error("Cannot connect to {}", ctx.getChannel().getRemoteAddress());
         }
+        log.error("response handler error: {}", e);
         ctx.sendUpstream(e);
     }
 }

@@ -57,7 +57,7 @@ public final class MappingClient {
             public ChannelPipeline getPipeline() {
                 ChannelPipeline pipeline = Channels.pipeline();
                 pipeline.addLast("codec", new HttpClientCodec());
-                pipeline.addLast("aggregator", new HttpChunkAggregator(4096));
+                pipeline.addLast("aggregator", new HttpChunkAggregator(1048576));
                 pipeline.addLast("handler", new HttpResponseHandler());
                 return pipeline;
             }

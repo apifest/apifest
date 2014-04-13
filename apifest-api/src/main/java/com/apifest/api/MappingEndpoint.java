@@ -48,6 +48,13 @@ public class MappingEndpoint implements  Serializable {
     @XmlAttribute(name = "backendHost", required = false)
     private String backendHost;
 
+    // support for multiple vars?
+    @XmlAttribute(name = "varExpression")
+    private String varExpression;
+
+    @XmlAttribute(name = "varName")
+    private String varName;
+
     @XmlAttribute(name = "authType", required = false)
     private String authType;
 
@@ -68,13 +75,6 @@ public class MappingEndpoint implements  Serializable {
 
     @XmlElement(name = "filter", type = ResponseFilter.class)
     private List<ResponseFilter> filters;
-
-    // support for multiple vars?
-    @XmlAttribute(name = "varExpression")
-    private String varExpression;
-
-    @XmlAttribute(name = "varName")
-    private String varName;
 
     public MappingEndpoint() {
     }
