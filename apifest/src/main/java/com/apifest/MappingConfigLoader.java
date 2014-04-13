@@ -50,6 +50,10 @@ import com.hazelcast.core.IMap;
 public final class MappingConfigLoader {
 
     private static Logger log = LoggerFactory.getLogger(MappingConfigLoader.class);
+    private static final String END = "$";
+
+    private static final String VAR_NAME_FORMAT = "{%s}";
+    private static final String VAR_EXPRESSION_FORMAT = "(%s%s)";
 
     protected static URLClassLoader jarClassLoader;
 
@@ -200,13 +204,18 @@ public final class MappingConfigLoader {
     protected static Pattern constructPattern(MappingEndpoint endpoint) {
         String path = endpoint.getExternalEndpoint();
         if (endpoint.getExternalEndpoint().contains("{")) {
-            String varExpr = "(" + endpoint.getVarExpression() + ")";
-            String varName = "{" + endpoint.getVarName() + "}";
+            // if var is at the end of endpoint, add $
+            String end = "";
+            if(path.endsWith(endpoint.getVarName() + "}")) {
+                end = END;
+            }
+            String varExpr = String.format(VAR_EXPRESSION_FORMAT, endpoint.getVarExpression(), end);//"(" + endpoint.getVarExpression() + end + ")" ;
+            String varName = String.format(VAR_NAME_FORMAT, endpoint.getVarName());//"{" + endpoint.getVarName() + "}";
             path = path.replace(varName, varExpr);
             return Pattern.compile(path);
         } else {
             // add $ for regular expressions - for no RE path
-            return Pattern.compile(path + "$");
+            return Pattern.compile(path + END);
         }
     }
 

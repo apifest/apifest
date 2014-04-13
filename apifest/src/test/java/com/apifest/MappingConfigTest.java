@@ -140,7 +140,23 @@ public class MappingConfigTest {
         Pattern p = MappingConfigLoader.constructPattern(endpoint);
 
         // THEN
-        assertEquals(p.toString(), "/v0.1/payments/(\\d*)");
+        assertEquals(p.toString(), "/v0.1/payments/(\\d*$)");
+    }
+
+    @Test
+    public void when_mapping_with_RE_varName_not_at_the_end_construct_Pattern_without_$() throws Exception {
+        // GIVEN
+        MappingEndpoint endpoint = new MappingEndpoint();
+        endpoint.setExternalEndpoint("/v0.1/payments/{paymentId}/info");
+        endpoint.setInternalEndpoint("/v0.1/payments/{paymentId}/info");
+        endpoint.setVarExpression("\\d*");
+        endpoint.setVarName("paymentId");
+
+        // WHEN
+        Pattern p = MappingConfigLoader.constructPattern(endpoint);
+
+        // THEN
+        assertEquals(p.toString(), "/v0.1/payments/(\\d*)/info");
     }
 
     @Test
