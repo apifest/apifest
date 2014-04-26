@@ -1,18 +1,18 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest;
 
@@ -41,16 +41,17 @@ public final class MappingServer {
 
     private static Logger log = LoggerFactory.getLogger(MappingServer.class);
 
+    private static final int MAX_CONTENT_LEN = 1048576;
+
     private MappingServer() {
     }
 
     public static void main(String[] args) {
-        if(!serverSetupChecks()){
+        if (!serverSetupChecks()) {
             System.exit(1);
         }
 
-        ChannelFactory factory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(),
-                Executors.newCachedThreadPool());
+        ChannelFactory factory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool());
 
         ServerBootstrap bootstrap = new ServerBootstrap(factory);
         bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
@@ -59,7 +60,7 @@ public final class MappingServer {
             public ChannelPipeline getPipeline() {
                 ChannelPipeline pipeline = Channels.pipeline();
                 pipeline.addLast("decoder", new HttpRequestDecoder());
-                pipeline.addLast("aggregator", new HttpChunkAggregator(1048576));
+                pipeline.addLast("aggregator", new HttpChunkAggregator(MAX_CONTENT_LEN));
                 pipeline.addLast("encoder", new HttpResponseEncoder());
                 pipeline.addLast("handler", new HttpRequestHandler());
                 return pipeline;
@@ -87,7 +88,7 @@ public final class MappingServer {
     private static boolean serverSetupChecks() {
         try {
             ServerConfig.readProperties();
-        }catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             log.error("Property values not valid");
             return false;
         } catch (IOException e) {

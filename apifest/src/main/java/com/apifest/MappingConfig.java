@@ -1,18 +1,18 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest;
 
@@ -44,7 +44,7 @@ public class MappingConfig implements Serializable {
 
     private static Logger log = LoggerFactory.getLogger(MappingConfig.class);
 
-    private Map<MappingPattern, MappingEndpoint> mappings =  new HashMap<MappingPattern, MappingEndpoint>();
+    private Map<MappingPattern, MappingEndpoint> mappings = new HashMap<MappingPattern, MappingEndpoint>();
 
     private Map<String, String> actions = new HashMap<String, String>();
 
@@ -93,6 +93,7 @@ public class MappingConfig implements Serializable {
 
     /**
      * Returns MappingEndpoint corresponding to an URI.
+     *
      * @param uri external uri
      * @return <code>MappingEndpoint</code> that corresponds to the passed URI
      */
@@ -106,13 +107,12 @@ public class MappingConfig implements Serializable {
                 MappingEndpoint cur = getMappings().get(p);
                 String newUri = cur.getInternalEndpoint();
                 // when RE used
-                if(newUri.contains("{") && m.groupCount() >= 1) {
+                if (newUri.contains("{") && m.groupCount() >= 1) {
                     String varValue = m.group(1);
                     newUri = cur.getInternalEndpoint().replace("{" + cur.getVarName() + "}", varValue);
                 }
-                MappingEndpoint result = new MappingEndpoint(cur.getExternalEndpoint(), newUri, cur.getMethod(), cur.getAuthType(),
-                        cur.getScope(), cur.getActions(), cur.getFilters(), cur.getVarExpression(), cur.getVarName(),
-                        cur.getBackendHost(), cur.getBackendPort());
+                MappingEndpoint result = new MappingEndpoint(cur.getExternalEndpoint(), newUri, cur.getMethod(), cur.getAuthType(), cur.getScope(), cur.getActions(), cur.getFilters(),
+                        cur.getVarExpression(), cur.getVarName(), cur.getBackendHost(), cur.getBackendPort());
                 return result;
             }
         }
@@ -132,6 +132,7 @@ public class MappingConfig implements Serializable {
 
     /**
      * Returns instance of BasicAction that corresponds to the passed mappingAction.
+     *
      * @param mappingAction <code>MappingAction</code>
      * @return instance of <code>BasicAction</code>
      */
@@ -143,7 +144,7 @@ public class MappingConfig implements Serializable {
         } else {
             actionClass = getActions().get(mappingAction.getName());
         }
-        if(actionClass == null) {
+        if (actionClass == null) {
             throw new MappingException("action " + mappingAction.getName() + " not mapped to class");
         }
         Class<?> clazz;
@@ -169,6 +170,7 @@ public class MappingConfig implements Serializable {
 
     /**
      * Returns instance of BasicFilter that corresponds to the response filter.
+     *
      * @param responseFilter response filter
      * @return BasicFilter instance
      */
@@ -180,7 +182,7 @@ public class MappingConfig implements Serializable {
         } else {
             filterClass = getFilters().get(responseFilter.getName());
         }
-        if(filterClass == null) {
+        if (filterClass == null) {
             throw new MappingException("filter " + responseFilter.getName() + " not mapped to class");
         }
         Class<?> clazz;
@@ -195,7 +197,7 @@ public class MappingConfig implements Serializable {
             }
         }
 
-        try{
+        try {
             filter = (BasicFilter) clazz.newInstance();
         } catch (InstantiationException e) {
             throw new MappingException("cannot instantiate filter class " + filterClass, e);

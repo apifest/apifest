@@ -1,21 +1,20 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest.api;
-
 
 import java.io.Serializable;
 import java.util.List;
@@ -26,16 +25,16 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
  * Represents a mapping with its external and internal endpoints, HTTP method, actions, filters
  * and regular expressions used.
+ *
  * @author Rossitsa Borissova
  *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "endpoint")
-public class MappingEndpoint implements  Serializable {
+public class MappingEndpoint implements Serializable {
 
     public static final String AUTH_TYPE_USER = "user";
     public static final String AUTH_TYPE_CLIENT_APP = "client-app";
@@ -139,7 +138,7 @@ public class MappingEndpoint implements  Serializable {
         return actions;
     }
 
-    public void setActions(List<MappingAction>actions) {
+    public void setActions(List<MappingAction> actions) {
         this.actions = actions;
     }
 
@@ -184,7 +183,9 @@ public class MappingEndpoint implements  Serializable {
     }
 
     /**
-     * Unique mapping endpoint key is constructed from mapping endpoint method and mapping endpoint external endpoint.
+     * Unique mapping endpoint key is constructed from mapping endpoint method and
+     * mapping endpoint external endpoint.
+     *
      * @return mapping endpoint unique key
      */
     public String getUniqueKey() {

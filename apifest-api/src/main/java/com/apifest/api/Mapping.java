@@ -1,18 +1,18 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest.api;
 
@@ -28,12 +28,13 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Represents an endpoint mapping - with its endpoint mapping, actions, filters and errors.
+ *
  * @author Rossitsa Borissova
  *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "mappings")
-public class Mapping implements  Serializable {
+public class Mapping implements Serializable {
 
     private static final long serialVersionUID = 6087428073230165216L;
 
@@ -102,7 +103,6 @@ public class Mapping implements  Serializable {
     public ErrorsWrapper getErrorsWrapper() {
         return errorsWrapper;
     }
-
 
     @XmlType
     public static class EndpointsWrapper implements Serializable {

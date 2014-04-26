@@ -1,18 +1,18 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest;
 
@@ -30,8 +30,8 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 
 /**
- * Responsible for creating Hazelcast node in JVM.
- * Reads the configuration for Hazelcast maps used to store mapping configuration.
+ * Responsible for creating Hazelcast node in JVM. Reads the configuration for Hazelcast maps used to store mapping
+ * configuration.
  *
  * @author Rossitsa Borissova
  */
@@ -55,7 +55,7 @@ public class HazelcastConfigInstance {
             log.debug("Hazelcast instance created");
             hzInstance = Hazelcast.newHazelcastInstance(cfg);
             ConfigChangeListener listener = new ConfigChangeListener();
-            IMap<String, MappingConfig> map= hzInstance.getMap("mappings");
+            IMap<String, MappingConfig> map = hzInstance.getMap("mappings");
             map.addEntryListener(listener, true);
         } catch (FileNotFoundException e) {
             log.error("hazelcast.config.file {} not found", hazelcastConfig);
@@ -63,7 +63,7 @@ public class HazelcastConfigInstance {
     }
 
     public static HazelcastConfigInstance instance() {
-        if(configInstance == null) {
+        if (configInstance == null) {
             configInstance = new HazelcastConfigInstance();
             configInstance.load();
         }
@@ -71,7 +71,7 @@ public class HazelcastConfigInstance {
     }
 
     public IMap<String, com.apifest.MappingConfig> getMappingConfigs() {
-      return hzInstance.getMap("mappings");
+        return hzInstance.getMap("mappings");
     }
 
 }

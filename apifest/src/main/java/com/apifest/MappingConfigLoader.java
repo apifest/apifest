@@ -79,7 +79,7 @@ public final class MappingConfigLoader {
                     MappingConfig config = new MappingConfig();
                     Mapping mappings = (Mapping) unmarshaller.unmarshal(mappingFile);
 
-                    if(mappings.getActionsWrapper() != null) {
+                    if (mappings.getActionsWrapper() != null) {
                         config.setActions(getActionsMap(mappings));
                     }
 
@@ -126,7 +126,7 @@ public final class MappingConfigLoader {
             } else {
                 throw new MappingException("cannot load custom jar");
             }
-        }catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
             throw new MappingException("cannot load custom class", e);
         }
         return clazz;
@@ -134,7 +134,7 @@ public final class MappingConfigLoader {
 
     private static boolean createJarClassLoader() throws MalformedURLException {
         boolean created = false;
-        if(ServerConfig.getCustomJarPath() != null) {
+        if (ServerConfig.getCustomJarPath() != null) {
             File file = new File(ServerConfig.getCustomJarPath());
             URL jarfile = file.toURI().toURL();
             jarClassLoader = URLClassLoader.newInstance(new URL[] { jarfile }, MappingConfigLoader.class.getClassLoader());
@@ -192,7 +192,7 @@ public final class MappingConfigLoader {
             // construct regular expression
             Pattern p = constructPattern(endpoint);
             MappingPattern pattern = new MappingPattern(p, endpoint.getMethod());
-            if(endpoint.getBackendHost() == null) {
+            if (endpoint.getBackendHost() == null) {
                 endpoint.setBackendHost(backend.getBackendHost());
                 endpoint.setBackendPort(backend.getBackendPort());
             }
@@ -206,11 +206,11 @@ public final class MappingConfigLoader {
         if (endpoint.getExternalEndpoint().contains("{")) {
             // if var is at the end of endpoint, add $
             String end = "";
-            if(path.endsWith(endpoint.getVarName() + "}")) {
+            if (path.endsWith(endpoint.getVarName() + "}")) {
                 end = END;
             }
-            String varExpr = String.format(VAR_EXPRESSION_FORMAT, endpoint.getVarExpression(), end);//"(" + endpoint.getVarExpression() + end + ")" ;
-            String varName = String.format(VAR_NAME_FORMAT, endpoint.getVarName());//"{" + endpoint.getVarName() + "}";
+            String varExpr = String.format(VAR_EXPRESSION_FORMAT, endpoint.getVarExpression(), end);
+            String varName = String.format(VAR_NAME_FORMAT, endpoint.getVarName());
             path = path.replace(varName, varExpr);
             return Pattern.compile(path);
         } else {
@@ -238,7 +238,7 @@ public final class MappingConfigLoader {
 
     private static void reloadCustomClasses(MappingConfig config) {
         jarClassLoader = null;
-        if(ServerConfig.getCustomJarPath() != null) {
+        if (ServerConfig.getCustomJarPath() != null) {
             try {
                 loadCustomClasses(config.getActions().values());
             } catch (MalformedURLException e) {

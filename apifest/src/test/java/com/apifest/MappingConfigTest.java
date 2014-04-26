@@ -17,10 +17,10 @@
 package com.apifest;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -30,10 +30,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import org.slf4j.Logger;
-import org.testng.*;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-import org.mockito.*;
 
 import com.apifest.api.BasicAction;
 import com.apifest.api.Mapping;
@@ -204,11 +202,12 @@ public class MappingConfigTest {
 
     private String marshal() {
         String result = null;
+        ByteArrayOutputStream out = null;
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(Mapping.class);
             Marshaller marshaller = jaxbContext.createMarshaller();
             marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            out = new ByteArrayOutputStream();
             Mapping mapping = new Mapping();
 
             MappingAction action = new MappingAction();
@@ -252,6 +251,15 @@ public class MappingConfigTest {
         } catch (UnsupportedEncodingException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
         }
         return result;
     }

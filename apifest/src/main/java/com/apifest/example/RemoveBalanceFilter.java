@@ -1,18 +1,18 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest.example;
 
@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.apifest.api.BasicFilter;
-
 
 /**
  * Filter that removes balance field from response.
@@ -45,7 +44,7 @@ public class RemoveBalanceFilter extends BasicFilter {
             log.info("response body: " + json.toString());
             json.remove("balance");
             log.info("modified response body: " + json.toString());
-            byte [] newContent = json.toString().getBytes(CharsetUtil.UTF_8);
+            byte[] newContent = json.toString().getBytes(CharsetUtil.UTF_8);
             response.setContent(ChannelBuffers.copiedBuffer(newContent));
             HttpHeaders.setContentLength(response, newContent.length);
         } catch (JSONException e) {

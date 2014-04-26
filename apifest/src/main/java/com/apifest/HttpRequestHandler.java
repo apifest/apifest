@@ -66,13 +66,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
     private MappingClient client = MappingClient.getClient();
 
+    private static final int HTTP_STATUS_300 = 300;
+
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
         final Channel channel = ctx.getChannel();
-//        SocketChannelConfig cfg = (SocketChannelConfig) channel.getConfig();
-//        cfg.setSoLinger(-1);
-//        cfg.setTcpNoDelay(true);
-//        cfg.setKeepAlive(true);
 
         setConnectTimeout(channel);
         Object message = e.getMessage();
@@ -128,7 +126,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                     final MappingConfig conf = config;
 
                     // validates access token
-                    TokenValidationListener validatorListener = new TokenValidationListener(accessToken) {
+                    TokenValidationListener validatorListener = new TokenValidationListener() {
                         @Override
                         public void responseReceived(HttpMessage response) {
                             HttpMessage tokenResponse = response;
@@ -207,11 +205,12 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 HttpMessage newResponse = response;
                 if (response instanceof HttpResponse) {
                     HttpResponse res = (HttpResponse) response;
-                    if (res.getStatus().getCode() >= 300) {
+                    // status greater than HTTP 300
+                    if (res.getStatus().getCode() >= HTTP_STATUS_300) {
                         // return error response
                         newResponse = res;
                     }
-                    if (res.getStatus().getCode() < 300 && getFilter() != null) {
+                    if (res.getStatus().getCode() < HTTP_STATUS_300 && getFilter() != null) {
                         newResponse = getFilter().execute((HttpResponse) response);
                     }
                 }

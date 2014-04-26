@@ -1,18 +1,18 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest;
 
@@ -36,6 +36,7 @@ public class HttpResponseFactory {
 
     /**
      * Creates HTTP response with HTTP status 500.
+     *
      * @return HTTP response created
      */
     public static HttpResponse createISEResponse() {
@@ -46,7 +47,9 @@ public class HttpResponseFactory {
 
     /**
      * Creates HTTP response with HTTP status 401 and the message passed.
-     * @param message message returned in the response
+     *
+     * @param message
+     *            message returned in the response
      * @return HTTP response created
      */
     public static HttpResponse createUnauthorizedResponse(String message) {
@@ -59,6 +62,7 @@ public class HttpResponseFactory {
 
     /**
      * Creates HTTP response with HTTP status 404.
+     *
      * @return HTTP response created
      */
     public static HttpResponse createNotFoundResponse() {
@@ -71,7 +75,9 @@ public class HttpResponseFactory {
 
     /**
      * Creates HTTP response with HTTP status 200 and the message passed.
-     * @param message message returned in the response
+     *
+     * @param message
+     *            message returned in the response
      * @return HTTP response created
      */
     public static HttpResponse createOKResponse(String message) {
@@ -84,8 +90,11 @@ public class HttpResponseFactory {
 
     /**
      * Create HTTP response with a given HTTP status and message.
-     * @param httpStatus HTTP response status
-     * @param message response message
+     *
+     * @param httpStatus
+     *            HTTP response status
+     * @param message
+     *            response message
      * @return HTTP response created
      */
     public static HttpResponse createResponse(HttpResponseStatus httpStatus, String message) {

@@ -1,18 +1,18 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest;
 
@@ -42,14 +42,15 @@ import org.slf4j.LoggerFactory;
  */
 public final class MappingClient {
 
+    private static final int MAX_CONTENT_LEN = 1048576;
+
     private ClientBootstrap bootstrap;
     private static MappingClient client;
 
     protected Logger log = LoggerFactory.getLogger(MappingClient.class);
 
     private MappingClient() {
-        ChannelFactory factory = new NioClientSocketChannelFactory(Executors.newCachedThreadPool(),
-                Executors.newCachedThreadPool());
+        ChannelFactory factory = new NioClientSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool());
         bootstrap = new ClientBootstrap(factory);
         bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
 
@@ -57,7 +58,7 @@ public final class MappingClient {
             public ChannelPipeline getPipeline() {
                 ChannelPipeline pipeline = Channels.pipeline();
                 pipeline.addLast("codec", new HttpClientCodec());
-                pipeline.addLast("aggregator", new HttpChunkAggregator(1048576));
+                pipeline.addLast("aggregator", new HttpChunkAggregator(MAX_CONTENT_LEN));
                 pipeline.addLast("handler", new HttpResponseHandler());
                 return pipeline;
             }
@@ -70,7 +71,7 @@ public final class MappingClient {
     }
 
     public static MappingClient getClient() {
-        if(client == null) {
+        if (client == null) {
             client = new MappingClient();
         }
         return client;
@@ -78,6 +79,7 @@ public final class MappingClient {
 
     /**
      * Sends the request to the given backend.
+     *
      * @param request request that should be sent to the given backend
      * @param host backend host
      * @param port backend port
@@ -90,12 +92,12 @@ public final class MappingClient {
             public void operationComplete(ChannelFuture future) {
                 final Channel channel = future.getChannel();
                 channel.getConfig().setConnectTimeoutMillis(ServerConfig.getConnectTimeout());
-                if(channel.isConnected()) {
+                if (channel.isConnected()) {
                     channel.getPipeline().getContext("handler").setAttachment(responseListener);
-                    if (future.isSuccess() && channel.isOpen()){
-                       channel.write(request);
+                    if (future.isSuccess() && channel.isOpen()) {
+                        channel.write(request);
                     } else {
-                        //if cannot connect
+                        // if cannot connect
                         channel.disconnect();
                         channel.close();
                         HttpResponse response = HttpResponseFactory.createISEResponse();
@@ -120,12 +122,12 @@ public final class MappingClient {
             public void operationComplete(ChannelFuture future) {
                 final Channel channel = future.getChannel();
                 channel.getConfig().setConnectTimeoutMillis(ServerConfig.getConnectTimeout());
-                if(channel.isConnected()) {
+                if (channel.isConnected()) {
                     channel.getPipeline().getContext("handler").setAttachment(validatorListener);
-                    if (future.isSuccess() && channel.isOpen()){
-                       channel.write(request);
+                    if (future.isSuccess() && channel.isOpen()) {
+                        channel.write(request);
                     } else {
-                        //if cannot connect
+                        // if cannot connect
                         channel.disconnect();
                         channel.close();
                         HttpResponse response = HttpResponseFactory.createISEResponse();

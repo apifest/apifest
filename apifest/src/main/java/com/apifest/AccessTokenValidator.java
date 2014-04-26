@@ -1,18 +1,18 @@
 /*
-* Copyright 2013-2014, ApiFest project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright 2013-2014, ApiFest project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.apifest;
 
@@ -37,13 +37,13 @@ public class AccessTokenValidator {
 
     protected static boolean validateTokenScope(String tokenContent, String endpointScope) {
         String tokenScope = extractTokenScope(tokenContent);
-        if(tokenScope == null) {
+        if (tokenScope == null) {
             return false;
         }
         // tokenScope should be always not null
-        String [] allowedScopes = endpointScope.split(",");
-        for(String scope : allowedScopes) {
-            if(scope.equals(tokenScope)) {
+        String[] allowedScopes = endpointScope.split(",");
+        for (String scope : allowedScopes) {
+            if (scope.equals(tokenScope)) {
                 return true;
             }
         }
@@ -55,7 +55,7 @@ public class AccessTokenValidator {
         try {
             JSONObject object = new JSONObject(tokenContent);
             Object rs = object.get("scope");
-            if(rs != null && !rs.toString().equals("null")) {
+            if (rs != null && !rs.toString().equals("null")) {
                 scope = (String) rs;
             }
         } catch (JSONException e) {
@@ -66,7 +66,7 @@ public class AccessTokenValidator {
 
     protected static String extractAccessToken(String header) {
         Matcher m = AUTH_BEARER_PATTERN.matcher(header);
-        if(m.find()) {
+        if (m.find()) {
             return m.group(2);
         }
         return null;
