@@ -42,6 +42,7 @@ public final class MappingConfigValidator {
     }
 
     public static void main(String[] args) {
+        InputStream xsdFile = null;
         try {
             String mappingFile = null;
             if (args.length > 0) {
@@ -54,7 +55,7 @@ public final class MappingConfigValidator {
                 return;
             }
             SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            InputStream xsdFile = ClassLoader.getSystemClassLoader().getResourceAsStream("schema.xsd");
+            xsdFile = ClassLoader.getSystemClassLoader().getResourceAsStream("schema.xsd");
             Schema schema = factory.newSchema(new StreamSource(xsdFile));
             Validator validator = schema.newValidator();
             validator.validate(new StreamSource(mappingFile));
@@ -63,6 +64,14 @@ public final class MappingConfigValidator {
             log.error("mapping file NOT valid: {}", ex.getMessage());
         } catch (IOException e) {
             log.error("mapping file not loaded: {}", e.getMessage());
+        } finally {
+            if (xsdFile != null) {
+                try {
+                    xsdFile.close();
+                } catch (IOException e) {
+                    log.error("cannot close input stream", e);
+                }
+            }
         }
     }
 }

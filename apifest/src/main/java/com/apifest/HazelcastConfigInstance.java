@@ -18,6 +18,7 @@ package com.apifest;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 
 import org.slf4j.Logger;
@@ -47,7 +48,7 @@ public class HazelcastConfigInstance {
 
     private void load() {
         String hazelcastConfig = System.getProperty("hazelcast.config.file");
-        InputStream xml;
+        InputStream xml = null;
         try {
             xml = new FileInputStream(hazelcastConfig);
             XmlConfigBuilder cfgBuilder = new XmlConfigBuilder(xml);
@@ -59,6 +60,14 @@ public class HazelcastConfigInstance {
             map.addEntryListener(listener, true);
         } catch (FileNotFoundException e) {
             log.error("hazelcast.config.file {} not found", hazelcastConfig);
+        } finally {
+            if (xml != null) {
+                try {
+                    xml.close();
+                } catch (IOException e) {
+                    log.error("cannot close input stream", e);
+                }
+            }
         }
     }
 

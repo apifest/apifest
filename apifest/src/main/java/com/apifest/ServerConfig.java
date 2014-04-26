@@ -47,18 +47,29 @@ public final class ServerConfig {
 
     public static void readProperties() throws IOException {
         String propertiesFilePath = System.getProperty("properties.file");
-        InputStream in;
-        if (propertiesFilePath == null) {
-            in = Thread.currentThread().getContextClassLoader().getResourceAsStream("apifest.properties");
-            if (in != null) {
-                loadProperties(in);
+        InputStream in = null;
+        try {
+            if (propertiesFilePath == null) {
+                in = Thread.currentThread().getContextClassLoader()
+                        .getResourceAsStream("apifest.properties");
+                if (in != null) {
+                    loadProperties(in);
+                } else {
+                    throw new IOException();
+                }
             } else {
-                throw new IOException();
+                File file = new File(propertiesFilePath);
+                in = new FileInputStream(file);
+                loadProperties(in);
             }
-        } else {
-            File file = new File(propertiesFilePath);
-            in = new FileInputStream(file);
-            loadProperties(in);
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    log.error("cannot close input stream", e);
+                }
+            }
         }
     }
 
