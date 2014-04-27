@@ -48,9 +48,10 @@ public class RemoveBalanceFilterTest {
     public void setup() {
         filter = spy(new RemoveBalanceFilter());
         response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-        response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "application/json");
+        response.headers().add(HttpHeaders.Names.CONTENT_TYPE, "application/json");
         String content = "{\"customerId\":\"1223\",\"email\":\"rossi.test@apifest.com\",\"balance\":\"1234.34\"}";
         response.setContent(ChannelBuffers.copiedBuffer(content.getBytes()));
+        response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, content.getBytes().length);
     }
 
 

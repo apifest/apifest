@@ -24,6 +24,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +50,7 @@ public class HttpResponseHandler extends SimpleChannelUpstreamHandler {
                 String content = MappingConfigLoader.getConfig().get(0).getErrorMessage(statusCode);
                 if (content != null) {
                     response.setContent(ChannelBuffers.copiedBuffer(content.getBytes()));
-                    response.headers().add("Content-Length", content.getBytes().length);
+                    response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, content.getBytes().length);
                 }
             }
             log.info("response: {}", new String(ChannelBuffers.copiedBuffer(response.getContent()).array()));

@@ -48,9 +48,10 @@ public class AddSenderIdInBodyActionTest {
     public void setup() {
         action = spy(new AddSenderIdInBodyAction());
         req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/payments");
-        req.setHeader(HttpHeaders.Names.CONTENT_TYPE, "application/json");
+        req.headers().add(HttpHeaders.Names.CONTENT_TYPE, "application/json");
         String content = "{}";
         req.setContent(ChannelBuffers.copiedBuffer(content.getBytes()));
+        req.headers().add(HttpHeaders.Names.CONTENT_LENGTH, content.getBytes().length);
     }
 
     @Test

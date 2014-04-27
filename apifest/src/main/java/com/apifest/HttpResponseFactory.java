@@ -16,10 +16,11 @@
 
 package com.apifest;
 
-import org.apache.http.HttpHeaders;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
@@ -41,7 +42,7 @@ public class HttpResponseFactory {
      */
     public static HttpResponse createISEResponse() {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
-        response.headers().add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
+        response.headers().add(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
         return response;
     }
 
@@ -54,9 +55,10 @@ public class HttpResponseFactory {
      */
     public static HttpResponse createUnauthorizedResponse(String message) {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
-        response.headers().add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
+        response.headers().add(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes());
         response.setContent(buf);
+        response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         return response;
     }
 
@@ -67,41 +69,41 @@ public class HttpResponseFactory {
      */
     public static HttpResponse createNotFoundResponse() {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
-        response.headers().add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
+        response.headers().add(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(NOT_FOUND_CONTENT.getBytes());
         response.setContent(buf);
+        response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         return response;
     }
 
     /**
      * Creates HTTP response with HTTP status 200 and the message passed.
      *
-     * @param message
-     *            message returned in the response
+     * @param message message returned in the response
      * @return HTTP response created
      */
     public static HttpResponse createOKResponse(String message) {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-        response.headers().add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
+        response.headers().add(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes());
         response.setContent(buf);
+        response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         return response;
     }
 
     /**
      * Create HTTP response with a given HTTP status and message.
      *
-     * @param httpStatus
-     *            HTTP response status
-     * @param message
-     *            response message
+     * @param httpStatus HTTP response status
+     * @param message response message
      * @return HTTP response created
      */
     public static HttpResponse createResponse(HttpResponseStatus httpStatus, String message) {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, httpStatus);
-        response.headers().add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON);
+        response.headers().add(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
         ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes());
         response.setContent(buf);
+        response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         return response;
     }
 }
