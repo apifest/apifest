@@ -16,16 +16,26 @@
 
 package com.apifest;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hazelcast.config.Config;
-import com.hazelcast.config.XmlConfigBuilder;
+import com.hazelcast.config.ExecutorConfig;
+import com.hazelcast.config.InMemoryFormat;
+import com.hazelcast.config.InterfacesConfig;
+import com.hazelcast.config.JoinConfig;
+import com.hazelcast.config.MapConfig;
+import com.hazelcast.config.MapConfig.EvictionPolicy;
+import com.hazelcast.config.MaxSizeConfig;
+import com.hazelcast.config.MaxSizeConfig.MaxSizePolicy;
+import com.hazelcast.config.MulticastConfig;
+import com.hazelcast.config.NetworkConfig;
+import com.hazelcast.config.TcpIpConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
@@ -43,32 +53,19 @@ public class HazelcastConfigInstance {
     private HazelcastInstance hzInstance;
     protected static HazelcastConfigInstance configInstance; // NOSONAR, used to mock in unit tests
 
+    private static final String HZ_MAP_NAME = "mappings";
+    private static final int MAX_POOL_SIZE = 64;
+
     private HazelcastConfigInstance() {
     }
 
     private void load() {
-        String hazelcastConfig = System.getProperty("hazelcast.config.file");
-        InputStream xml = null;
-        try {
-            xml = new FileInputStream(hazelcastConfig);
-            XmlConfigBuilder cfgBuilder = new XmlConfigBuilder(xml);
-            Config cfg = cfgBuilder.build();
-            log.debug("Hazelcast instance created");
-            hzInstance = Hazelcast.newHazelcastInstance(cfg);
-            ConfigChangeListener listener = new ConfigChangeListener();
-            IMap<String, MappingConfig> map = hzInstance.getMap("mappings");
-            map.addEntryListener(listener, true);
-        } catch (FileNotFoundException e) {
-            log.error("hazelcast.config.file {} not found", hazelcastConfig);
-        } finally {
-            if (xml != null) {
-                try {
-                    xml.close();
-                } catch (IOException e) {
-                    log.error("cannot close input stream", e);
-                }
-            }
-        }
+        Config cfg = createConfiguration();
+        hzInstance = Hazelcast.newHazelcastInstance(cfg);
+        log.debug("Hazelcast instance created");
+        ConfigChangeListener listener = new ConfigChangeListener();
+        IMap<String, MappingConfig> map = hzInstance.getMap(HZ_MAP_NAME);
+        map.addEntryListener(listener, true);
     }
 
     public static HazelcastConfigInstance instance() {
@@ -80,7 +77,75 @@ public class HazelcastConfigInstance {
     }
 
     public IMap<String, com.apifest.MappingConfig> getMappingConfigs() {
-        return hzInstance.getMap("mappings");
+        return hzInstance.getMap(HZ_MAP_NAME);
     }
 
+    protected Config createConfiguration() {
+        Config config = new Config();
+        Map<String, MapConfig> mapCfg = createMapConfigs();
+        config.setMapConfigs(mapCfg);
+
+        NetworkConfig networkCfg = createNetworkConfigs();
+        config.setNetworkConfig(networkCfg);
+
+        ExecutorConfig executorConfig = new ExecutorConfig();
+        executorConfig.setPoolSize(MAX_POOL_SIZE);
+        executorConfig.setStatisticsEnabled(false);
+        config.addExecutorConfig(executorConfig);
+
+        return config;
+    }
+
+    private NetworkConfig createNetworkConfigs() {
+        NetworkConfig networkConfig = new NetworkConfig();
+        InterfacesConfig interfaceConfig = new InterfacesConfig();
+        // add current host
+        interfaceConfig.addInterface(ServerConfig.getHost());
+        interfaceConfig.setEnabled(true);
+
+        networkConfig.setInterfaces(interfaceConfig);
+        JoinConfig joinConfig = new JoinConfig();
+        TcpIpConfig tcpIps = new TcpIpConfig();
+
+        // read members from properties file
+        List<String> ips = createNodesList();
+        if (ips != null) {
+            tcpIps.setMembers(ips);
+            joinConfig.setTcpIpConfig(tcpIps);
+        }
+        tcpIps.setEnabled(true);
+
+        MulticastConfig multicastConfig = new MulticastConfig();
+        multicastConfig.setEnabled(false);
+        joinConfig.setMulticastConfig(multicastConfig);
+        networkConfig.setJoin(joinConfig);
+
+        return networkConfig;
+    }
+
+    private List<String> createNodesList() {
+        List<String> nodes = null;
+        String list = ServerConfig.getApifestNodes();
+        if (list != null && list.length() > 0) {
+            String [] n = list.split(",");
+            nodes = Arrays.asList(n);
+        }
+        return nodes;
+    }
+
+    private Map<String, MapConfig> createMapConfigs() {
+        MapConfig mapConfig = new MapConfig(HZ_MAP_NAME);
+        mapConfig.setInMemoryFormat(InMemoryFormat.BINARY);
+        mapConfig.setBackupCount(1);
+        mapConfig.setAsyncBackupCount(0);
+        mapConfig.setTimeToLiveSeconds(0);
+        mapConfig.setMaxIdleSeconds(0);
+        mapConfig.setEvictionPolicy(EvictionPolicy.NONE);
+        mapConfig.setMaxSizeConfig(new MaxSizeConfig(0, MaxSizePolicy.PER_NODE));
+        mapConfig.setEvictionPercentage(0);
+        mapConfig.setMergePolicy("com.hazelcast.map.merge.PutIfAbsentMapMergePolicy");
+        Map<String, MapConfig> configs = new HashMap<String, MapConfig>();
+        configs.put(mapConfig.getName(), mapConfig);
+        return configs;
+    }
 }

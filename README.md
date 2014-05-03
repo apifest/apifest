@@ -42,6 +42,8 @@ apifest.mappings=
 token.validate.host=
 token.validate.port=
 connect.timeout=
+custom.jar=
+apifest.nodes=
 ```
 
 The path to the apifest.properties file should be passed as a system variable:
@@ -128,21 +130,22 @@ In order to setup connection timeout(in ms) to the backend, use the following pr
 
 ***connect.timeout***
 
+If you have some custom request transformations, then you can set the path to your jar with transformations by the 
+following property:
+   
+***custom.jar***
 
-**2. Hazelcast config**
+As ApiFest configurations are stored in distributed cache, you need to setup all other nodes (as comma-separated list of 
+IPs) on which ApiFest Mapping Server is running. For that purpose, use the following property in apifest.properties file -
 
-As ApiFest Mapping Server uses Hazelcast for its mapping configurations, you should create hazelcast configuration 
-file with Map named "mappings".
-A template with hazelcast configuration file could be found in resources folder in the project.
-The path to the hazelcast configuration file should be passed as system variable named hazelcast.config.file:
-
-***-Dhazelcast.config.file***
+***apifest.nodes***
+ 
 
 **3. Start ApiFest Mapping Server**
 
 You can start AMS with the following command:
 
-```java -Dproperties.file=[apifest_properties_file_path] -Dhazelcast.config.file=[hazelcast_config_file_path] -jar apifest-0.1.0-jar-with-dependencies.jar```
+```java -Dproperties.file=[apifest_properties_file_path] -jar apifest-0.1.0-jar-with-dependencies.jar```
 
 When the server starts, you will see:
 ```ApiFest Mapping Server started at [host]:[port]```

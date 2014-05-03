@@ -41,6 +41,7 @@ public final class ServerConfig {
     protected static Integer tokenValidatePort;
     protected static Integer connectTimeout;
     protected static String customJarPath;
+    protected static String apifestNodes;
 
     private ServerConfig() {
     }
@@ -88,6 +89,7 @@ public final class ServerConfig {
 
         connectTimeout = Integer.valueOf(props.getProperty("connect.timeout", "10"));
         customJarPath = props.getProperty("custom.jar");
+        apifestNodes = props.getProperty("apifest.nodes");
     }
 
     public static String getHost() {
@@ -116,5 +118,9 @@ public final class ServerConfig {
 
     public static String getCustomJarPath() {
         return customJarPath;
+    }
+
+    public static String getApifestNodes() {
+        return apifestNodes;
     }
 }
