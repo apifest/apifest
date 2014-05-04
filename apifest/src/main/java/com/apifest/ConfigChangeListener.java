@@ -50,8 +50,8 @@ public class ConfigChangeListener implements EntryListener<String, MappingConfig
      */
     @Override
     public void entryUpdated(EntryEvent<String, MappingConfig> event) {
-        log.debug("entry updated, key {}, value {}", event.getName(), event.getValue());
-        MappingConfigLoader.updateMapping(event.getName(), event.getValue());
+        log.debug("entry updated, key {}, value {}", event.getKey(), event.getValue());
+        MappingConfigLoader.updateMapping(event.getKey(), event.getValue());
     }
 
     /*

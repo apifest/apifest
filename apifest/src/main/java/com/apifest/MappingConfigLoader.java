@@ -106,7 +106,12 @@ public final class MappingConfigLoader {
                     local.put(mappings.getVersion(), config);
                 }
                 IMap<String, MappingConfig> map = getHazelcastConfig();
-                map.putAll(local);
+                if (local.size() > 0) {
+                    map.putAll(local);
+                    local.putAll(map);
+                } else {
+                    local.putAll(map);
+                }
                 localConfigMap = local;
             } else {
                 log.error("Cannot load mapping configuration from directory {}", mappingFileDir);
