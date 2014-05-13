@@ -16,6 +16,8 @@
 
 package com.apifest;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,9 +43,10 @@ public class AccessTokenValidator {
             return false;
         }
         // tokenScope should be always not null
-        String[] allowedScopes = endpointScope.split(",");
-        for (String scope : allowedScopes) {
-            if (scope.equals(tokenScope)) {
+        List<String> allowedScopes = Arrays.asList(endpointScope.split(" "));
+        String [] scopes = tokenScope.split(" ");
+        for (String scope : scopes) {
+            if (allowedScopes.contains(scope)) {
                 return true;
             }
         }

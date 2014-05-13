@@ -104,7 +104,7 @@ public class AccessTokenValidatorTest {
     @Test
     public void when_endpoint_scope_contain_token_scope_return_true() throws Exception {
         // GIVEN
-        String endpointScope = "extended,basic";
+        String endpointScope = "extended basic";
         String tokenContent = "{\"tokenType\":\"599\",\"scope\":\"basic\"," + "\"accessToken\":\"da96c8141bcda91be65db4adbc8fafe77d116c88caacb8de404c0654c16c6620\","
                 + "\"expiresIn\":\"Bearer\",\"userId\":null," + "\"refreshToken\":\"cb2e2e068447913d0c97f79f888f6e2882bfcb569325a9ad9e9b52937b06e547\"}";
 
@@ -118,8 +118,36 @@ public class AccessTokenValidatorTest {
     @Test
     public void when_endpoint_scope_not_contain_token_scope_return_false() throws Exception {
         // GIVEN
-        String endpointScope = "extended,friends";
+        String endpointScope = "extended friends";
         String tokenContent = "{\"tokenType\":\"599\",\"scope\":\"basic\"," + "\"accessToken\":\"da96c8141bcda91be65db4adbc8fafe77d116c88caacb8de404c0654c16c6620\","
+                + "\"expiresIn\":\"Bearer\",\"userId\":null," + "\"refreshToken\":\"cb2e2e068447913d0c97f79f888f6e2882bfcb569325a9ad9e9b52937b06e547\"}";
+
+        // WHEN
+        boolean result = AccessTokenValidator.validateTokenScope(tokenContent, endpointScope);
+
+        // THEN
+        assertFalse(result);
+    }
+
+    @Test
+    public void when_endpoint_scopes_contain_one_of_token_scopes_return_true() throws Exception {
+        // GIVEN
+        String endpointScope = "extended friends";
+        String tokenContent = "{\"tokenType\":\"599\",\"scope\":\"basic extended\"," + "\"accessToken\":\"da96c8141bcda91be65db4adbc8fafe77d116c88caacb8de404c0654c16c6620\","
+                + "\"expiresIn\":\"Bearer\",\"userId\":null," + "\"refreshToken\":\"cb2e2e068447913d0c97f79f888f6e2882bfcb569325a9ad9e9b52937b06e547\"}";
+
+        // WHEN
+        boolean result = AccessTokenValidator.validateTokenScope(tokenContent, endpointScope);
+
+        // THEN
+        assertTrue(result);
+    }
+
+    @Test
+    public void when_endpoint_scopes_contain_none_of_token_scopes_return_false() throws Exception {
+        // GIVEN
+        String endpointScope = "extended friends";
+        String tokenContent = "{\"tokenType\":\"599\",\"scope\":\"basic other\"," + "\"accessToken\":\"da96c8141bcda91be65db4adbc8fafe77d116c88caacb8de404c0654c16c6620\","
                 + "\"expiresIn\":\"Bearer\",\"userId\":null," + "\"refreshToken\":\"cb2e2e068447913d0c97f79f888f6e2882bfcb569325a9ad9e9b52937b06e547\"}";
 
         // WHEN
