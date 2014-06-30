@@ -27,7 +27,7 @@ It enables the usage of access tokens in ApiFest Mapping Server.
 - generate access token using refresh token - grant_type=refresh_token;
 - revoke access token;
 - validate access token;
-- pluggable storage (currently supports MongoDB);
+- pluggable storage (currently supports MongoDB and Redis);
 - unlimited horizontal scalability;
 
 
