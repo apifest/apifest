@@ -75,8 +75,9 @@ public final class MappingServer {
         bootstrap.bind(new InetSocketAddress(ServerConfig.getHost(), ServerConfig.getPort()));
 
         try {
-            MappingConfigLoader.load();
+            MappingConfigLoader.load(false);
         } catch (IllegalArgumentException e) {
+            log.error("Cannot load mappings", e);
             System.exit(1);
         }
         log.info("ApiFest Mapping Server started at " + ServerConfig.getHost() + ":" + ServerConfig.getPort());

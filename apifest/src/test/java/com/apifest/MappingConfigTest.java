@@ -77,7 +77,7 @@ public class MappingConfigTest {
     public void when_load_read_mapping() {
 
         // WHEN
-        MappingConfigLoader.load();
+        MappingConfigLoader.load(false);
 
         // THEN
         List<MappingConfig> config = MappingConfigLoader.getConfig();
@@ -107,7 +107,7 @@ public class MappingConfigTest {
     @Test
     public void when_actionClassname_is_null_get_className_from_actions_config() throws Exception {
         // GIVEN
-        MappingConfigLoader.load();
+        MappingConfigLoader.load(false);
         MappingAction mappingAction = new MappingAction();
         List<MappingAction> actions = new ArrayList<MappingAction>();
         mappingAction.setName("ReplaceCustomerId");
@@ -160,7 +160,7 @@ public class MappingConfigTest {
     @Test
     public void when_endpoint_contains_RE_return_it_from_RE_mappings() throws Exception {
         // GIVEN
-        MappingConfigLoader.load();
+        MappingConfigLoader.load(false);
 
         // WHEN
         MappingEndpoint endpoint = MappingConfigLoader.getConfig().get(0).getMappingEndpoint("/v0.1/payments/12345", "GET");
@@ -172,7 +172,7 @@ public class MappingConfigTest {
     @Test
     public void when_mapping_list_contains_method_and_uri_return_that_mapping_endpoint() throws Exception {
         // GIVEN
-        MappingConfigLoader.load();
+        MappingConfigLoader.load(false);
 
         // WHEN
         MappingEndpoint meEndpoint = MappingConfigLoader.getConfig().get(0).getMappingEndpoint("/v0.1/me", "GET");
@@ -185,7 +185,7 @@ public class MappingConfigTest {
     @Test
     public void when_action_class_is_not_null_do_not_invoke_getAction_from_actions_map() throws Exception {
         // GIVEN
-        MappingConfigLoader.load();
+        MappingConfigLoader.load(false);
         MappingAction action = new MappingAction();
         action.setName("testAction");
         action.setActionClassName("com.apifest.example.AddSenderIdInBodyAction");

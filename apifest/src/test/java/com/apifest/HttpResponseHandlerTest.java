@@ -70,7 +70,7 @@ public class HttpResponseHandlerTest {
         // GIVEN
         response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
         doReturn(response).when(e).getMessage();
-        MappingConfigLoader.load();
+        MappingConfigLoader.load(false);
 
         // WHEN
         handler.messageReceived(ctx, e);
@@ -85,7 +85,7 @@ public class HttpResponseHandlerTest {
         response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
         doReturn(response).when(e).getMessage();
 
-        MappingConfigLoader.load();
+        MappingConfigLoader.load(false);
 
         // WHEN
         handler.messageReceived(ctx, e);
@@ -100,7 +100,7 @@ public class HttpResponseHandlerTest {
         response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
         doReturn(response).when(e).getMessage();
 
-        MappingConfigLoader.load();
+        MappingConfigLoader.load(false);
 
         // WHEN
         handler.messageReceived(ctx, e);
@@ -115,7 +115,7 @@ public class HttpResponseHandlerTest {
         response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.MULTIPLE_CHOICES);
         doReturn(response).when(e).getMessage();
 
-        MappingConfigLoader.load();
+        MappingConfigLoader.load(false);
 
         // WHEN
         handler.messageReceived(ctx, e);
@@ -130,7 +130,7 @@ public class HttpResponseHandlerTest {
         response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.CREATED);
         doReturn(response).when(e).getMessage();
 
-        MappingConfigLoader.load();
+        MappingConfigLoader.load(false);
 
         // WHEN
         handler.messageReceived(ctx, e);

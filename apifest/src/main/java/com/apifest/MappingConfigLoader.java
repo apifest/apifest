@@ -62,7 +62,7 @@ public final class MappingConfigLoader {
     private MappingConfigLoader() {
     }
 
-    protected static void load() {
+    protected static void load(boolean reload) {
         String mappingFileDir = ServerConfig.getMappingsPath();
         Map<String, MappingConfig> local = new HashMap<String, MappingConfig>();
         try {
@@ -106,6 +106,9 @@ public final class MappingConfigLoader {
                     local.put(mappings.getVersion(), config);
                 }
                 IMap<String, MappingConfig> map = getHazelcastConfig();
+                if (reload) {
+                    map.clear();
+                }
                 if (local.size() > 0) {
                     map.putAll(local);
                     local.putAll(map);
@@ -257,6 +260,6 @@ public final class MappingConfigLoader {
      */
     public static void reloadConfigs() {
         jarClassLoader = null;
-        load();
+        load(true);
     }
 }
