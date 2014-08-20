@@ -37,15 +37,15 @@
       <xs:element name="action" type="action" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="filter" type="filter" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
-    <xs:attribute name="backendPort" type="xs:string"/>
+    <xs:attribute name="backendPort" type="xs:int"/>
     <xs:attribute name="backendHost" type="xs:string"/>
-    <xs:attribute name="authRequired" type="xs:string"/>
+    <xs:attribute name="varExpression" type="xs:string"/>
+    <xs:attribute name="varName" type="xs:string"/>
+    <xs:attribute name="authType" type="xs:string"/>
     <xs:attribute name="scope" type="xs:string"/>
     <xs:attribute name="method" type="xs:string" use="required"/>
     <xs:attribute name="internal" type="xs:string" use="required"/>
     <xs:attribute name="external" type="xs:string" use="required"/>
-    <xs:attribute name="varExpression" type="xs:string"/>
-    <xs:attribute name="varName" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="action">
@@ -75,7 +75,7 @@
   <xs:complexType name="backend">
     <xs:sequence/>
     <xs:attribute name="host" type="xs:string"/>
-    <xs:attribute name="port" type="xs:string"/>
+    <xs:attribute name="port" type="xs:int"/>
   </xs:complexType>
 
   <xs:complexType name="errorsWrapper">
@@ -101,4 +101,3 @@
     <xs:attribute name="version" type="xs:string"/>
   </xs:complexType>
 </xs:schema>
-
