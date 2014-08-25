@@ -39,6 +39,7 @@ import com.apifest.api.Mapping.Backend;
 import com.apifest.api.MappingAction;
 import com.apifest.api.MappingEndpoint;
 import com.apifest.api.MappingError;
+import com.apifest.api.MappingException;
 import com.apifest.api.ResponseFilter;
 import com.hazelcast.core.IMap;
 

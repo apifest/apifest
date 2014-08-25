@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.apifest;
+package com.apifest.api;
 
 /**
+ * Exception used when something wrong goes with a mapping request.
+ *
  * @author Rossitsa Borissova
  */
 public class MappingException extends Exception {

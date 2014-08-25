@@ -45,6 +45,7 @@ import com.apifest.api.BasicAction;
 import com.apifest.api.BasicFilter;
 import com.apifest.api.MappingAction;
 import com.apifest.api.MappingEndpoint;
+import com.apifest.api.MappingException;
 
 /**
  * Handler for requests received on the server.

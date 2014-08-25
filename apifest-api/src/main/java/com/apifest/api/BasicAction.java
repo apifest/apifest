@@ -30,5 +30,13 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
  */
 public abstract class BasicAction {
 
-    public abstract HttpRequest execute(HttpRequest req, String internalURI, String userId);
+    /**
+     * Maps the request to the internal URI passed as a parameter. Modifies the request body/headers, if necessary.
+     * @param req request received from client application
+     * @param internalURI the internal URI to which the request should be mapped
+     * @param userId userId (if any) extracted from access token
+     * @return the modified request
+     * @throws MappingException if something goes wrong with request mapping
+     */
+    public abstract HttpRequest execute(HttpRequest req, String internalURI, String userId) throws MappingException;
 }

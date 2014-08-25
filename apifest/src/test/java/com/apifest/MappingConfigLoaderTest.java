@@ -22,6 +22,7 @@ import static org.testng.Assert.*;
 
 import org.testng.annotations.Test;
 
+import com.apifest.api.MappingException;
 import com.apifest.example.AddSenderIdInBodyAction;
 
 /**
