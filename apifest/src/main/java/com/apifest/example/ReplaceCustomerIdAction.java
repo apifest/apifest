@@ -17,6 +17,7 @@
 package com.apifest.example;
 
 import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.HttpResponse;
 
 import com.apifest.api.BasicAction;
 
@@ -30,8 +31,8 @@ public class ReplaceCustomerIdAction extends BasicAction {
     protected static final String CUSTOMER_ID = "{customerId}";
 
     @Override
-    public HttpRequest execute(HttpRequest req, String internalURI, String userId) {
-        String newURI = internalURI.replace(CUSTOMER_ID, userId);
+    public HttpRequest execute(HttpRequest req, String internalURI, HttpResponse tokenValidationResponse) {
+        String newURI = internalURI.replace(CUSTOMER_ID, BasicAction.getUserId(tokenValidationResponse));
         req.setUri(newURI);
         return req;
     }

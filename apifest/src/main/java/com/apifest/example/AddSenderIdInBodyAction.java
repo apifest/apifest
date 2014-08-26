@@ -20,6 +20,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.util.CharsetUtil;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.apifest.api.BasicAction;
+import com.apifest.api.MappingException;
 
 /**
  * Action that adds senderId in request body.
@@ -37,8 +39,11 @@ public class AddSenderIdInBodyAction extends BasicAction {
 
     public static Logger log = LoggerFactory.getLogger(AddSenderIdInBodyAction.class);
 
+    /*
+     * @see com.apifest.api.BasicAction#execute(org.jboss.netty.handler.codec.http.HttpRequest, java.lang.String, org.jboss.netty.handler.codec.http.HttpResponse)
+     */
     @Override
-    public HttpRequest execute(HttpRequest req, String internalURI, String userId) {
+    public HttpRequest execute(HttpRequest req, String internalURI, HttpResponse tokenValidationResponse) throws MappingException {
         try {
             JSONObject json = new JSONObject(req.getContent().toString(CharsetUtil.UTF_8));
             log.info("request body: " + json.toString());
@@ -52,4 +57,5 @@ public class AddSenderIdInBodyAction extends BasicAction {
         }
         return req;
     }
+
 }

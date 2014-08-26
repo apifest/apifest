@@ -17,6 +17,12 @@
 package com.apifest.api;
 
 import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * Parent class for all mapping actions. Actions are executed before a request from the client application is sent to
@@ -30,13 +36,32 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
  */
 public abstract class BasicAction {
 
+    protected static Logger log = LoggerFactory.getLogger(BasicAction.class);
+
     /**
      * Maps the request to the internal URI passed as a parameter. Modifies the request body/headers, if necessary.
      * @param req request received from client application
      * @param internalURI the internal URI to which the request should be mapped
-     * @param userId userId (if any) extracted from access token
+     * @param tokenValidationResponse access token validation response
      * @return the modified request
      * @throws MappingException if something goes wrong with request mapping
      */
-    public abstract HttpRequest execute(HttpRequest req, String internalURI, String userId) throws MappingException;
+    public abstract HttpRequest execute(HttpRequest req, String internalURI, HttpResponse tokenValidationResponse) throws MappingException;
+
+    /**
+     * Extracts userId from tokenValidationResponse.
+     * @param response the response received after access token is validate
+     * @return userId associated with a token
+     */
+    public static String getUserId(HttpResponse tokenValidationResponse) {
+        JSONObject json;
+        String userId = null;
+        try {
+            json = new JSONObject(new String(tokenValidationResponse.getContent().array()));
+            userId = json.getString("userId");
+        } catch (JSONException e1) {
+            log.error("Cannot parse JSON", e1);
+        }
+        return userId;
+    }
 }

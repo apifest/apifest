@@ -36,8 +36,6 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringEncoder;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,7 +92,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                     break;
                 }
             }
-            String userId = null;
             if (mapping != null) {
                 if (mapping.getAuthType() != null) {
                     String accessToken = null;
@@ -132,12 +129,12 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                         public void responseReceived(HttpMessage response) {
                             HttpMessage tokenResponse = response;
                             if (response instanceof HttpResponse) {
-                                HttpResponse res = (HttpResponse) response;
-                                if (!HttpResponseStatus.OK.equals(res.getStatus())) {
+                                HttpResponse tokenValidationResponse = (HttpResponse) response;
+                                if (!HttpResponseStatus.OK.equals(tokenValidationResponse.getStatus())) {
                                     writeResponseToChannel(channel, HttpResponseFactory.createUnauthorizedResponse(INVALID_ACCESS_TOKEN));
                                     return;
                                 }
-                                String tokenContent = new String(ChannelBuffers.copiedBuffer(res.getContent()).array());
+                                String tokenContent = new String(ChannelBuffers.copiedBuffer(tokenValidationResponse.getContent()).array());
                                 boolean scopeOk = AccessTokenValidator.validateTokenScope(tokenContent, endpoint.getScope());
                                 if(!scopeOk) {
                                      log.debug("access token scope not valid");
@@ -145,11 +142,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                                      return;
                                 }
 
-                                String userId = getUserId(res);
+                                String userId = BasicAction.getUserId(tokenValidationResponse);
                                 if((MappingEndpoint.AUTH_TYPE_USER.equals(endpoint.getAuthType()) && (userId != null && userId.length() > 0)) ||
                                         MappingEndpoint.AUTH_TYPE_CLIENT_APP.equals(endpoint.getAuthType())) {
                                     try {
-                                        HttpRequest mappedReq = mapRequest(request, endpoint, conf, userId);
+                                        HttpRequest mappedReq = mapRequest(request, endpoint, conf, tokenValidationResponse);
                                         channel.getPipeline().getContext("handler").setAttachment(responseListener);
                                         client.send(mappedReq, endpoint.getBackendHost(), Integer.valueOf(endpoint.getBackendPort()), responseListener);
                                     } catch (MappingException e) {
@@ -179,7 +176,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
                         channel.getPipeline().getContext("handler").setAttachment(responseListener);
 
-                        HttpRequest mappedReq = mapRequest(req, mapping, config, userId);
+                        HttpRequest mappedReq = mapRequest(req, mapping, config, null);
                         client.send(mappedReq, mapping.getBackendHost(), Integer.valueOf(mapping.getBackendPort()), responseListener);
                     } catch (MappingException e2) {
                         log.error("cannot map request", e2);
@@ -223,13 +220,13 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         return responseListener;
     }
 
-    protected HttpRequest mapRequest(HttpRequest request, MappingEndpoint mapping, MappingConfig config, String userId) throws MappingException {
+    protected HttpRequest mapRequest(HttpRequest request, MappingEndpoint mapping, MappingConfig config, HttpResponse tokenValidationResponse) throws MappingException {
         BaseMapper mapper = new BaseMapper();
         HttpRequest req = mapper.map(request, mapping.getInternalEndpoint());
         if (mapping.getActions() != null) {
             for (MappingAction mappingAction : mapping.getActions()) {
                 BasicAction action = config.getAction(mappingAction);
-                req = action.execute(req, mapping.getInternalEndpoint(), userId);
+                req = action.execute(req, mapping.getInternalEndpoint(), tokenValidationResponse);
             }
         }
         return req;
@@ -261,17 +258,17 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         return;
     }
 
-    protected String getUserId(HttpResponse response) {
-        JSONObject json;
-        String userId = null;
-        try {
-            json = new JSONObject(new String(response.getContent().array()));
-            userId = json.getString("userId");
-        } catch (JSONException e1) {
-            log.info("Cannot parse JSON", e1);
-        }
-        return userId;
-    }
+//    protected String getUserId(HttpResponse response) {
+//        JSONObject json;
+//        String userId = null;
+//        try {
+//            json = new JSONObject(new String(response.getContent().array()));
+//            userId = json.getString("userId");
+//        } catch (JSONException e1) {
+//            log.info("Cannot parse JSON", e1);
+//        }
+//        return userId;
+//    }
 
     protected HttpRequest createTokenValidateRequest(String accessToken) {
         QueryStringEncoder enc = new QueryStringEncoder(OAUTH_TOKEN_VALIDATE_URI);
