@@ -258,18 +258,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         return;
     }
 
-//    protected String getUserId(HttpResponse response) {
-//        JSONObject json;
-//        String userId = null;
-//        try {
-//            json = new JSONObject(new String(response.getContent().array()));
-//            userId = json.getString("userId");
-//        } catch (JSONException e1) {
-//            log.info("Cannot parse JSON", e1);
-//        }
-//        return userId;
-//    }
-
     protected HttpRequest createTokenValidateRequest(String accessToken) {
         QueryStringEncoder enc = new QueryStringEncoder(OAUTH_TOKEN_VALIDATE_URI);
         enc.addParam("token", accessToken);
