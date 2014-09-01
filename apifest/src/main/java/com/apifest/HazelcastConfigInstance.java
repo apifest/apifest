@@ -16,6 +16,8 @@
 
 package com.apifest;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -100,7 +102,11 @@ public class HazelcastConfigInstance {
         NetworkConfig networkConfig = new NetworkConfig();
         InterfacesConfig interfaceConfig = new InterfacesConfig();
         // add current host
-        interfaceConfig.addInterface(ServerConfig.getHost());
+        try {
+            interfaceConfig.addInterface(InetAddress.getByName(ServerConfig.getHost()).getHostAddress());
+        } catch (UnknownHostException e) {
+            log.error("cannot create Hazelcast network config", e);
+        }
         interfaceConfig.setEnabled(true);
 
         networkConfig.setInterfaces(interfaceConfig);
