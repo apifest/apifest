@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * Represents a customized error response. The error mapping is defined by status (HTTP statuse code) and message -
+ * Represents a customized error response. The error mapping is defined by status (HTTP status code) and message -
  * customized response. Note, that error mappings work only for HTTP status equals or above HTTP status 300.
  *
  * @author Rossitsa Borissova

@@ -107,11 +107,17 @@ public class MappingConfig implements Serializable {
             if (m.find() && p.getMethod().equals(method)) {
                 MappingEndpoint cur = getMappings().get(p);
                 String newUri = cur.getInternalEndpoint();
-                // when RE used
-                if (newUri.contains("{") && m.groupCount() >= 1) {
-                    String varValue = m.group(1);
-                    newUri = cur.getInternalEndpoint().replace("{" + cur.getVarName() + "}", varValue);
+                // replace variables with their values
+                if (cur.getVarName() != null) {
+                    String [] varNames = cur.getVarName().split(" ");
+                    if (newUri.contains("{") && m.groupCount() >= 1) {
+                        for (int i = 0; i < varNames.length; i++) {
+                            String varValue = m.group(i + 1);
+                            newUri = newUri.replace("{" + varNames[i] + "}", varValue);
+                        }
+                    }
                 }
+
                 MappingEndpoint result = new MappingEndpoint(cur.getExternalEndpoint(), newUri, cur.getMethod(), cur.getAuthType(), cur.getScope(), cur.getActions(), cur.getFilters(),
                         cur.getVarExpression(), cur.getVarName(), cur.getBackendHost(), cur.getBackendPort());
                 return result;

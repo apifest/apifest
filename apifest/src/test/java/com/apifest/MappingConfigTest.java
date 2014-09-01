@@ -138,7 +138,7 @@ public class MappingConfigTest {
         Pattern p = MappingConfigLoader.constructPattern(endpoint);
 
         // THEN
-        assertEquals(p.toString(), "/v0.1/payments/(\\d*$)");
+        assertEquals(p.toString(), "/v0.1/payments/(\\d*)$");
     }
 
     @Test
@@ -199,6 +199,19 @@ public class MappingConfigTest {
         // THEN
         assertTrue(actionClass instanceof AddSenderIdInBodyAction);
     }
+
+    @Test
+    public void when_endpoint_contains_two_variables_replace_them_all() throws Exception {
+        // GIVEN
+        MappingConfigLoader.load(false);
+
+        // WHEN
+        MappingEndpoint endpoint = MappingConfigLoader.getConfig().get(0).getMappingEndpoint("/v0.1/contacts/mobile/support", "GET");
+
+        // THEN
+        assertEquals(endpoint.getInternalEndpoint(), "/contacts/mobile/support");
+    }
+
 
     private String marshal() {
         String result = null;

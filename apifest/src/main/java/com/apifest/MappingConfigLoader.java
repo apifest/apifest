@@ -54,7 +54,7 @@ public final class MappingConfigLoader {
     private static final String END = "$";
 
     private static final String VAR_NAME_FORMAT = "{%s}";
-    private static final String VAR_EXPRESSION_FORMAT = "(%s%s)";
+    private static final String VAR_EXPRESSION_FORMAT = "(%s)%s";
 
     protected static URLClassLoader jarClassLoader;
 
@@ -212,15 +212,18 @@ public final class MappingConfigLoader {
 
     protected static Pattern constructPattern(MappingEndpoint endpoint) {
         String path = endpoint.getExternalEndpoint();
-        if (endpoint.getExternalEndpoint().contains("{")) {
-            // if var is at the end of endpoint, add $
+        if (path.contains("{") && endpoint.getVarName() != null && endpoint.getVarExpression() != null) {
+            String [] varNames = endpoint.getVarName().split(" ");
+            String [] varExpressions = endpoint.getVarExpression().split(" ");
             String end = "";
-            if (path.endsWith(endpoint.getVarName() + "}")) {
-                end = END;
-            }
-            String varExpr = String.format(VAR_EXPRESSION_FORMAT, endpoint.getVarExpression(), end);
-            String varName = String.format(VAR_NAME_FORMAT, endpoint.getVarName());
-            path = path.replace(varName, varExpr);
+            for (int i = 0; i < varNames.length; i++) {
+                if ((i == varNames.length - 1) && endpoint.getExternalEndpoint().endsWith("}")) {
+                    end = (varExpressions[i].endsWith(END)) ? "": END;
+                }
+                String varExpr = String.format(VAR_EXPRESSION_FORMAT, varExpressions[i], end);
+                String varName = String.format(VAR_NAME_FORMAT, varNames[i]);
+                path = path.replace(varName, varExpr);
+            };
             return Pattern.compile(path);
         } else {
             // add $ for regular expressions - for no RE path

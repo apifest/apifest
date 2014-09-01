@@ -109,8 +109,8 @@ XML specific tags explained:
 - authType - *user* for tokens obtained with user credentials, *client-app* for tokens obtained for client application;
 - action - defines action that will be executed before requests hit your API;
 - filter - defines filter that will be executed before responses from API are returned back;
-- varName - the name of a variable used in internal/external path;
-- varExpression - regular expression (Java format) for varName;
+- varName - the name of the variable/s used in internal/external path (space delimited);
+- varExpression - regular expression (Java format) for varName (space delimited);
 - error - customize error responses - *status* attribute value defines the HTTP status for which *message* attribute value will be returned;
 
 You can define as many mapping configuration files as many versions your API supports.
