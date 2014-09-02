@@ -226,7 +226,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         if (mapping.getActions() != null) {
             for (MappingAction mappingAction : mapping.getActions()) {
                 BasicAction action = config.getAction(mappingAction);
-                req = action.execute(req, mapping.getInternalEndpoint(), tokenValidationResponse);
+                req = action.execute(req, req.getUri(), tokenValidationResponse);
             }
         }
         return req;
