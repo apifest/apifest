@@ -104,7 +104,13 @@ public final class MappingConfigLoader {
                             throw new IllegalArgumentException(e);
                         }
                     }
-                    local.put(mappings.getVersion(), config);
+                    MappingConfig currentConfig = local.get(mappings.getVersion());
+                    if (currentConfig != null) {
+                        MappingConfig mergedConfig = currentConfig.mergeConfig(config);
+                        local.put(mappings.getVersion(), mergedConfig);
+                    } else {
+                        local.put(mappings.getVersion(), config);
+                    }
                 }
                 IMap<String, MappingConfig> map = getHazelcastConfig();
                 if (reload) {

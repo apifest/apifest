@@ -214,4 +214,12 @@ public class MappingConfig implements Serializable {
         return filter;
     }
 
+    public MappingConfig mergeConfig(MappingConfig config) {
+        mappings.putAll(config.getMappings());
+        actions.putAll(config.getActions());
+        filters.putAll(config.getFilters());
+        errors.putAll(config.getErrors());
+        return this;
+    }
+
 }
