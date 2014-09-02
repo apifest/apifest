@@ -16,29 +16,48 @@
 
 package com.apifest;
 
+import static org.mockito.BDDMockito.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
+import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.slf4j.Logger;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+
+import com.apifest.api.BasicAction;
+import com.apifest.api.MappingAction;
+import com.apifest.api.MappingEndpoint;
+import com.apifest.example.ReplaceCustomerIdAction;
 
 /**
  * @author Rossitsa Borissova
  */
 public class HttpRequestHandlerTest {
 
+    HttpRequestHandler handler;
+
+    @BeforeTest
+    public void setup() {
+        handler = spy(new HttpRequestHandler());
+        handler.log = mock(Logger.class);
+    }
+
     @Test
     public void when_uri_is_apifest_reload_invoke_reload_mapping_configs() throws Exception {
         // GIVEN
-        HttpRequestHandler handler = spy(new HttpRequestHandler());
-        handler.log = mock(Logger.class);
         MessageEvent message = mock(MessageEvent.class);
         HttpRequest req = mock(HttpRequest.class);
         doReturn(req).when(message).getMessage();
@@ -56,4 +75,26 @@ public class HttpRequestHandlerTest {
         verify(handler).reloadMappingConfig(any(Channel.class));
     }
 
+    @Test
+    public void when_invoke_action_pass_request_uri() throws Exception {
+        // GIVEN
+        HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/v0.1/countries?id=BUL");
+        MappingEndpoint mapping = mock(MappingEndpoint.class);
+        MappingConfig config = mock(MappingConfig.class);
+        HttpResponse validationResponse = mock(HttpResponse.class);
+        willReturn("/countries").given(mapping).getInternalEndpoint();
+        MappingAction action = mock(MappingAction.class);
+        List<MappingAction> actionList = new ArrayList<MappingAction>();
+        actionList.add(action);
+        willReturn(actionList).given(mapping).getActions();
+        ReplaceCustomerIdAction replaceAction = mock(ReplaceCustomerIdAction.class);
+        willReturn(replaceAction).given(config).getAction(action);
+        willReturn(request).given(replaceAction).execute(request, "/countries?id=BUL", validationResponse);
+
+        // WHEN
+        handler.mapRequest(request, mapping, config, validationResponse);
+
+        // THEN
+        verify(replaceAction).execute(request, "/countries?id=BUL", validationResponse);
+    }
 }
