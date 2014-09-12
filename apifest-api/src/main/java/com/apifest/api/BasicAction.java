@@ -54,13 +54,15 @@ public abstract class BasicAction {
      * @return userId associated with a token
      */
     public static String getUserId(HttpResponse tokenValidationResponse) {
-        JSONObject json;
         String userId = null;
-        try {
-            json = new JSONObject(new String(tokenValidationResponse.getContent().array()));
-            userId = json.getString("userId");
-        } catch (JSONException e1) {
-            log.error("Cannot parse JSON", e1);
+        if (tokenValidationResponse != null) {
+            JSONObject json;
+            try {
+                json = new JSONObject(new String(tokenValidationResponse.getContent().array()));
+                userId = json.getString("userId");
+            } catch (JSONException e1) {
+                log.error("Cannot parse JSON", e1);
+            }
         }
         return userId;
     }
