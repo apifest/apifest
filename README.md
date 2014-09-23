@@ -145,7 +145,7 @@ IPs) on which the ApiFest Mapping Server is running. To do that use the followin
 
 You can start the ApiFest Mapping Server with the following command:
 
-```java -Dproperties.file=[apifest_properties_file_path] -jar apifest-0.1.0-jar-with-dependencies.jar```
+```java -Dproperties.file=[apifest_properties_file_path] -Dlog4j.configuration=file:///[log4j_xml_file_path] -jar apifest-0.1.0-jar-with-dependencies.jar```
 
 When the server starts, you will see:
 ```ApiFest Mapping Server started at [host]:[port]```
