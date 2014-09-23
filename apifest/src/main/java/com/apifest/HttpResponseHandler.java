@@ -17,6 +17,7 @@
 package com.apifest;
 
 import java.net.ConnectException;
+import java.nio.charset.Charset;
 
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -49,11 +50,13 @@ public class HttpResponseHandler extends SimpleChannelUpstreamHandler {
             if (statusCode >= HTTP_STATUS_300 && (MappingConfigLoader.getConfig().get(0).getErrorMessage(statusCode) != null)) {
                 String content = MappingConfigLoader.getConfig().get(0).getErrorMessage(statusCode);
                 if (content != null) {
-                    response.setContent(ChannelBuffers.copiedBuffer(content.getBytes()));
+                    response.setContent(ChannelBuffers.copiedBuffer(content.getBytes(Charset.forName("UTF-8"))));
                     response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, content.getBytes().length);
                 }
             }
-            log.debug("response: {}", new String(ChannelBuffers.copiedBuffer(response.getContent()).array()));
+            if (log.isDebugEnabled()) {
+                log.debug("response: {}", new String(ChannelBuffers.copiedBuffer(response.getContent()).array()));
+            }
         }
         Channel channel = ctx.getChannel();
         channel.close();
