@@ -45,8 +45,10 @@ public abstract class BasicAction {
      * @param tokenValidationResponse access token validation response
      * @return the modified request
      * @throws MappingException if something goes wrong with request mapping
+     * @throws UpstreamException if the upstream should be stopped and a response should be returned directly
      */
-    public abstract HttpRequest execute(HttpRequest req, String internalURI, HttpResponse tokenValidationResponse) throws MappingException;
+    public abstract HttpRequest execute(HttpRequest req, String internalURI, HttpResponse tokenValidationResponse)
+            throws MappingException, UpstreamException;
 
     /**
      * Extracts userId from tokenValidationResponse.

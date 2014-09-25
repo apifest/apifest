@@ -44,6 +44,7 @@ import com.apifest.api.BasicFilter;
 import com.apifest.api.MappingAction;
 import com.apifest.api.MappingEndpoint;
 import com.apifest.api.MappingException;
+import com.apifest.api.UpstreamException;
 
 /**
  * Handler for requests received on the server.
@@ -153,6 +154,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                                         log.error("cannot map request", e);
                                         writeResponseToChannel(channel, HttpResponseFactory.createISEResponse());
                                         return;
+                                    } catch(UpstreamException ue) {
+                                        writeResponseToChannel(channel, ue.getResponse());
+                                        return;
                                     }
                                 } else {
                                     writeResponseToChannel(channel, HttpResponseFactory.createUnauthorizedResponse(INVALID_ACCESS_TOKEN_TYPE));
@@ -182,6 +186,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                         log.error("cannot map request", e2);
                         writeResponseToChannel(channel, HttpResponseFactory.createISEResponse());
                         return;
+                    } catch(UpstreamException ue) {
+                        writeResponseToChannel(channel, ue.getResponse());
+                        return;
                     }
                 }
             } else {
@@ -196,7 +203,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         }
     }
 
-    protected ResponseListener createResponseListener( BasicFilter filter, final Channel channel) {
+    protected ResponseListener createResponseListener(BasicFilter filter, final Channel channel) {
         ResponseListener responseListener = new ResponseListener(filter) {
             @Override
             public void responseReceived(HttpMessage response) {
@@ -220,7 +227,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         return responseListener;
     }
 
-    protected HttpRequest mapRequest(HttpRequest request, MappingEndpoint mapping, MappingConfig config, HttpResponse tokenValidationResponse) throws MappingException {
+    protected HttpRequest mapRequest(HttpRequest request, MappingEndpoint mapping, MappingConfig config, HttpResponse tokenValidationResponse)
+            throws MappingException, UpstreamException {
         BaseMapper mapper = new BaseMapper();
         HttpRequest req = mapper.map(request, mapping.getInternalEndpoint());
         if (mapping.getActions() != null) {
