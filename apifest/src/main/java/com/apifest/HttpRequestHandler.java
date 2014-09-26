@@ -275,6 +275,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         } catch (URISyntaxException e) {
             log.error("cannot build token validation URI", e);
         }
-        return new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri);
+        HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri);
+        request.headers().add(HttpHeaders.Names.HOST, ServerConfig.tokenValidateHost);
+        return request;
     }
 }
