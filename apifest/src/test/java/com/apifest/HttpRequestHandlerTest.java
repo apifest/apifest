@@ -37,7 +37,6 @@ import org.slf4j.Logger;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import com.apifest.api.BasicAction;
 import com.apifest.api.MappingAction;
 import com.apifest.api.MappingEndpoint;
 import com.apifest.example.ReplaceCustomerIdAction;
@@ -80,6 +79,7 @@ public class HttpRequestHandlerTest {
         // GIVEN
         HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/v0.1/countries?id=BUL");
         MappingEndpoint mapping = mock(MappingEndpoint.class);
+        willReturn("http://example.com").given(mapping).getBackendHost();
         MappingConfig config = mock(MappingConfig.class);
         HttpResponse validationResponse = mock(HttpResponse.class);
         willReturn("/countries").given(mapping).getInternalEndpoint();

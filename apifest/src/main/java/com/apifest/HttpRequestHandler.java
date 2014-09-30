@@ -230,6 +230,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     protected HttpRequest mapRequest(HttpRequest request, MappingEndpoint mapping, MappingConfig config, HttpResponse tokenValidationResponse)
             throws MappingException, UpstreamException {
         BaseMapper mapper = new BaseMapper();
+        request.headers().add(HttpHeaders.Names.HOST, mapping.getBackendHost());
         HttpRequest req = mapper.map(request, mapping.getInternalEndpoint());
         if (mapping.getActions() != null) {
             for (MappingAction mappingAction : mapping.getActions()) {
