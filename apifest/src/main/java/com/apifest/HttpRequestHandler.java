@@ -220,7 +220,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                     }
                 }
                 ChannelFuture future = channel.write(newResponse);
-                setConnectTimeout(channel);
                 future.addListener(ChannelFutureListener.CLOSE);
             }
         };
