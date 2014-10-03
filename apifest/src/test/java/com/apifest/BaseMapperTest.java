@@ -16,9 +16,10 @@
 
 package com.apifest;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.testng.Assert.assertEquals;
 
 import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
 import org.jboss.netty.handler.codec.http.HttpMethod;
@@ -38,7 +39,7 @@ public class BaseMapperTest {
     @BeforeMethod
     public void setup() {
         mapper = spy(new BaseMapper());
-        mapper.log = mock(Logger.class);
+        BaseMapper.log = mock(Logger.class);
     }
 
     @Test
@@ -73,7 +74,7 @@ public class BaseMapperTest {
         HttpRequest req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "http://api.example.com/me");
 
         // WHEN
-        HttpRequest res = mapper.map(req, internalUri);
+        mapper.map(req, internalUri);
 
         // THEN
         verify(mapper).constructNewUri("http://api.example.com/me", internalUri);

@@ -17,10 +17,8 @@
 package com.apifest.example;
 
 import static org.mockito.BDDMockito.willReturn;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.testng.Assert.*;
 import static org.testng.Assert.assertEquals;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -36,8 +34,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import com.apifest.example.AddSenderIdInBodyAction;
 
 /**
  * @author Rossitsa Borissova

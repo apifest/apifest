@@ -16,25 +16,17 @@
 
 package com.apifest.example;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.spy;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
-import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import com.apifest.example.RemoveBalanceFilter;
 
 /**
  * @author Rossitsa Borissova

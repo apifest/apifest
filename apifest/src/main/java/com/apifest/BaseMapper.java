@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 public class BaseMapper {
 
-    protected Logger log = LoggerFactory.getLogger(BaseMapper.class);
+    protected static Logger log = LoggerFactory.getLogger(BaseMapper.class);
 
     public HttpRequest map(HttpRequest req, String internalURI) {
         // pass all query params and headers

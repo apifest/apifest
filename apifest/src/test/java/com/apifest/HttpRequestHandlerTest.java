@@ -16,10 +16,13 @@
 
 package com.apifest;
 
-import static org.mockito.BDDMockito.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
+import static org.mockito.BDDMockito.willReturn;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +54,8 @@ public class HttpRequestHandlerTest {
     @BeforeTest
     public void setup() {
         handler = spy(new HttpRequestHandler());
-        handler.log = mock(Logger.class);
+        HttpRequestHandler.log = mock(Logger.class);
+        BaseMapper.log = mock(Logger.class);
     }
 
     @Test

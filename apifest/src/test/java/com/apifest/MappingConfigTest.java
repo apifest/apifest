@@ -60,7 +60,10 @@ public class MappingConfigTest {
         ServerConfig.customJarPath = null;
 
         HazelcastConfigInstance.configInstance = mock(HazelcastConfigInstance.class);
+
+        @SuppressWarnings("unchecked")
         IMap<String, com.apifest.MappingConfig> map = mock(IMap.class);
+
         MappingConfig config = mock(MappingConfig.class);
         doReturn(mock(BasicAction.class)).when(config).getAction(any(MappingAction.class));
         map.put("v0.1", config);
@@ -259,17 +262,14 @@ public class MappingConfigTest {
             marshaller.marshal(mapping, out);
             result = out.toString("UTF-8");
         } catch (JAXBException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } finally {
             if (out != null) {
                 try {
                     out.close();
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }

@@ -16,9 +16,12 @@
 
 package com.apifest;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -61,6 +64,8 @@ public class HttpResponseHandlerTest {
         ServerConfig.mappingsPath = path.replace("/test_mapping.xml", "");
 
         HazelcastConfigInstance.configInstance = mock(HazelcastConfigInstance.class);
+
+        @SuppressWarnings("unchecked")
         IMap<String, com.apifest.MappingConfig> map = mock(IMap.class);
         doReturn(map).when(HazelcastConfigInstance.configInstance).getMappingConfigs();
     }

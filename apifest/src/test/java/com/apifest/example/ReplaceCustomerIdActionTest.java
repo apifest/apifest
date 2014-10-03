@@ -16,6 +16,11 @@
 
 package com.apifest.example;
 
+import static org.mockito.BDDMockito.willReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.testng.Assert.assertEquals;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
@@ -25,14 +30,6 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.*;
-import static org.mockito.Mockito.*;
-import static org.mockito.BDDMockito.*;
-import org.testng.*;
-import org.mockito.*;
-
-import com.apifest.example.ReplaceCustomerIdAction;
 
 /**
  * @author Rossitsa Borissova

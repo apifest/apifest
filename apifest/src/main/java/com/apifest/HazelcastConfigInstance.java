@@ -142,6 +142,7 @@ public class HazelcastConfigInstance {
     private Map<String, MapConfig> createMapConfigs() {
         MapConfig mapConfig = new MapConfig(HZ_MAP_NAME);
         mapConfig.setInMemoryFormat(InMemoryFormat.BINARY);
+        // REVISIT: backupCount = nodes/2 + 1
         mapConfig.setBackupCount(1);
         mapConfig.setAsyncBackupCount(0);
         mapConfig.setTimeToLiveSeconds(0);
