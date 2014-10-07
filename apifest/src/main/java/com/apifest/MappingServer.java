@@ -32,6 +32,8 @@ import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.apifest.api.MappingException;
+
 /**
  * Class responsible for ApiFest Mapping Server.
  *
@@ -76,7 +78,7 @@ public final class MappingServer {
 
         try {
             MappingConfigLoader.load(false);
-        } catch (IllegalArgumentException e) {
+        } catch (MappingException e) {
             log.error("Cannot load mappings", e);
             System.exit(1);
         }

@@ -17,8 +17,10 @@
 package com.apifest;
 
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.List;
 
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
@@ -259,8 +261,15 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     }
 
     protected void reloadMappingConfig(final Channel channel) {
-        MappingConfigLoader.reloadConfigs();
-        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+        HttpResponse response = null;
+        try {
+            MappingConfigLoader.reloadConfigs();
+            response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+        } catch (MappingException e) {
+            response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
+            ChannelBuffer content = ChannelBuffers.copiedBuffer(e.getMessage().getBytes(Charset.forName("UTF-8")));
+            response.setContent(content);
+        }
         ChannelFuture future = channel.write(response);
         future.addListener(ChannelFutureListener.CLOSE);
         return;

@@ -214,7 +214,15 @@ public class MappingConfig implements Serializable {
         return filter;
     }
 
-    public MappingConfig mergeConfig(MappingConfig config) {
+    public MappingConfig mergeConfig(MappingConfig config) throws MappingException {
+        Map<MappingPattern, MappingEndpoint> newMappings = config.getMappings();
+        for (MappingPattern pattern : newMappings.keySet()) {
+            if (!mappings.containsKey(pattern)) {
+                continue;
+            } else {
+                throw new MappingException("external path " + pattern.getMethod() + " " + pattern.getPattern().toString() + " is duplicated in mappings");
+            }
+        }
         mappings.putAll(config.getMappings());
         actions.putAll(config.getActions());
         filters.putAll(config.getFilters());

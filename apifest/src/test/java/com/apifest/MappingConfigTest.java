@@ -16,265 +16,63 @@
 
 package com.apifest;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.List;
+import static org.mockito.Mockito.mock;
+import static org.testng.Assert.assertTrue;
+
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-
-import org.slf4j.Logger;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import com.apifest.api.BasicAction;
-import com.apifest.api.Mapping;
-import com.apifest.api.Mapping.ActionsWrapper;
-import com.apifest.api.Mapping.EndpointsWrapper;
-import com.apifest.api.MappingAction;
 import com.apifest.api.MappingEndpoint;
-import com.apifest.example.AddSenderIdInBodyAction;
-import com.apifest.example.RemoveBalanceFilter;
-import com.apifest.example.ReplaceCustomerIdAction;
-import com.hazelcast.core.IMap;
-
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
+import com.apifest.api.MappingException;
 
 /**
  * @author Rossitsa Borissova
  */
 public class MappingConfigTest {
 
-    @BeforeTest
-    public void setup() throws Exception {
-        String hzPath = getClass().getClassLoader().getResource("test_mapping.xml").getPath();
-        ServerConfig.mappingsPath = hzPath.replace("/test_mapping.xml", "");
-        ServerConfig.customJarPath = null;
-
-        HazelcastConfigInstance.configInstance = mock(HazelcastConfigInstance.class);
-
-        @SuppressWarnings("unchecked")
-        IMap<String, com.apifest.MappingConfig> map = mock(IMap.class);
-
-        MappingConfig config = mock(MappingConfig.class);
-        doReturn(mock(BasicAction.class)).when(config).getAction(any(MappingAction.class));
-        map.put("v0.1", config);
-        doReturn(map).when(HazelcastConfigInstance.configInstance).getMappingConfigs();
-
-        // mock loggers
-        AddSenderIdInBodyAction.log = mock(Logger.class);
-        RemoveBalanceFilter.log = mock(Logger.class);
-
-        ServerConfig.getMappingsPath();
-    }
-
-    @Test
-    public void when_load_read_mapping() {
-
-        // WHEN
-        MappingConfigLoader.load(false);
-
-        // THEN
-        List<MappingConfig> config = MappingConfigLoader.getConfig();
-        Map<String, String> actions = config.get(0).getActions();
-        assertEquals(actions.get("ReplaceCustomerId"), "com.apifest.example.ReplaceCustomerIdAction");
-        assertEquals(actions.get("AddSenderIdInBody"), "com.apifest.example.AddSenderIdInBody");
-
-        MappingEndpoint endpoint = config.get(0).getMappingEndpoint("/v0.1/me", "GET");
-        assertEquals(endpoint.getInternalEndpoint(), "/customer/{customerId}");
-        assertEquals(endpoint.getActions().get(0).getName(), "ReplaceCustomerId");
-    }
-
-    @Test
-    public void test_marshal() {
-        // WHEN
-        String marshalled = marshal();
-
-        // THEN
-        assertTrue(marshalled.startsWith("<mappings><actions><action"));
-        assertTrue(marshalled.endsWith("</endpoint></endpoints></mappings>"));
-        assertTrue(marshalled.contains("class=\"com.apifest.example.ReplaceCustomerIdAction\""));
-        assertTrue(marshalled.contains("class=\"com.apifest.example.AddSenderIdInBody\""));
-        assertTrue(marshalled.contains("name=\"AddSenderIdInBody\""));
-        assertTrue(marshalled.contains("name=\"ReplaceCustomerId\""));
-    }
-
-    @Test
-    public void when_actionClassname_is_null_get_className_from_actions_config() throws Exception {
+    @Test(expectedExceptions = MappingException.class)
+    public void when_merge_and_there_is_conflict_throw_exception() throws Exception {
         // GIVEN
-        MappingConfigLoader.load(false);
-        MappingAction mappingAction = new MappingAction();
-        List<MappingAction> actions = new ArrayList<MappingAction>();
-        mappingAction.setName("ReplaceCustomerId");
-        actions.add(mappingAction);
-        MappingEndpoint endpoint = new MappingEndpoint();
-        endpoint.setActions(actions);
+        MappingConfig config = new MappingConfig();
+        Map<MappingPattern, MappingEndpoint> mappings = new HashMap<MappingPattern, MappingEndpoint>();
+        MappingPattern pattern = new MappingPattern(Pattern.compile("/v0.1/me"), "GET");
+        MappingEndpoint endpoint = mock(MappingEndpoint.class);
+        mappings.put(pattern, endpoint);
+        config.setMappings(mappings);
 
-        MappingConfigLoader.jarClassLoader = mock(URLClassLoader.class);
-        doReturn(ReplaceCustomerIdAction.class).when(MappingConfigLoader.jarClassLoader).loadClass(ReplaceCustomerIdAction.class.getCanonicalName());
+        MappingConfig newConfig = new MappingConfig();
+        Map<MappingPattern, MappingEndpoint> newMappings = new HashMap<MappingPattern, MappingEndpoint>();
+        newMappings.put(pattern, endpoint);
+        newConfig.setMappings(newMappings);
 
         // WHEN
-        BasicAction action = MappingConfigLoader.getConfig().get(0).getAction(mappingAction);
-
-        // THEN
-        assertTrue(action instanceof ReplaceCustomerIdAction);
+        config.mergeConfig(newConfig);
     }
 
     @Test
-    public void when_mapping_with_RE_construct_Pattern() throws Exception {
+    public void when_merge_with_no_conflict_add_new_mappings() throws Exception {
         // GIVEN
-        MappingEndpoint endpoint = new MappingEndpoint();
-        endpoint.setExternalEndpoint("/v0.1/payments/{paymentId}");
-        endpoint.setInternalEndpoint("/v0.1/payments/{paymentId}");
-        endpoint.setVarExpression("\\d*");
-        endpoint.setVarName("paymentId");
+        MappingConfig config = new MappingConfig();
+        Map<MappingPattern, MappingEndpoint> mappings = new HashMap<MappingPattern, MappingEndpoint>();
+        MappingPattern pattern = new MappingPattern(Pattern.compile("/v0.1/me"), "GET");
+        MappingEndpoint endpoint = mock(MappingEndpoint.class);
+        mappings.put(pattern, endpoint);
+        config.setMappings(mappings);
+
+        MappingConfig newConfig = new MappingConfig();
+        Map<MappingPattern, MappingEndpoint> newMappings = new HashMap<MappingPattern, MappingEndpoint>();
+        MappingPattern newPattern = new MappingPattern(Pattern.compile("/v0.1/me/emails"), "GET");
+        newMappings.put(newPattern, endpoint);
+        newConfig.setMappings(newMappings);
 
         // WHEN
-        Pattern p = MappingConfigLoader.constructPattern(endpoint);
+        config.mergeConfig(newConfig);
 
         // THEN
-        assertEquals(p.toString(), "/v0.1/payments/(\\d*)$");
-    }
-
-    @Test
-    public void when_mapping_with_RE_varName_not_at_the_end_construct_Pattern_without_$() throws Exception {
-        // GIVEN
-        MappingEndpoint endpoint = new MappingEndpoint();
-        endpoint.setExternalEndpoint("/v0.1/payments/{paymentId}/info");
-        endpoint.setInternalEndpoint("/v0.1/payments/{paymentId}/info");
-        endpoint.setVarExpression("\\d*");
-        endpoint.setVarName("paymentId");
-
-        // WHEN
-        Pattern p = MappingConfigLoader.constructPattern(endpoint);
-
-        // THEN
-        assertEquals(p.toString(), "/v0.1/payments/(\\d*)/info");
-    }
-
-    @Test
-    public void when_endpoint_contains_RE_return_it_from_RE_mappings() throws Exception {
-        // GIVEN
-        MappingConfigLoader.load(false);
-
-        // WHEN
-        MappingEndpoint endpoint = MappingConfigLoader.getConfig().get(0).getMappingEndpoint("/v0.1/payments/12345", "GET");
-
-        // THEN
-        assertEquals(endpoint.getInternalEndpoint(), "/payments/12345");
-    }
-
-    @Test
-    public void when_mapping_list_contains_method_and_uri_return_that_mapping_endpoint() throws Exception {
-        // GIVEN
-        MappingConfigLoader.load(false);
-
-        // WHEN
-        MappingEndpoint meEndpoint = MappingConfigLoader.getConfig().get(0).getMappingEndpoint("/v0.1/me", "GET");
-
-        // THEN
-        assertEquals(meEndpoint.getExternalEndpoint(), "/v0.1/me");
-        assertEquals(meEndpoint.getMethod(), "GET");
-    }
-
-    @Test
-    public void when_action_class_is_not_null_do_not_invoke_getAction_from_actions_map() throws Exception {
-        // GIVEN
-        MappingConfigLoader.load(false);
-        MappingAction action = new MappingAction();
-        action.setName("testAction");
-        action.setActionClassName("com.apifest.example.AddSenderIdInBodyAction");
-
-        MappingConfigLoader.jarClassLoader = mock(URLClassLoader.class);
-        doReturn(AddSenderIdInBodyAction.class).when(MappingConfigLoader.jarClassLoader).loadClass(action.getActionClassName());
-
-        // WHEN
-        BasicAction actionClass = MappingConfigLoader.getConfig().get(0).getAction(action);
-
-        // THEN
-        assertTrue(actionClass instanceof AddSenderIdInBodyAction);
-    }
-
-    @Test
-    public void when_endpoint_contains_two_variables_replace_them_all() throws Exception {
-        // GIVEN
-        MappingConfigLoader.load(false);
-
-        // WHEN
-        MappingEndpoint endpoint = MappingConfigLoader.getConfig().get(0).getMappingEndpoint("/v0.1/contacts/mobile/support", "GET");
-
-        // THEN
-        assertEquals(endpoint.getInternalEndpoint(), "/contacts/mobile/support");
-    }
-
-
-    private String marshal() {
-        String result = null;
-        ByteArrayOutputStream out = null;
-        try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(Mapping.class);
-            Marshaller marshaller = jaxbContext.createMarshaller();
-            marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
-            out = new ByteArrayOutputStream();
-            Mapping mapping = new Mapping();
-
-            MappingAction action = new MappingAction();
-            action.setName("ReplaceCustomerId");
-            action.setActionClassName("com.apifest.example.ReplaceCustomerIdAction");
-
-            MappingAction action2 = new MappingAction();
-            action2.setName("AddSenderIdInBody");
-            action2.setActionClassName("com.apifest.example.AddSenderIdInBody");
-
-            List<MappingAction> actions = new ArrayList<MappingAction>();
-            actions.add(action);
-            actions.add(action2);
-
-            ActionsWrapper allActions = new ActionsWrapper();
-            allActions.setActions(actions);
-
-            mapping.setActionsWrapper(allActions);
-
-            MappingEndpoint endpoint = new MappingEndpoint();
-            List<MappingAction> acts = new ArrayList<MappingAction>();
-            MappingAction addAction = new MappingAction();
-            addAction.setName("ReplaceCustomerId");
-            acts.add(addAction);
-            endpoint.setActions(acts);
-            endpoint.setInternalEndpoint("/v0.1/customer/{customerId}");
-            endpoint.setExternalEndpoint("/v0.1/me");
-
-            EndpointsWrapper endpointWrapper = new EndpointsWrapper();
-            List<MappingEndpoint> endpoints = new ArrayList<MappingEndpoint>();
-            endpoints.add(endpoint);
-
-            endpointWrapper.setEndpoints(endpoints);
-            mapping.setEndpointsWrapper(endpointWrapper);
-
-            marshaller.marshal(mapping, out);
-            result = out.toString("UTF-8");
-        } catch (JAXBException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } finally {
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return result;
+        assertTrue(config.getMappings().size() == 2);
     }
 
 }

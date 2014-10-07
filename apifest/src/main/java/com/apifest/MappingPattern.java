@@ -32,9 +32,6 @@ public class MappingPattern implements Serializable {
     private Pattern pattern;
     private String method;
 
-    public MappingPattern() {
-    }
-
     public MappingPattern(Pattern pattern, String method) {
         this.pattern = pattern;
         this.method = method;
@@ -46,5 +43,35 @@ public class MappingPattern implements Serializable {
 
     public String getMethod() {
         return method;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof MappingPattern) {
+            MappingPattern otherPattern = (MappingPattern) obj;
+            if (this.method.equals(otherPattern.getMethod()) && this.pattern.toString().equals(otherPattern.getPattern().toString())) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((method == null) ? 0 : method.hashCode());
+        result = prime * result + ((pattern == null) ? 0 : pattern.toString().hashCode());
+        return result;
     }
 }

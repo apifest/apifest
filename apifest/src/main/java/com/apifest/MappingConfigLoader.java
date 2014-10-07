@@ -63,7 +63,7 @@ public final class MappingConfigLoader {
     private MappingConfigLoader() {
     }
 
-    protected static void load(boolean reload) {
+    protected static void load(boolean reload) throws MappingException {
         String mappingFileDir = ServerConfig.getMappingsPath();
         Map<String, MappingConfig> local = new HashMap<String, MappingConfig>();
         try {
@@ -125,11 +125,15 @@ public final class MappingConfigLoader {
                 localConfigMap = local;
             } else {
                 log.error("Cannot load mapping configuration from directory {}", mappingFileDir);
-                throw new IllegalArgumentException();
+                throw new MappingException("Cannot load mapping configuration from directory " + mappingFileDir);
             }
         } catch (JAXBException e) {
             log.error("Cannot load mapping configuration, directory {}", mappingFileDir);
-            throw new IllegalArgumentException(e);
+            String errorMessage = e.getMessage();
+            if (errorMessage == null && e.getLinkedException() != null) {
+                errorMessage = e.getLinkedException().getMessage();
+            }
+            throw new MappingException(errorMessage, e);
         }
     }
 
@@ -201,7 +205,7 @@ public final class MappingConfigLoader {
         return errors;
     }
 
-    protected static Map<MappingPattern, MappingEndpoint> getMappingsMap(List<MappingEndpoint> mappingEndpoints, Backend backend) {
+    protected static Map<MappingPattern, MappingEndpoint> getMappingsMap(List<MappingEndpoint> mappingEndpoints, Backend backend) throws MappingException {
         Map<MappingPattern, MappingEndpoint> mappings = new HashMap<MappingPattern, MappingEndpoint>();
         for (MappingEndpoint endpoint : mappingEndpoints) {
             // construct regular expression
@@ -211,7 +215,12 @@ public final class MappingConfigLoader {
                 endpoint.setBackendHost(backend.getBackendHost());
                 endpoint.setBackendPort(backend.getBackendPort());
             }
-            mappings.put(pattern, endpoint);
+            // if the map already contains that pattern, throws exception
+            if (mappings.containsKey(pattern)) {
+                throw new MappingException("external path " + pattern.getMethod() + " " + pattern.getPattern().toString() + " is duplicated in mappings");
+            } else {
+                mappings.put(pattern, endpoint);
+            }
         }
         return mappings;
     }
@@ -267,8 +276,9 @@ public final class MappingConfigLoader {
 
     /**
      * Reloads all mapping configs.
+     * @throws MappingException
      */
-    public static void reloadConfigs() {
+    public static void reloadConfigs() throws MappingException {
         jarClassLoader = null;
         load(true);
     }

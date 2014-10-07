@@ -32,7 +32,7 @@
         <endpoint external="/v0.1/contacts/{type}/{level}" internal="/contacts/{type}/{level}" method="GET" varExpression="phone|mobile|address support|finance|manager" varName="type level"/>
     </endpoints>
     <errors>
-    	<error status="201" message='{"message":"resource created"}' />
+        <error status="201" message='{"message":"resource created"}' />
         <error status="300" message='{"error":"further actions required"}' />
         <error status="404" message='{"error":"resource not found"}' />
         <error status="500" message='{"error":"ops...something wrong"}' />

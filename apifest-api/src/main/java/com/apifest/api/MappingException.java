@@ -32,7 +32,8 @@ public class MappingException extends Exception {
     }
 
     public MappingException(String message, Throwable cause) {
-        super(message, cause);
+        super(cause);
+        this.message = message;
     }
 
     public MappingException(String message) {
