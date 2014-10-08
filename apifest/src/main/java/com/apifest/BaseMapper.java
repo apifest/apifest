@@ -47,7 +47,9 @@ public class BaseMapper {
         Map<String, List<String>> queryParams = decoder.getParameters();
         QueryStringEncoder encoder = new QueryStringEncoder(newUri);
         for (String key : queryParams.keySet()) {
-            encoder.addParam(key, queryParams.get(key).get(0));
+            for (String value : queryParams.get(key)) {
+                encoder.addParam(key, value);
+            }
         }
         return encoder.toString();
     }
