@@ -93,7 +93,7 @@ public class MappingConfigLoaderTest {
 
         MappingEndpoint endpoint = config.get(0).getMappingEndpoint("/v0.1/me", "GET");
         assertEquals(endpoint.getInternalEndpoint(), "/customer/{customerId}");
-        assertEquals(endpoint.getActions().get(0).getName(), "ReplaceCustomerId");
+        assertEquals(endpoint.getAction().getName(), "ReplaceCustomerId");
     }
 
     @Test
@@ -115,11 +115,9 @@ public class MappingConfigLoaderTest {
         // GIVEN
         MappingConfigLoader.load(false);
         MappingAction mappingAction = new MappingAction();
-        List<MappingAction> actions = new ArrayList<MappingAction>();
         mappingAction.setName("ReplaceCustomerId");
-        actions.add(mappingAction);
         MappingEndpoint endpoint = new MappingEndpoint();
-        endpoint.setActions(actions);
+        endpoint.setAction(mappingAction);
 
         MappingConfigLoader.jarClassLoader = mock(URLClassLoader.class);
         doReturn(ReplaceCustomerIdAction.class).when(MappingConfigLoader.jarClassLoader).loadClass(ReplaceCustomerIdAction.class.getCanonicalName());
@@ -264,11 +262,9 @@ public class MappingConfigLoaderTest {
             mapping.setActionsWrapper(allActions);
 
             MappingEndpoint endpoint = new MappingEndpoint();
-            List<MappingAction> acts = new ArrayList<MappingAction>();
             MappingAction addAction = new MappingAction();
             addAction.setName("ReplaceCustomerId");
-            acts.add(addAction);
-            endpoint.setActions(acts);
+            endpoint.setAction(addAction);
             endpoint.setInternalEndpoint("/v0.1/customer/{customerId}");
             endpoint.setExternalEndpoint("/v0.1/me");
 

@@ -80,20 +80,16 @@ public final class MappingConfigLoader {
                     MappingConfig config = new MappingConfig();
                     Mapping mappings = (Mapping) unmarshaller.unmarshal(mappingFile);
 
-                    if (mappings.getActionsWrapper() != null) {
-                        config.setActions(getActionsMap(mappings));
-                    }
+                    List<MappingEndpoint> mappingEndpoints = mappings.getEndpointsWrapper().getEndpoints();
+                    config.setMappings(getMappingsMap(mappingEndpoints, mappings.getBackend()));
 
-                    if (mappings.getFiltersWrapper() != null) {
-                        config.setFilters(getFiltersMap(mappings));
-                    }
+                    setConfigActions(config, mappings);
+
+                    setConfigFilters(config, mappings);
 
                     if (mappings.getErrorsWrapper() != null) {
                         config.setErrors(getErrorsMap(mappings));
                     }
-
-                    List<MappingEndpoint> mappingEndpoints = mappings.getEndpointsWrapper().getEndpoints();
-                    config.setMappings(getMappingsMap(mappingEndpoints, mappings.getBackend()));
 
                     // load all actions and filters
                     if (ServerConfig.getCustomJarPath() != null && ServerConfig.getCustomJarPath().length() > 0) {
@@ -137,6 +133,52 @@ public final class MappingConfigLoader {
         }
     }
 
+    protected static void setConfigFilters(MappingConfig config, Mapping mappings) {
+        if (mappings.getFiltersWrapper() != null) {
+            config.setFilters(getFiltersMap(mappings));
+        } else {
+            // search for filters per endpoint
+            Map<String, String> filters = new HashMap<String, String>();
+            Map<MappingPattern, MappingEndpoint> maps = config.getMappings();
+            for(MappingEndpoint endpoint : maps.values()) {
+                if (endpoint.getFilter() != null) {
+                    ResponseFilter filter = endpoint.getFilter();
+                    String filterName = filter.getName();
+                    if (filterName == null) {
+                        filterName = filter.getFilterClassName();
+                    }
+                    filters.put(filterName, filter.getFilterClassName());
+                }
+            }
+            if (filters.size() > 0) {
+                config.setFilters(filters);
+            }
+        }
+    }
+
+    protected static void setConfigActions(MappingConfig config, Mapping mappings) {
+        if (mappings.getActionsWrapper() != null) {
+            config.setActions(getActionsMap(mappings));
+        } else {
+            // search for actions per endpoint
+            Map<String, String> actions = new HashMap<String, String>();
+            Map<MappingPattern, MappingEndpoint> maps = config.getMappings();
+            for(MappingEndpoint endpoint : maps.values()) {
+                if (endpoint.getAction() != null) {
+                    MappingAction action = endpoint.getAction();
+                    String actionName = action.getName();
+                    if (actionName == null) {
+                        actionName = action.getActionClassName();
+                    }
+                    actions.put(actionName, action.getActionClassName());
+                }
+            }
+            if (actions.size() > 0) {
+                config.setActions(actions);
+            }
+        }
+    }
+
     public static Class<?> loadCustomClass(String className) throws MappingException, ClassNotFoundException {
         Class<?> clazz = null;
         try {
@@ -162,13 +204,13 @@ public final class MappingConfigLoader {
         return created;
     }
 
-    private static void loadCustomClasses(Collection<String> actionClasses) throws MalformedURLException {
+    private static void loadCustomClasses(Collection<String> actionClasses) throws MalformedURLException, MappingException {
         if (jarClassLoader != null || createJarClassLoader()) {
             for (String className : actionClasses) {
                 try {
                     jarClassLoader.loadClass(className);
                 } catch (ClassNotFoundException e) {
-                    log.error("cannot load custom class {}", className, e);
+                    throw new MappingException("cannot load custom class " + className, e);
                 }
             }
         }
@@ -258,12 +300,15 @@ public final class MappingConfigLoader {
      * Reads mappings config from Hazelcast Distributed Map.
      */
     public static void updateMapping(String name, MappingConfig value) {
-        // TODO: check if custom classes are OK
-        reloadCustomClasses(value);
+        try {
+            reloadCustomClasses(value);
+        } catch (MappingException e) {
+            log.error("check custom.jar is the consistent on each running instance", e);
+        }
         localConfigMap.put(name, value);
     }
 
-    private static void reloadCustomClasses(MappingConfig config) {
+    private static void reloadCustomClasses(MappingConfig config) throws MappingException {
         jarClassLoader = null;
         if (ServerConfig.getCustomJarPath() != null) {
             try {

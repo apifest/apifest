@@ -24,9 +24,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -88,9 +85,7 @@ public class HttpRequestHandlerTest {
         HttpResponse validationResponse = mock(HttpResponse.class);
         willReturn("/countries").given(mapping).getInternalEndpoint();
         MappingAction action = mock(MappingAction.class);
-        List<MappingAction> actionList = new ArrayList<MappingAction>();
-        actionList.add(action);
-        willReturn(actionList).given(mapping).getActions();
+        willReturn(action).given(mapping).getAction();
         ReplaceCustomerIdAction replaceAction = mock(ReplaceCustomerIdAction.class);
         willReturn(replaceAction).given(config).getAction(action);
         willReturn(request).given(replaceAction).execute(request, "/countries?id=BUL", validationResponse);

@@ -118,7 +118,7 @@ public class MappingConfig implements Serializable {
                     }
                 }
 
-                MappingEndpoint result = new MappingEndpoint(cur.getExternalEndpoint(), newUri, cur.getMethod(), cur.getAuthType(), cur.getScope(), cur.getActions(), cur.getFilters(),
+                MappingEndpoint result = new MappingEndpoint(cur.getExternalEndpoint(), newUri, cur.getMethod(), cur.getAuthType(), cur.getScope(), cur.getAction(), cur.getFilter(),
                         cur.getVarExpression(), cur.getVarName(), cur.getBackendHost(), cur.getBackendPort());
                 return result;
             }

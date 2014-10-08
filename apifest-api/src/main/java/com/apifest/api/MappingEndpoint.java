@@ -70,24 +70,24 @@ public class MappingEndpoint implements Serializable {
     private String externalEndpoint;
 
     @XmlElement(name = "action", type = MappingAction.class)
-    private List<MappingAction> actions;
+    private MappingAction action;
 
     @XmlElement(name = "filter", type = ResponseFilter.class)
-    private List<ResponseFilter> filters;
+    private ResponseFilter filter;
 
     public MappingEndpoint() {
     }
 
     public MappingEndpoint(String external, String internal, String method, String authRequired, String scope,
-            List<MappingAction> actions, List<ResponseFilter> filters, String varExpr, String varName,
+            MappingAction action, ResponseFilter filter, String varExpr, String varName,
             String backendHost, Integer backendPort) {
         this.externalEndpoint = external;
         this.internalEndpoint = internal;
         this.method = method;
         this.authType = authRequired;
         this.scope = scope;
-        this.actions = actions;
-        this.filters = filters;
+        this.action = action;
+        this.filter = filter;
         this.varExpression = varExpr;
         this.varName = varName;
         this.backendHost = backendHost;
@@ -134,20 +134,20 @@ public class MappingEndpoint implements Serializable {
         this.scope = scope;
     }
 
-    public List<MappingAction> getActions() {
-        return actions;
+    public MappingAction getAction() {
+        return action;
     }
 
-    public void setActions(List<MappingAction> actions) {
-        this.actions = actions;
+    public void setAction(MappingAction action) {
+        this.action = action;
     }
 
-    public List<ResponseFilter> getFilters() {
-        return filters;
+    public ResponseFilter getFilter() {
+        return filter;
     }
 
-    public void setFilters(List<ResponseFilter> filters) {
-        this.filters = filters;
+    public void setFilters(ResponseFilter filter) {
+        this.filter = filter;
     }
 
     public String getVarExpression() {

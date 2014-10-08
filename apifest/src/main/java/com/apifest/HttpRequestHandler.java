@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
 
 import com.apifest.api.BasicAction;
 import com.apifest.api.BasicFilter;
-import com.apifest.api.MappingAction;
 import com.apifest.api.MappingEndpoint;
 import com.apifest.api.MappingException;
 import com.apifest.api.UpstreamException;
@@ -233,19 +232,17 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         BaseMapper mapper = new BaseMapper();
         request.headers().set(HttpHeaders.Names.HOST, mapping.getBackendHost());
         HttpRequest req = mapper.map(request, mapping.getInternalEndpoint());
-        if (mapping.getActions() != null) {
-            for (MappingAction mappingAction : mapping.getActions()) {
-                BasicAction action = config.getAction(mappingAction);
-                req = action.execute(req, req.getUri(), tokenValidationResponse);
-            }
+        if (mapping.getAction() != null) {
+            BasicAction action = config.getAction(mapping.getAction());
+            req = action.execute(req, req.getUri(), tokenValidationResponse);
         }
         return req;
     }
 
     protected BasicFilter getMappingFilter(MappingEndpoint mapping, MappingConfig config, final Channel channel) throws MappingException {
         BasicFilter filter = null;
-        if (mapping.getFilters() != null && mapping.getFilters().size() > 0) {
-            filter = config.getFilter(mapping.getFilters().get(0));
+        if (mapping.getFilter() != null) {
+            filter = config.getFilter(mapping.getFilter());
         }
         return filter;
     }
