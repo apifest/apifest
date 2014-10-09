@@ -16,19 +16,21 @@
 
 package com.apifest.example;
 
+import java.nio.charset.Charset;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.util.CharsetUtil;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.apifest.api.BasicAction;
 import com.apifest.api.MappingException;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 /**
  * Action that adds senderId in request body.
@@ -44,17 +46,14 @@ public class AddSenderIdInBodyAction extends BasicAction {
      */
     @Override
     public HttpRequest execute(HttpRequest req, String internalURI, HttpResponse tokenValidationResponse) throws MappingException {
-        try {
-            JSONObject json = new JSONObject(req.getContent().toString(CharsetUtil.UTF_8));
-            log.info("request body: " + json.toString());
-            json.put("senderId", "1232");
-            byte[] newContent = json.toString().getBytes();
-            ChannelBuffer buf = ChannelBuffers.copiedBuffer(newContent);
-            req.setContent(buf);
-            HttpHeaders.setContentLength(req, newContent.length);
-        } catch (JSONException e) {
-            log.info(e.getMessage());
-        }
+        JsonParser parser = new JsonParser();
+        JsonObject json= parser.parse(new String(req.getContent().toString(CharsetUtil.UTF_8))).getAsJsonObject();
+        log.info("request body: " + json);
+        json.addProperty("senderId", "1232");
+        byte[] newContent = json.toString().getBytes(CharsetUtil.UTF_8);
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(newContent);
+        req.setContent(buf);
+        HttpHeaders.setContentLength(req, newContent.length);
         return req;
     }
 

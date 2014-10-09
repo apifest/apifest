@@ -24,6 +24,7 @@ import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
+import org.jboss.netty.util.CharsetUtil;
 
 /**
  * Creates HTTP response with appropriate HTTP status and message.
@@ -56,7 +57,7 @@ public class HttpResponseFactory {
     public static HttpResponse createUnauthorizedResponse(String message) {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
         response.headers().add(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes(CharsetUtil.UTF_8));
         response.setContent(buf);
         response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         return response;
@@ -70,7 +71,7 @@ public class HttpResponseFactory {
     public static HttpResponse createNotFoundResponse() {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
         response.headers().add(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(NOT_FOUND_CONTENT.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(NOT_FOUND_CONTENT.getBytes(CharsetUtil.UTF_8));
         response.setContent(buf);
         response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         return response;
@@ -85,7 +86,7 @@ public class HttpResponseFactory {
     public static HttpResponse createOKResponse(String message) {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
         response.headers().add(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes(CharsetUtil.UTF_8));
         response.setContent(buf);
         response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         return response;
@@ -101,7 +102,7 @@ public class HttpResponseFactory {
     public static HttpResponse createResponse(HttpResponseStatus httpStatus, String message) {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, httpStatus);
         response.headers().add(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes());
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes(CharsetUtil.UTF_8));
         response.setContent(buf);
         response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         return response;

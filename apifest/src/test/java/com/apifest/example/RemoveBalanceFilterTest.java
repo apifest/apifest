@@ -25,6 +25,7 @@ import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
+import org.jboss.netty.util.CharsetUtil;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -42,8 +43,8 @@ public class RemoveBalanceFilterTest {
         response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
         response.headers().add(HttpHeaders.Names.CONTENT_TYPE, "application/json");
         String content = "{\"customerId\":\"1223\",\"email\":\"rossi.test@apifest.com\",\"balance\":\"1234.34\"}";
-        response.setContent(ChannelBuffers.copiedBuffer(content.getBytes()));
-        response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, content.getBytes().length);
+        response.setContent(ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8)));
+        response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, content.getBytes(CharsetUtil.UTF_8).length);
     }
 
 

@@ -96,4 +96,25 @@ public class HttpRequestHandlerTest {
         // THEN
         verify(replaceAction).execute(request, "/countries?id=BUL", validationResponse);
     }
+
+    @Test
+    public void when_apifest_mappings_invoke_getLoadedMappings() throws Exception {
+        // GIVEN
+        MessageEvent message = mock(MessageEvent.class);
+        HttpRequest req = mock(HttpRequest.class);
+        doReturn(req).when(message).getMessage();
+        ChannelHandlerContext ctx = mock(ChannelHandlerContext.class);
+        doReturn(ChannelBuffers.EMPTY_BUFFER).when(req).getContent();
+        doReturn(HttpRequestHandler.MAPPINGS_URI).when(req).getUri();
+        doReturn(HttpMethod.GET).when(req).getMethod();
+        doNothing().when(handler).getLoadedMappings(any(Channel.class));
+        doNothing().when(handler).setConnectTimeout(any(Channel.class));
+
+        // WHEN
+        handler.messageReceived(ctx, message);
+
+        // THEN
+        verify(handler).getLoadedMappings(any(Channel.class));
+    }
+
 }

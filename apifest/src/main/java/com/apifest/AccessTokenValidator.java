@@ -21,10 +21,12 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 /**
  * Extracts access token and validates it against endpoint scope.
@@ -55,14 +57,12 @@ public class AccessTokenValidator {
 
     protected static String extractTokenScope(String tokenContent) {
         String scope = null;
-        try {
-            JSONObject object = new JSONObject(tokenContent);
-            Object rs = object.get("scope");
-            if (rs != null && !rs.toString().equals("null")) {
-                scope = (String) rs;
-            }
-        } catch (JSONException e) {
-            log.error("Cannot extract scope from content {}", tokenContent);
+        JsonParser parser = new JsonParser();
+        JsonObject jsonObject = parser.parse(tokenContent).getAsJsonObject();
+        JsonElement scopeElement = jsonObject.get("scope");
+        String rs = (scopeElement != null && !scopeElement.isJsonNull()) ? scopeElement.getAsString() : null;
+        if (rs != null && !rs.toString().equals("null")) {
+            scope = rs;
         }
         return scope;
     }

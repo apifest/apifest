@@ -340,4 +340,12 @@ public final class MappingConfigLoader {
         jarClassLoader = null;
         load(true);
     }
+
+    /**
+     * Returns all currently loaded mappings.
+     * @return {@link Map} of all current mappings
+     */
+    public static Map<String, MappingConfig> getLoadedMappings() {
+        return localConfigMap;
+    }
 }

@@ -20,12 +20,12 @@ import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.util.CharsetUtil;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.apifest.api.BasicFilter;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 /**
  * Filter that removes balance field from response.
@@ -38,18 +38,14 @@ public class RemoveBalanceFilter extends BasicFilter {
 
     @Override
     public HttpResponse execute(HttpResponse response) {
-        JSONObject json;
-        try {
-            json = new JSONObject(response.getContent().toString(CharsetUtil.UTF_8));
-            log.info("response body: " + json.toString());
-            json.remove("balance");
-            log.info("modified response body: " + json.toString());
-            byte[] newContent = json.toString().getBytes(CharsetUtil.UTF_8);
-            response.setContent(ChannelBuffers.copiedBuffer(newContent));
-            HttpHeaders.setContentLength(response, newContent.length);
-        } catch (JSONException e) {
-            log.error("Cannot parse JSON", e);
-        }
+        JsonParser parser = new JsonParser();
+        JsonObject json= parser.parse(response.getContent().toString(CharsetUtil.UTF_8)).getAsJsonObject();
+        log.info("response body: " + json.toString());
+        json.remove("balance");
+        log.info("modified response body: " + json.toString());
+        byte[] newContent = json.toString().getBytes(CharsetUtil.UTF_8);
+        response.setContent(ChannelBuffers.copiedBuffer(newContent));
+        HttpHeaders.setContentLength(response, newContent.length);
         return response;
     }
 

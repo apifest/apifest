@@ -17,7 +17,6 @@
 package com.apifest;
 
 import java.net.ConnectException;
-import java.nio.charset.Charset;
 
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -27,6 +26,7 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,8 +50,8 @@ public class HttpResponseHandler extends SimpleChannelUpstreamHandler {
             if (statusCode >= HTTP_STATUS_300 && (MappingConfigLoader.getConfig().get(0).getErrorMessage(statusCode) != null)) {
                 String content = MappingConfigLoader.getConfig().get(0).getErrorMessage(statusCode);
                 if (content != null) {
-                    response.setContent(ChannelBuffers.copiedBuffer(content.getBytes(Charset.forName("UTF-8"))));
-                    response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, content.getBytes().length);
+                    response.setContent(ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8)));
+                    response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, content.getBytes(CharsetUtil.UTF_8).length);
                 }
             }
             if (log.isDebugEnabled()) {

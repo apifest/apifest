@@ -18,10 +18,12 @@ package com.apifest.api;
 
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 
 /**
@@ -58,13 +60,10 @@ public abstract class BasicAction {
     public static String getUserId(HttpResponse tokenValidationResponse) {
         String userId = null;
         if (tokenValidationResponse != null) {
-            JSONObject json;
-            try {
-                json = new JSONObject(new String(tokenValidationResponse.getContent().array()));
-                userId = json.getString("userId");
-            } catch (JSONException e1) {
-                log.error("Cannot parse JSON", e1);
-            }
+            JsonParser parser = new JsonParser();
+            JsonObject json= parser.parse(new String(tokenValidationResponse.getContent().array())).getAsJsonObject();
+            JsonElement userIdElement = json.get("userId");
+            userId = (userIdElement != null && !userIdElement.isJsonNull()) ? userIdElement.getAsString() : null;
         }
         return userId;
     }

@@ -17,8 +17,8 @@
 package com.apifest;
 
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -38,18 +38,17 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringEncoder;
+import org.jboss.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.apifest.api.BasicAction;
 import com.apifest.api.BasicFilter;
-import com.apifest.api.LifecycleHandler;
-import com.apifest.api.MappingAction;
 import com.apifest.api.MappingEndpoint;
 import com.apifest.api.MappingException;
 import com.apifest.api.UpstreamException;
-import com.apifest.LifecycleEventHandlers;
-import com.apifest.api.ExceptionEventHandler;
+import com.google.gson.Gson;
+
 
 /**
  * Handler for requests received on the server.
@@ -59,6 +58,7 @@ import com.apifest.api.ExceptionEventHandler;
 public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
     protected static final String RELOAD_URI = "/apifest-reload";
+    protected static final String MAPPINGS_URI = "/apifest-mappings";
 
     protected static final String ACCESS_TOKEN_REQUIRED = "{\"error\":\"access token required\"}";
     protected static final String INVALID_ACCESS_TOKEN_SCOPE = "{\"error\":\"access token scope not valid\"}";
@@ -86,6 +86,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             HttpMethod method = req.getMethod();
             if (RELOAD_URI.equals(uri) && method.equals(HttpMethod.GET)) {
                 reloadMappingConfig(channel);
+                return;
+            }
+
+            if (MAPPINGS_URI.equals(uri) && method.equals(HttpMethod.GET)) {
+                getLoadedMappings(channel);
                 return;
             }
 
@@ -269,12 +274,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
         } catch (MappingException e) {
             response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
-            ChannelBuffer content = ChannelBuffers.copiedBuffer(e.getMessage().getBytes(Charset.forName("UTF-8")));
+            ChannelBuffer content = ChannelBuffers.copiedBuffer(e.getMessage().getBytes(CharsetUtil.UTF_8));
             response.setContent(content);
         }
         ChannelFuture future = channel.write(response);
         future.addListener(ChannelFutureListener.CLOSE);
-        return;
     }
 
     protected HttpRequest createTokenValidateRequest(String accessToken) {
@@ -289,5 +293,16 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri);
         request.headers().add(HttpHeaders.Names.HOST, ServerConfig.tokenValidateHost);
         return request;
+    }
+
+    protected void getLoadedMappings(Channel channel) {
+        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "application/json");
+        Map<String, MappingConfig> mappings = MappingConfigLoader.getLoadedMappings();
+        Gson gson = new Gson();
+        String jsonObj = gson.toJson(mappings);
+        response.setContent(ChannelBuffers.copiedBuffer(jsonObj.getBytes(CharsetUtil.UTF_8)));
+        ChannelFuture future = channel.write(response);
+        future.addListener(ChannelFutureListener.CLOSE);
     }
 }
