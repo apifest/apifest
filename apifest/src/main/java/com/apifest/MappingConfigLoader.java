@@ -41,6 +41,7 @@ import com.apifest.api.MappingEndpoint;
 import com.apifest.api.MappingError;
 import com.apifest.api.MappingException;
 import com.apifest.api.ResponseFilter;
+import com.apifest.LifecycleEventHandlers;
 import com.hazelcast.core.IMap;
 
 /**
@@ -176,6 +177,18 @@ public final class MappingConfigLoader {
             if (actions.size() > 0) {
                 config.setActions(actions);
             }
+        }
+    }
+
+    public static void loadCustomHandlers() throws MappingException {
+        try {
+            if (jarClassLoader != null || createJarClassLoader()) {
+                LifecycleEventHandlers.loadLifecycleHandlers(jarClassLoader, ServerConfig.getCustomJarPath());
+            } else {
+                throw new MappingException("cannot load custom jar");
+            }
+        } catch (MalformedURLException e) {
+            throw new MappingException("cannot load custom jar");
         }
     }
 

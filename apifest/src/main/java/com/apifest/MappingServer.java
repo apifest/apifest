@@ -77,6 +77,13 @@ public final class MappingServer {
         bootstrap.bind(new InetSocketAddress(ServerConfig.getHost(), ServerConfig.getPort()));
 
         try {
+            MappingConfigLoader.loadCustomHandlers();
+        } catch (MappingException e) {
+            log.error("Cannot load custom jar", e);
+            System.exit(1);
+        }
+
+        try {
             MappingConfigLoader.load(false);
         } catch (MappingException e) {
             log.error("Cannot load mappings", e);
@@ -91,11 +98,15 @@ public final class MappingServer {
     private static boolean serverSetupChecks() {
         try {
             ServerConfig.readProperties();
+            ServerConfig.loadCustomJar();
         } catch (NumberFormatException e) {
             log.error("Property values not valid");
             return false;
         } catch (IOException e) {
             log.error("Cannot load properties file");
+            return false;
+        } catch (MappingException e) {
+            log.error("Cannot load custom jar");
             return false;
         }
         return true;

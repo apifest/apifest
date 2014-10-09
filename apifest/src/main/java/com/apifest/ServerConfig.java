@@ -25,6 +25,8 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.apifest.api.MappingException;
+
 /**
  * Initialize all server configs.
  *
@@ -90,6 +92,10 @@ public final class ServerConfig {
         connectTimeout = Integer.valueOf(props.getProperty("connect.timeout", "10"));
         customJarPath = props.getProperty("custom.jar");
         apifestNodes = props.getProperty("apifest.nodes");
+    }
+
+    protected static void loadCustomJar() throws MappingException {
+        MappingConfigLoader.loadCustomHandlers();
     }
 
     public static String getHost() {
