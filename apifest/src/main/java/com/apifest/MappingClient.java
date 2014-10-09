@@ -96,6 +96,7 @@ public final class MappingClient {
                     channel.getPipeline().getContext("handler").setAttachment(responseListener);
                     if (future.isSuccess() && channel.isOpen()) {
                         channel.write(request);
+                        LifecycleEventHandlers.invokeRequestEventHandlers(request, null);
                     } else {
                         // if cannot connect
                         channel.disconnect();

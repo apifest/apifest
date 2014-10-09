@@ -43,9 +43,13 @@ import org.slf4j.LoggerFactory;
 
 import com.apifest.api.BasicAction;
 import com.apifest.api.BasicFilter;
+import com.apifest.api.LifecycleHandler;
+import com.apifest.api.MappingAction;
 import com.apifest.api.MappingEndpoint;
 import com.apifest.api.MappingException;
 import com.apifest.api.UpstreamException;
+import com.apifest.LifecycleEventHandlers;
+import com.apifest.api.ExceptionEventHandler;
 
 /**
  * Handler for requests received on the server.
@@ -84,6 +88,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 return;
             }
 
+            LifecycleEventHandlers.invokeRequestEventHandlers(req, null);
             List<MappingConfig> configList = MappingConfigLoader.getConfig();
             MappingEndpoint mapping = null;
             MappingConfig config = null;
