@@ -111,7 +111,10 @@ public final class MappingConfigLoader {
                 }
                 IMap<String, MappingConfig> map = getHazelcastConfig();
                 if (reload) {
-                    map.clear();
+                    //clear all keys one by one in order to fire events in Hazelcast
+                    for (String key : map.keySet()) {
+                        map.remove(key);
+                    }
                 }
                 if (local.size() > 0) {
                     map.putAll(local);
@@ -319,6 +322,13 @@ public final class MappingConfigLoader {
             log.error("check custom.jar is the consistent on each running instance", e);
         }
         localConfigMap.put(name, value);
+    }
+
+    /**
+     * Removes mapping config.
+     */
+    public static void removeMapping(String name) {
+        localConfigMap.remove(name);
     }
 
     private static void reloadCustomClasses(MappingConfig config) throws MappingException {

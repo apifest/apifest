@@ -34,7 +34,8 @@ public class ConfigChangeListener implements EntryListener<String, MappingConfig
      */
     @Override
     public void entryAdded(EntryEvent<String, MappingConfig> event) {
-        // not used
+        log.debug("entry added, key {}, value {}", event.getKey(), event.getValue());
+        MappingConfigLoader.updateMapping(event.getKey(), event.getValue());
     }
 
     /*
@@ -42,7 +43,8 @@ public class ConfigChangeListener implements EntryListener<String, MappingConfig
      */
     @Override
     public void entryRemoved(EntryEvent<String, MappingConfig> event) {
-        // not used
+        log.debug("entry removed, key {}, value {}", event.getKey(), event.getValue());
+        MappingConfigLoader.removeMapping(event.getKey());
     }
 
     /*
@@ -59,7 +61,8 @@ public class ConfigChangeListener implements EntryListener<String, MappingConfig
      */
     @Override
     public void entryEvicted(EntryEvent<String, MappingConfig> event) {
-        // not used
+        log.debug("entry evicted, key {}, value {}", event.getKey(), event.getValue());
+        MappingConfigLoader.removeMapping(event.getKey());
     }
 
 }

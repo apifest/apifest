@@ -16,8 +16,6 @@
 
 package com.apifest.example;
 
-import java.nio.charset.Charset;
-
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
