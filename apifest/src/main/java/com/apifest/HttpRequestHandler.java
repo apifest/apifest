@@ -65,7 +65,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     protected static final String INVALID_ACCESS_TOKEN = "{\"error\":\"access token not valid\"}";
     protected static final String INVALID_ACCESS_TOKEN_TYPE = "{\"error\":\"access token type not valid\"}";
 
-    protected static final String OAUTH_TOKEN_VALIDATE_URI = "/oauth20/token/validate";
+    protected static final String OAUTH_TOKEN_VALIDATE_URI = "/oauth20/tokens/validate";
 
     protected static Logger log = LoggerFactory.getLogger(HttpRequestHandler.class);
 
@@ -116,7 +116,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                     }
 
                     if(accessToken == null) {
-                        writeResponseToChannel(channel, HttpResponseFactory.createUnauthorizedResponse(ACCESS_TOKEN_REQUIRED));
+                        writeResponseToChannel(channel, req, HttpResponseFactory.createUnauthorizedResponse(ACCESS_TOKEN_REQUIRED));
                         return;
                     }
 
@@ -125,7 +125,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                         filter = getMappingFilter(mapping, config, channel);
                     } catch (MappingException e2) {
                         log.error("cannot map request", e2);
-                        writeResponseToChannel(channel, HttpResponseFactory.createISEResponse());
+                        LifecycleEventHandlers.invokeExceptionHandler(e2, req);
+                        writeResponseToChannel(channel, req, HttpResponseFactory.createISEResponse());
                         return;
                     }
 
@@ -143,14 +144,14 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                             if (response instanceof HttpResponse) {
                                 HttpResponse tokenValidationResponse = (HttpResponse) response;
                                 if (!HttpResponseStatus.OK.equals(tokenValidationResponse.getStatus())) {
-                                    writeResponseToChannel(channel, HttpResponseFactory.createUnauthorizedResponse(INVALID_ACCESS_TOKEN));
+                                    writeResponseToChannel(channel, request, HttpResponseFactory.createUnauthorizedResponse(INVALID_ACCESS_TOKEN));
                                     return;
                                 }
                                 String tokenContent = new String(ChannelBuffers.copiedBuffer(tokenValidationResponse.getContent()).array());
                                 boolean scopeOk = AccessTokenValidator.validateTokenScope(tokenContent, endpoint.getScope());
                                 if(!scopeOk) {
                                      log.debug("access token scope not valid");
-                                     writeResponseToChannel(channel, HttpResponseFactory.createUnauthorizedResponse(INVALID_ACCESS_TOKEN_SCOPE));
+                                     writeResponseToChannel(channel, request, HttpResponseFactory.createUnauthorizedResponse(INVALID_ACCESS_TOKEN_SCOPE));
                                      return;
                                 }
 
@@ -163,14 +164,16 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                                         client.send(mappedReq, endpoint.getBackendHost(), Integer.valueOf(endpoint.getBackendPort()), responseListener);
                                     } catch (MappingException e) {
                                         log.error("cannot map request", e);
-                                        writeResponseToChannel(channel, HttpResponseFactory.createISEResponse());
+                                        LifecycleEventHandlers.invokeExceptionHandler(e, request);
+
+                                        writeResponseToChannel(channel, request, HttpResponseFactory.createISEResponse());
                                         return;
                                     } catch(UpstreamException ue) {
-                                        writeResponseToChannel(channel, ue.getResponse());
+                                        writeResponseToChannel(channel, request, ue.getResponse());
                                         return;
                                     }
                                 } else {
-                                    writeResponseToChannel(channel, HttpResponseFactory.createUnauthorizedResponse(INVALID_ACCESS_TOKEN_TYPE));
+                                    writeResponseToChannel(channel, request, HttpResponseFactory.createUnauthorizedResponse(INVALID_ACCESS_TOKEN_TYPE));
                                     return;
                                 }
                             } else {
@@ -195,18 +198,20 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                         client.send(mappedReq, mapping.getBackendHost(), Integer.valueOf(mapping.getBackendPort()), responseListener);
                     } catch (MappingException e2) {
                         log.error("cannot map request", e2);
-                        writeResponseToChannel(channel, HttpResponseFactory.createISEResponse());
+                        LifecycleEventHandlers.invokeExceptionHandler(e2, req);
+
+                        writeResponseToChannel(channel, req, HttpResponseFactory.createISEResponse());
                         return;
                     } catch(UpstreamException ue) {
-                        writeResponseToChannel(channel, ue.getResponse());
+                        LifecycleEventHandlers.invokeResponseEventHandlers(req, ue.getResponse());
+                        writeResponseToChannel(channel, req, ue.getResponse());
                         return;
                     }
                 }
             } else {
                 // if no mapping found
                 HttpResponse response = HttpResponseFactory.createNotFoundResponse();
-                ChannelFuture future = channel.write(response);
-                future.addListener(ChannelFutureListener.CLOSE);
+                writeResponseToChannel(channel, req, response);
                 return;
             }
         } else {
@@ -257,7 +262,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         return filter;
     }
 
-    protected void writeResponseToChannel(Channel channel, HttpResponse response) {
+    protected void writeResponseToChannel(Channel channel, HttpRequest request, HttpResponse response) {
+        LifecycleEventHandlers.invokeResponseEventHandlers(request, response);
         ChannelFuture future = channel.write(response);
         future.addListener(ChannelFutureListener.CLOSE);
     }
@@ -292,6 +298,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         }
         HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri);
         request.headers().add(HttpHeaders.Names.HOST, ServerConfig.tokenValidateHost);
+        // REVISIT: propagate all custom headers?
         return request;
     }
 

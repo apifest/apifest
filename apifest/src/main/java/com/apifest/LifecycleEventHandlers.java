@@ -116,7 +116,7 @@ public class LifecycleEventHandlers {
         invokeHandlers(request, response, LifecycleEventHandlers.getRequestEventHandlers());
     }
 
-    protected void invokeResponseEventHandlers(HttpRequest request, HttpResponse response) {
+    protected static void invokeResponseEventHandlers(HttpRequest request, HttpResponse response) {
         invokeHandlers(request, response, LifecycleEventHandlers.getResponseEventHandlers());
     }
 
