@@ -147,7 +147,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                                     writeResponseToChannel(channel, request, HttpResponseFactory.createUnauthorizedResponse(INVALID_ACCESS_TOKEN));
                                     return;
                                 }
-                                String tokenContent = new String(ChannelBuffers.copiedBuffer(tokenValidationResponse.getContent()).array());
+                                String tokenContent = tokenValidationResponse.getContent().toString(CharsetUtil.UTF_8);
                                 boolean scopeOk = AccessTokenValidator.validateTokenScope(tokenContent, endpoint.getScope());
                                 if(!scopeOk) {
                                      log.debug("access token scope not valid");

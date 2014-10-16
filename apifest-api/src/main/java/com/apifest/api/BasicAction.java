@@ -18,6 +18,7 @@ package com.apifest.api;
 
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +62,7 @@ public abstract class BasicAction {
         String userId = null;
         if (tokenValidationResponse != null) {
             JsonParser parser = new JsonParser();
-            JsonObject json= parser.parse(new String(tokenValidationResponse.getContent().array())).getAsJsonObject();
+            JsonObject json= parser.parse(tokenValidationResponse.getContent().toString(CharsetUtil.UTF_8)).getAsJsonObject();
             JsonElement userIdElement = json.get("userId");
             userId = (userIdElement != null && !userIdElement.isJsonNull()) ? userIdElement.getAsString() : null;
         }

@@ -54,9 +54,6 @@ public class HttpResponseHandler extends SimpleChannelUpstreamHandler {
                     response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, content.getBytes(CharsetUtil.UTF_8).length);
                 }
             }
-            if (log.isDebugEnabled()) {
-                log.debug("response: {}", new String(ChannelBuffers.copiedBuffer(response.getContent()).array()));
-            }
         }
         Channel channel = ctx.getChannel();
         channel.close();
