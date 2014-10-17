@@ -53,11 +53,13 @@ public final class MappingServer {
             System.exit(1);
         }
 
-        try {
-            MappingConfigLoader.loadCustomHandlers();
-        } catch (MappingException e) {
-            log.error("Cannot load custom jar", e);
-            System.exit(1);
+        if (ServerConfig.getCustomJarPath() != null && ServerConfig.getCustomJarPath().length() > 0) {
+            try {
+                MappingConfigLoader.loadCustomHandlers();
+            } catch (MappingException e) {
+                log.error("Cannot load custom jar", e);
+                System.exit(1);
+            }
         }
 
         ChannelFactory factory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool());
