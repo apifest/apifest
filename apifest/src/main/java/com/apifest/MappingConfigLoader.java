@@ -66,6 +66,9 @@ public final class MappingConfigLoader {
 
     protected static void load(boolean reload) throws MappingException {
         String mappingFileDir = ServerConfig.getMappingsPath();
+        if (mappingFileDir == null || mappingFileDir.isEmpty()) {
+            throw new MappingException("apifest.mappings property not set");
+        }
         Map<String, MappingConfig> local = new HashMap<String, MappingConfig>();
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(Mapping.class);
