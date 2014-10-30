@@ -43,7 +43,7 @@ public final class MappingServer {
 
     private static Logger log = LoggerFactory.getLogger(MappingServer.class);
 
-    private static final int MAX_CONTENT_LEN = 1048576;
+    private static final int MAX_CONTENT_LEN = 10 * 1024 * 1024;
 
     private MappingServer() {
     }
