@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class MappingClient {
 
-    private static final int MAX_CONTENT_LEN = 1048576;
+    private static final int MAX_CONTENT_LEN = 10 * 1024 * 1024;
 
     private ClientBootstrap bootstrap;
     private static MappingClient client;
