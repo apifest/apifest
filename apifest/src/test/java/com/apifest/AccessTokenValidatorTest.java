@@ -16,12 +16,9 @@
 
 package com.apifest;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
 import org.slf4j.Logger;
 import org.testng.annotations.BeforeMethod;
@@ -171,5 +168,20 @@ public class AccessTokenValidatorTest {
 
         // THEN
         assertFalse(result);
+    }
+
+
+    @Test
+    public void when_token_but_scope_is_null_return_true() throws Exception {
+        // GIVEN
+        String endpointScope = null;
+        String tokenContent = "{\"tokenType\":\"599\",\"scope\":\"basic other\"," + "\"accessToken\":\"da96c8141bcda91be65db4adbc8fafe77d116c88caacb8de404c0654c16c6620\","
+                + "\"expiresIn\":\"Bearer\",\"userId\":null," + "\"refreshToken\":\"cb2e2e068447913d0c97f79f888f6e2882bfcb569325a9ad9e9b52937b06e547\"}";
+
+        // WHEN
+        boolean result = AccessTokenValidator.validateTokenScope(tokenContent, endpointScope);
+
+        // THEN
+        assertTrue(result);
     }
 }
