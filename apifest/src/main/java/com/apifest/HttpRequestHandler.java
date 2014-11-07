@@ -49,7 +49,6 @@ import com.apifest.api.MappingException;
 import com.apifest.api.UpstreamException;
 import com.google.gson.Gson;
 
-
 /**
  * Handler for requests received on the server.
  *
@@ -115,7 +114,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                         }
                     }
 
-                    if(accessToken == null) {
+                    if (accessToken == null) {
                         writeResponseToChannel(channel, req, HttpResponseFactory.createUnauthorizedResponse(ACCESS_TOKEN_REQUIRED));
                         return;
                     }
@@ -149,14 +148,14 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                                 }
                                 String tokenContent = tokenValidationResponse.getContent().toString(CharsetUtil.UTF_8);
                                 boolean scopeOk = AccessTokenValidator.validateTokenScope(tokenContent, endpoint.getScope());
-                                if(!scopeOk) {
-                                     log.debug("access token scope not valid");
-                                     writeResponseToChannel(channel, request, HttpResponseFactory.createUnauthorizedResponse(INVALID_ACCESS_TOKEN_SCOPE));
-                                     return;
+                                if (!scopeOk) {
+                                    log.debug("access token scope not valid");
+                                    writeResponseToChannel(channel, request, HttpResponseFactory.createUnauthorizedResponse(INVALID_ACCESS_TOKEN_SCOPE));
+                                    return;
                                 }
 
                                 String userId = BasicAction.getUserId(tokenValidationResponse);
-                                if((MappingEndpoint.AUTH_TYPE_USER.equals(endpoint.getAuthType()) && (userId != null && userId.length() > 0)) ||
+                                if ((MappingEndpoint.AUTH_TYPE_USER.equals(endpoint.getAuthType()) && (userId != null && userId.length() > 0)) ||
                                         MappingEndpoint.AUTH_TYPE_CLIENT_APP.equals(endpoint.getAuthType())) {
                                     try {
                                         HttpRequest mappedReq = mapRequest(request, endpoint, conf, tokenValidationResponse);
@@ -168,7 +167,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
                                         writeResponseToChannel(channel, request, HttpResponseFactory.createISEResponse());
                                         return;
-                                    } catch(UpstreamException ue) {
+                                    } catch (UpstreamException ue) {
                                         writeResponseToChannel(channel, request, ue.getResponse());
                                         return;
                                     }
@@ -202,7 +201,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
                         writeResponseToChannel(channel, req, HttpResponseFactory.createISEResponse());
                         return;
-                    } catch(UpstreamException ue) {
+                    } catch (UpstreamException ue) {
                         LifecycleEventHandlers.invokeResponseEventHandlers(req, ue.getResponse());
                         writeResponseToChannel(channel, req, ue.getResponse());
                         return;
@@ -225,13 +224,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             public void responseReceived(HttpMessage response) {
                 HttpMessage newResponse = response;
                 if (response instanceof HttpResponse) {
-                    HttpResponse res = (HttpResponse) response;
-                    // status greater than HTTP 300
-                    if (res.getStatus().getCode() >= HTTP_STATUS_300) {
-                        // return error response
-                        newResponse = res;
-                    }
-                    if (res.getStatus().getCode() < HTTP_STATUS_300 && getFilter() != null) {
+                    if (getFilter() != null) {
                         newResponse = getFilter().execute((HttpResponse) response);
                     }
                 }
