@@ -45,7 +45,7 @@ public final class MappingClient {
     private static final int MAX_CONTENT_LEN = 10 * 1024 * 1024;
 
     private ClientBootstrap bootstrap;
-    private static MappingClient client;
+    private static volatile MappingClient client;
 
     protected Logger log = LoggerFactory.getLogger(MappingClient.class);
 
@@ -70,7 +70,7 @@ public final class MappingClient {
         bootstrap.setOption("child.connectTimeoutMillis", ServerConfig.getConnectTimeout());
     }
 
-    public static MappingClient getClient() {
+    public synchronized static MappingClient getClient() {
         if (client == null) {
             client = new MappingClient();
         }

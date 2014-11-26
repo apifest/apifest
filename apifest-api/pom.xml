@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.apifest</groupId>
     <artifactId>apifest-parent</artifactId>
-    <version>0.1.1-SNAPSHOT</version>
+    <version>0.1.1</version>
   </parent>
   <artifactId>apifest-api</artifactId>
   <name>apifest-api</name>
@@ -63,8 +63,6 @@
               <!-- <project>apifest</project> -->
               <destdir>target/schemas</destdir>
               <srcdir>src/main/java/com/apifest/api</srcdir>
-              <!-- <schemas> <schema> <namespace>http://www.jordeu.net/XSDCREATOR/1.0.0</namespace> 
-                <file>xsdcreator-v1_0_0.xsd</file> </schema> </schemas> -->
               <verbose>true</verbose>
             </configuration>
             <dependencies>
