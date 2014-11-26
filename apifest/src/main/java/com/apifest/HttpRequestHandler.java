@@ -70,8 +70,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
     private MappingClient client = MappingClient.getClient();
 
-    private static final int HTTP_STATUS_300 = 300;
-
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
         final Channel channel = ctx.getChannel();
@@ -129,7 +127,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                         return;
                     }
 
-                    final ResponseListener responseListener = createResponseListener(filter, channel);
+                    final ResponseListener responseListener = createResponseListener(filter, channel, req);
 
                     final HttpRequest request = req;
                     final MappingEndpoint endpoint = mapping;
@@ -189,7 +187,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 } else {
                     try {
                         BasicFilter filter = getMappingFilter(mapping, config, channel);
-                        ResponseListener responseListener = createResponseListener(filter, channel);
+                        ResponseListener responseListener = createResponseListener(filter, channel, req);
 
                         channel.getPipeline().getContext("handler").setAttachment(responseListener);
 
@@ -218,7 +216,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         }
     }
 
-    protected ResponseListener createResponseListener(BasicFilter filter, final Channel channel) {
+    protected ResponseListener createResponseListener(BasicFilter filter, final Channel channel, final HttpRequest request) {
         ResponseListener responseListener = new ResponseListener(filter) {
             @Override
             public void responseReceived(HttpMessage response) {
@@ -229,7 +227,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                     }
                 }
                 ChannelFuture future = channel.write(newResponse);
-                future.addListener(ChannelFutureListener.CLOSE);
+                if (!HttpHeaders.isKeepAlive(request)) {
+                    future.addListener(ChannelFutureListener.CLOSE);
+                }
             }
         };
         return responseListener;

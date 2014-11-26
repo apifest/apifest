@@ -19,8 +19,6 @@ package com.apifest.api;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.util.CharsetUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -39,7 +37,6 @@ import com.google.gson.JsonParser;
  */
 public abstract class BasicAction {
 
-    protected static Logger log = LoggerFactory.getLogger(BasicAction.class);
 
     /**
      * Maps the request to the internal URI passed as a parameter. Modifies the request body/headers, if necessary.
