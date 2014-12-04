@@ -6,3 +6,4 @@ token.validate.port=
 connect.timeout=
 custom.jar=
 apifest.nodes=
+hazelcast.password=

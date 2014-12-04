@@ -44,6 +44,7 @@ token.validate.port=
 connect.timeout=
 custom.jar=
 apifest.nodes=
+hazelcast.password=
 ```
 
 The path to the apifest.properties file should be set as a system variable:
@@ -139,7 +140,11 @@ As ApiFest configurations are stored in distributed cache, you need to setup all
 IPs) on which the ApiFest Mapping Server is running. To do that use the following property in the apifest.properties file -
 
 ***apifest.nodes***
- 
+
+As Hazelcast is used as a mapping configurations storage, you can set a password that will be used when Hazelcast is started in the ApiFest Mapping Server
+ (otherwise the default Hazelcast password - dev-pass will be used). To set a password use the following property in the apifest.properties file -
+
+***hazelcast.password***
 
 **3. Start the ApiFest Mapping Server**
 

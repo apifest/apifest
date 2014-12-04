@@ -42,6 +42,7 @@ public final class ServerConfig {
     protected static Integer connectTimeout;
     protected static String customJarPath;
     protected static String apifestNodes;
+    protected static String hazelcastPassword;
 
     private ServerConfig() {
     }
@@ -90,6 +91,8 @@ public final class ServerConfig {
         connectTimeout = Integer.valueOf(props.getProperty("connect.timeout", "10"));
         customJarPath = props.getProperty("custom.jar");
         apifestNodes = props.getProperty("apifest.nodes");
+        // dev-pass is the default password used in Hazelcast
+        hazelcastPassword = props.getProperty("hazelcast.password", "dev-pass");
     }
 
     public static String getHost() {
@@ -122,5 +125,9 @@ public final class ServerConfig {
 
     public static String getApifestNodes() {
         return apifestNodes;
+    }
+
+    public static String getHazelcastPassword() {
+        return hazelcastPassword;
     }
 }

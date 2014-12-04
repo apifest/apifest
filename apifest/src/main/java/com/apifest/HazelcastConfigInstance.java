@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import com.hazelcast.config.Config;
 import com.hazelcast.config.ExecutorConfig;
+import com.hazelcast.config.GroupConfig;
 import com.hazelcast.config.InMemoryFormat;
 import com.hazelcast.config.InterfacesConfig;
 import com.hazelcast.config.JoinConfig;
@@ -63,6 +64,7 @@ public class HazelcastConfigInstance {
 
     private void load() {
         Config cfg = createConfiguration();
+        cfg.setGroupConfig(new GroupConfig("apifest-map", ServerConfig.getHazelcastPassword()));
         hzInstance = Hazelcast.newHazelcastInstance(cfg);
         log.debug("Hazelcast instance created");
         ConfigChangeListener listener = new ConfigChangeListener();
