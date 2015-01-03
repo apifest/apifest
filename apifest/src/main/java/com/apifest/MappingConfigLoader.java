@@ -81,6 +81,8 @@ public final class MappingConfigLoader {
                     if (!mappingFile.isFile() || !mappingFile.getName().endsWith(".xml")) {
                         continue;
                     }
+                    //REVISIT: first, check whether the mapping is valid against the schema
+
                     MappingConfig config = new MappingConfig();
                     Mapping mappings = (Mapping) unmarshaller.unmarshal(mappingFile);
 
@@ -94,7 +96,6 @@ public final class MappingConfigLoader {
                     if (mappings.getErrorsWrapper() != null) {
                         config.setErrors(getErrorsMap(mappings));
                     }
-
                     // load all actions and filters
                     if (ServerConfig.getCustomJarPath() != null && ServerConfig.getCustomJarPath().length() > 0) {
                         try {

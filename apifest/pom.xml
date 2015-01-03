@@ -128,7 +128,7 @@
 
   <profiles>
     <profile>
-      <id>config-validation</id>
+      <id>mapping-validation</id>
       <build>
         <plugins>
           <plugin>
@@ -144,7 +144,7 @@
                 <configuration>
                   <mainClass>com.apifest.MappingConfigValidator</mainClass>
                   <arguments>
-                    <argument>${basedir}\src\test\resources\mapping.xml</argument>
+                    <argument>${basedir}\src\main\resources\schema.xsd</argument>
                   </arguments>
                 </configuration>
               </execution>

@@ -50,14 +50,14 @@
 
   <xs:complexType name="action">
     <xs:sequence/>
-    <xs:attribute name="name" type="xs:string" use="required"/>
-    <xs:attribute name="class" type="xs:string"/>
+    <xs:attribute name="name" type="xs:string"/>
+    <xs:attribute name="class" type="xs:string" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="filter">
     <xs:sequence/>
-    <xs:attribute name="name" type="xs:string" use="required"/>
-    <xs:attribute name="class" type="xs:string"/>
+    <xs:attribute name="name" type="xs:string"/>
+    <xs:attribute name="class" type="xs:string" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="actionsWrapper">

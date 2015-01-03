@@ -35,10 +35,10 @@ public class ResponseFilter implements Serializable {
 
     private static final long serialVersionUID = 5849638109501694966L;
 
-    @XmlAttribute(name = "name", required = true)
+    @XmlAttribute(name = "name")
     private String name;
 
-    @XmlAttribute(name = "class")
+    @XmlAttribute(name = "class", required = true)
     private String filterClassName;
 
     public String getName() {

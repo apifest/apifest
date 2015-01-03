@@ -63,6 +63,15 @@
               <!-- <project>apifest</project> -->
               <destdir>target/schemas</destdir>
               <srcdir>src/main/java/com/apifest/api</srcdir>
+              <includes>
+                <include>**/BasicAction.java</include>
+                <include>**/BasicFilter.java</include>
+                <include>**/Mapping.java</include>
+                <include>**/MappingAction.java</include>
+                <include>**/MappingEndpoint.java</include>
+                <include>**/MappingError.java</include>
+                <include>**/ResponseFilter.java</include>
+              </includes>
               <verbose>true</verbose>
             </configuration>
             <dependencies>

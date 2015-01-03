@@ -16,6 +16,8 @@
 
 package com.apifest;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -30,13 +32,14 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 /**
- * Parses mapping configuration.
+ * Validates a mapping file against schema.
  *
  * @author Rossitsa Borissova
  */
 public final class MappingConfigValidator {
 
     private static Logger log = LoggerFactory.getLogger(MappingConfigValidator.class);
+    private static volatile Schema schema;
 
     private MappingConfigValidator() {
     }
@@ -44,26 +47,62 @@ public final class MappingConfigValidator {
     public static void main(String[] args) {
         InputStream xsdFile = null;
         try {
-            String mappingFile = null;
-            if (args.length > 0) {
-                mappingFile = args[0];
+            if (args.length == 1) {
+                xsdFile = new FileInputStream(new File(args[0]));
             } else {
-                mappingFile = System.getProperty(ServerConfig.getMappingsPath());
+                throw new IllegalArgumentException("ERROR: schema file is not passed as arguments");
             }
+            String mappingFile = System.getProperty("mapping.file");
             if (mappingFile == null) {
-                log.error("mapping file not set by argument in pom.xml or as system property apifest.mappings");
-                return;
+                throw new IllegalArgumentException("ERROR: mapping.file property not set");
+            } else {
+                SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                Schema schema = factory.newSchema(new StreamSource(xsdFile));
+                Validator validator = schema.newValidator();
+                validator.validate(new StreamSource(mappingFile));
             }
-            SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            xsdFile = ClassLoader.getSystemClassLoader().getResourceAsStream("schema.xsd");
-            Schema schema = factory.newSchema(new StreamSource(xsdFile));
+        } catch (SAXException e) {
+            throw new RuntimeException("ERROR: mapping file NOT valid: " + e.getMessage());
+        } catch (IOException e) {
+            throw new RuntimeException("ERROR: mapping or schema file not loaded: " + e.getMessage());
+        } finally {
+            if (xsdFile != null) {
+                try {
+                    xsdFile.close();
+                } catch (IOException e) {
+                    System.err.println("cannot close input stream" + e);
+                }
+            }
+        }
+    }
+
+    public static boolean validate(File mappingFile) {
+        boolean ok = false;
+        try {
+            if (schema == null) {
+                loadSchema();
+            }
             Validator validator = schema.newValidator();
             validator.validate(new StreamSource(mappingFile));
-            log.info("mapping file validated");
+            ok = true;
         } catch (SAXException ex) {
             log.error("mapping file NOT valid: {}", ex.getMessage());
         } catch (IOException e) {
-            log.error("mapping file not loaded: {}", e.getMessage());
+            log.error("schema file not loaded: {}", e.getMessage());
+        }
+        return ok;
+    }
+
+    private static void loadSchema() {
+        InputStream xsdFile = null;
+        try {
+            if (schema == null) {
+                SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                xsdFile = ClassLoader.getSystemResourceAsStream("schema.xsd");
+                schema = factory.newSchema(new StreamSource(xsdFile));
+            }
+        }catch (SAXException e) {
+            log.error("schema file not valid: {}", e.getMessage());
         } finally {
             if (xsdFile != null) {
                 try {
