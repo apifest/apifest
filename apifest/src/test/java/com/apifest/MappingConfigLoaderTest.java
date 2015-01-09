@@ -233,6 +233,14 @@ public class MappingConfigLoaderTest {
         assertEquals(errorMsg, "cannot load custom jar");
     }
 
+    @Test(expectedExceptions = MappingException.class)
+    public void when_mapping_external_variables_do_not_match_variables_throw_exception() throws Exception {
+        // GIVEN
+        MappingConfigLoader.load(false);
+
+        // WHEN
+        MappingConfigLoader.getConfig().get(0).getMappingEndpoint("/v0.1/me/contacts/123", "GET");
+    }
 
     private String marshal() {
         String result = null;
