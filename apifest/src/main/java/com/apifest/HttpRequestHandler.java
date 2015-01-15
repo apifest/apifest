@@ -95,15 +95,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             MappingEndpoint mapping = null;
             MappingConfig config = null;
             for (MappingConfig mconfig : configList) {
-                try {
-                    mapping = mconfig.getMappingEndpoint(uri, method.toString());
-                } catch (MappingException ex) {
-                    log.error(ex.getMessage());
-                    LifecycleEventHandlers.invokeExceptionHandler(ex, req);
-
-                    writeResponseToChannel(channel, req, HttpResponseFactory.createISEResponse());
-                    return;
-                }
+                mapping = mconfig.getMappingEndpoint(uri, method.toString());
                 if (mapping != null) {
                     config = mconfig;
                     break;

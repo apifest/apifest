@@ -30,9 +30,6 @@
         </endpoint>
         <endpoint external="/v0.1/payments/{paymentId}" internal="/payments/{paymentId}" method="GET" varExpression="\d*" varName="paymentId"/>
         <endpoint external="/v0.1/contacts/{type}/{level}" internal="/contacts/{type}/{level}" method="GET" varExpression="phone|mobile|address support|finance|manager" varName="type level"/>
-         <endpoint external="/v0.1/me/contacts/{type}" internal="/customers/{customerId}/contacts/{type}/" method="GET" varExpression="\d\+ .*" varName="customerId type">
-           <action name="ReplaceCustomerId"/>
-         </endpoint>
     </endpoints>
     <errors>
         <error status="201" message='{"message":"resource created"}' />

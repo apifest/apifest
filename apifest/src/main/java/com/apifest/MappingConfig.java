@@ -98,7 +98,7 @@ public class MappingConfig implements Serializable {
      * @param uri external uri
      * @return <code>MappingEndpoint</code> that corresponds to the passed URI
      */
-    public MappingEndpoint getMappingEndpoint(String uri, String method) throws MappingException {
+    public MappingEndpoint getMappingEndpoint(String uri, String method) {
         String rawUri = getUriWithoutParams(uri);
 
         Set<MappingPattern> patterns = getMappings().keySet();
@@ -110,9 +110,6 @@ public class MappingConfig implements Serializable {
                 // replace variables with their values
                 if (cur.getVarName() != null) {
                     String [] varNames = cur.getVarName().split(" ");
-                    if (m.groupCount() != varNames.length) {
-                        throw new MappingException("cannot match URI variables to RE");
-                    }
                     if (newUri.contains("{") && m.groupCount() >= 1) {
                         for (int i = 0; i < varNames.length; i++) {
                             String varValue = m.group(i + 1);
