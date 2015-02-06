@@ -127,7 +127,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                         return;
                     }
 
-                    final ResponseListener responseListener = createResponseListener(filter, channel, req);
+                    final ResponseListener responseListener = createResponseListener(filter, config.getErrors(), channel, req);
 
                     final HttpRequest request = req;
                     final MappingEndpoint endpoint = mapping;
@@ -187,7 +187,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 } else {
                     try {
                         BasicFilter filter = getMappingFilter(mapping, config, channel);
-                        ResponseListener responseListener = createResponseListener(filter, channel, req);
+                        ResponseListener responseListener = createResponseListener(filter, config.getErrors(), channel, req);
 
                         channel.getPipeline().getContext("handler").setAttachment(responseListener);
 
@@ -216,8 +216,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         }
     }
 
-    protected ResponseListener createResponseListener(BasicFilter filter, final Channel channel, final HttpRequest request) {
-        ResponseListener responseListener = new ResponseListener(filter) {
+    protected ResponseListener createResponseListener(BasicFilter filter, Map<String, String> errors, final Channel channel, final HttpRequest request) {
+        ResponseListener responseListener = new ResponseListener(filter, errors) {
             @Override
             public void responseReceived(HttpMessage response) {
                 HttpMessage newResponse = response;

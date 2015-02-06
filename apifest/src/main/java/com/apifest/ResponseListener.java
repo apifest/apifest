@@ -16,6 +16,8 @@
 
 package com.apifest;
 
+import java.util.Map;
+
 import org.jboss.netty.handler.codec.http.HttpMessage;
 
 import com.apifest.api.BasicFilter;
@@ -28,9 +30,11 @@ import com.apifest.api.BasicFilter;
 public abstract class ResponseListener {
 
     private BasicFilter filter = null;
+    private Map<String, String> errors = null;
 
-    public ResponseListener(BasicFilter filter) {
+    public ResponseListener(BasicFilter filter, Map<String, String> errors) {
         this.filter = filter;
+        this.errors = errors;
     }
 
     /**
@@ -43,4 +47,9 @@ public abstract class ResponseListener {
     public BasicFilter getFilter() {
         return filter;
     }
+
+    public String getErrorMessage(int statusCode) {
+        return errors.get(String.valueOf(statusCode));
+    }
+
 }

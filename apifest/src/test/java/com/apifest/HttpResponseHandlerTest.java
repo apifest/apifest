@@ -23,6 +23,8 @@ import static org.mockito.Mockito.spy;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 
+import java.util.Map;
+
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.MessageEvent;
@@ -47,18 +49,11 @@ public class HttpResponseHandlerTest {
     MessageEvent e;
 
     @BeforeMethod
-    public void setup() {
+    public void setup() throws Exception {
         handler = spy(new HttpResponseHandler());
         handler.log = mock(Logger.class);
         ctx = mock(ChannelHandlerContext.class);
         e = mock(MessageEvent.class);
-
-        Channel channel = mock(Channel.class);
-        doReturn(channel).when(ctx).getChannel();
-        doReturn(null).when(channel).close();
-        ResponseListener listener = mock(ResponseListener.class);
-        doReturn(listener).when(ctx).getAttachment();
-        doNothing().when(listener).responseReceived(response);
 
         String path = getClass().getClassLoader().getResource("test_mapping.xml").getPath();
         ServerConfig.mappingsPath = path.replace("/test_mapping.xml", "");
@@ -68,6 +63,19 @@ public class HttpResponseHandlerTest {
         @SuppressWarnings("unchecked")
         IMap<String, com.apifest.MappingConfig> map = mock(IMap.class);
         doReturn(map).when(HazelcastConfigInstance.configInstance).getMappingConfigs();
+
+        MappingConfigLoader.load(false);
+
+        Channel channel = mock(Channel.class);
+        doReturn(channel).when(ctx).getChannel();
+        doReturn(null).when(channel).close();
+        ResponseListener listener = mock(ResponseListener.class);
+        Map<String, String> errors = MappingConfigLoader.getConfig().get(0).getErrors();
+        for (String status : errors.keySet()) {
+            doReturn(errors.get(status)).when(listener).getErrorMessage(Integer.valueOf(status));
+        }
+        doReturn(listener).when(ctx).getAttachment();
+        doNothing().when(listener).responseReceived(response);
     }
 
     @Test
@@ -75,7 +83,6 @@ public class HttpResponseHandlerTest {
         // GIVEN
         response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
         doReturn(response).when(e).getMessage();
-        MappingConfigLoader.load(false);
 
         // WHEN
         handler.messageReceived(ctx, e);
@@ -90,8 +97,6 @@ public class HttpResponseHandlerTest {
         response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
         doReturn(response).when(e).getMessage();
 
-        MappingConfigLoader.load(false);
-
         // WHEN
         handler.messageReceived(ctx, e);
 
@@ -105,8 +110,6 @@ public class HttpResponseHandlerTest {
         response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
         doReturn(response).when(e).getMessage();
 
-        MappingConfigLoader.load(false);
-
         // WHEN
         handler.messageReceived(ctx, e);
 
@@ -119,8 +122,6 @@ public class HttpResponseHandlerTest {
         // GIVEN
         response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.MULTIPLE_CHOICES);
         doReturn(response).when(e).getMessage();
-
-        MappingConfigLoader.load(false);
 
         // WHEN
         handler.messageReceived(ctx, e);
