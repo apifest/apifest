@@ -122,12 +122,11 @@ The ApiFest Mapping Server will get all mappings files from the directory define
 
 * **Setup Global errors**
 
-The ApiFest Mapping Server enables you to customize the error responses that are not related to a specific mapping configuration. For instance, when there is
-no mapping for a resource the default ApiFest Mapping Server response is:
+The ApiFest Mapping Server enables you to customize the error responses that are not related to a specific mapping configuration. 
+For instance, when there is no mapping for a resource the default ApiFest Mapping Server response for 404 Status Code will be returned:
+
 Status Code HTTP 404
-
 Content-Type application/json
-
 {"error":"Not found"}
 
 You can customize the content of that response using an XML file that describes your custom global errors.
@@ -138,6 +137,7 @@ Here is an example file:
   <error status="401" message='{"error":"unauthorized"}'/>
   <error status="404" message='{"error":"resource not found"}'/>
 </global-errors>
+Using that customization, the response content when a resource is not mapped will be '{"error":"resource not found"}'.
 ```
 In order to use that configuration file in ApiFest Mapping Server, you should set the path to that file in apifest.properties file as
 
