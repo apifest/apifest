@@ -137,9 +137,9 @@ Here is an example file:
   <error status="401" message='{"error":"unauthorized"}'/>
   <error status="404" message='{"error":"resource not found"}'/>
 </global-errors>
-Using that customization, the response content when a resource is not mapped will be '{"error":"resource not found"}'.
 ```
-In order to use that configuration file in ApiFest Mapping Server, you should set the path to that file in apifest.properties file as
+Using that customization, the response content when a resource is not mapped will be '{"error":"resource not found"}'.
+In order to setup errors customization in ApiFest Mapping Server, you should set the path to the configuration file in apifest.properties file as
 
 ***apifest.global-errors***
 
