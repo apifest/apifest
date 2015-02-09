@@ -34,6 +34,7 @@ import javax.xml.bind.Unmarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.apifest.api.GlobalErrors;
 import com.apifest.api.Mapping;
 import com.apifest.api.Mapping.Backend;
 import com.apifest.api.MappingAction;
@@ -41,17 +42,16 @@ import com.apifest.api.MappingEndpoint;
 import com.apifest.api.MappingError;
 import com.apifest.api.MappingException;
 import com.apifest.api.ResponseFilter;
-import com.apifest.LifecycleEventHandlers;
 import com.hazelcast.core.IMap;
 
 /**
- * Loads/reloads all mapping configurations.
+ * Loads/reloads all mapping and global errors configurations.
  *
  * @author Rossitsa Borissova
  */
-public final class MappingConfigLoader {
+public final class ConfigLoader {
 
-    private static Logger log = LoggerFactory.getLogger(MappingConfigLoader.class);
+    private static Logger log = LoggerFactory.getLogger(ConfigLoader.class);
     private static final String END = "$";
 
     private static final String VAR_NAME_FORMAT = "{%s}";
@@ -59,9 +59,10 @@ public final class MappingConfigLoader {
 
     protected static URLClassLoader jarClassLoader;
 
-    private static Map<String, MappingConfig> localConfigMap = new HashMap<String, MappingConfig>();
+    private static Map<String, MappingConfig> localMappingConfigMap = new HashMap<String, MappingConfig>();
+    private static Map<Integer, String> localGlobalErrorsMap = new HashMap<Integer, String>();
 
-    private MappingConfigLoader() {
+    private ConfigLoader() {
     }
 
     protected static void load(boolean reload) throws MappingException {
@@ -71,7 +72,7 @@ public final class MappingConfigLoader {
         }
         Map<String, MappingConfig> local = new HashMap<String, MappingConfig>();
         try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(Mapping.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(Mapping.class, GlobalErrors.class);
             Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
             File configPath = new File(mappingFileDir);
             if (configPath.isDirectory()) {
@@ -82,7 +83,6 @@ public final class MappingConfigLoader {
                         continue;
                     }
                     //REVISIT: first, check whether the mapping is valid against the schema
-
                     MappingConfig config = new MappingConfig();
                     Mapping mappings = (Mapping) unmarshaller.unmarshal(mappingFile);
 
@@ -126,11 +126,13 @@ public final class MappingConfigLoader {
                 } else {
                     local.putAll(map);
                 }
-                localConfigMap = local;
+                localMappingConfigMap = local;
             } else {
                 log.error("Cannot load mapping configuration from directory {}", mappingFileDir);
                 throw new MappingException("Cannot load mapping configuration from directory " + mappingFileDir);
             }
+
+            loadGlobalErrorsConfig(reload, unmarshaller);
         } catch (JAXBException e) {
             log.error("Cannot load mapping configuration, directory {}", mappingFileDir);
             String errorMessage = e.getMessage();
@@ -138,6 +140,39 @@ public final class MappingConfigLoader {
                 errorMessage = e.getLinkedException().getMessage();
             }
             throw new MappingException(errorMessage, e);
+        }
+    }
+
+    protected static void loadGlobalErrorsConfig(boolean reload, Unmarshaller unmarshaller) throws JAXBException, MappingException {
+        String globalErrorsFile = ServerConfig.getGlobalErrorsFile();
+        if (globalErrorsFile != null && !globalErrorsFile.isEmpty()) {
+            File errorsFile = new File(globalErrorsFile);
+            Map<Integer, String> errors = new HashMap<Integer, String>();
+            if (errorsFile.isFile() && errorsFile.getName().endsWith(".xml")) {
+                //REVISIT: first, check whether the file is valid against the schema
+                GlobalErrors globalErrors = (GlobalErrors) unmarshaller.unmarshal(errorsFile);
+
+                for (MappingError error : globalErrors.getErrors()) {
+                    errors.put(Integer.valueOf(error.getStatus()), error.getMessage());
+                }
+
+                IMap<Integer, String> errorsMap = getHazelcastErrorsConfig();
+                if (reload) {
+                    //clear all keys one by one in order to fire events in Hazelcast
+                    for (Integer key : errorsMap.keySet()) {
+                        errorsMap.remove(key);
+                    }
+                }
+                if (errors.size() > 0) {
+                    errorsMap.putAll(errors);
+                } else {
+                    errors.putAll(errorsMap);
+                }
+                localGlobalErrorsMap = errors;
+            } else {
+                log.error("Cannot load errors configuration from directory {}", globalErrorsFile);
+                throw new MappingException("Cannot load errors configuration from directory " + globalErrorsFile);
+            }
         }
     }
 
@@ -218,7 +253,7 @@ public final class MappingConfigLoader {
         if (ServerConfig.getCustomJarPath() != null) {
             File file = new File(ServerConfig.getCustomJarPath());
             URL jarfile = file.toURI().toURL();
-            jarClassLoader = URLClassLoader.newInstance(new URL[] { jarfile }, MappingConfigLoader.class.getClassLoader());
+            jarClassLoader = URLClassLoader.newInstance(new URL[] { jarfile }, ConfigLoader.class.getClassLoader());
             created = true;
         }
         return created;
@@ -237,7 +272,7 @@ public final class MappingConfigLoader {
     }
 
     public static List<MappingConfig> getConfig() {
-        return new ArrayList<MappingConfig>(localConfigMap.values());
+        return new ArrayList<MappingConfig>(localMappingConfigMap.values());
     }
 
     private static Map<String, String> getActionsMap(Mapping configs) {
@@ -312,10 +347,6 @@ public final class MappingConfigLoader {
         return HazelcastConfigInstance.instance().getMappingConfigs();
     }
 
-    protected static Map<String, MappingConfig> getLocalConfig() {
-        return localConfigMap;
-    }
-
     /**
      * Reads mappings config from Hazelcast Distributed Map.
      */
@@ -325,14 +356,14 @@ public final class MappingConfigLoader {
         } catch (MappingException e) {
             log.error("check custom.jar is the consistent on each running instance", e);
         }
-        localConfigMap.put(name, value);
+        localMappingConfigMap.put(name, value);
     }
 
     /**
      * Removes mapping config.
      */
     public static void removeMapping(String name) {
-        localConfigMap.remove(name);
+        localMappingConfigMap.remove(name);
     }
 
     private static void reloadCustomClasses(MappingConfig config) throws MappingException {
@@ -347,7 +378,7 @@ public final class MappingConfigLoader {
     }
 
     /**
-     * Reloads all mapping configs.
+     * Reloads all mapping and errors configs.
      * @throws MappingException
      */
     public static void reloadConfigs() throws MappingException {
@@ -360,6 +391,23 @@ public final class MappingConfigLoader {
      * @return {@link Map} of all current mappings
      */
     public static Map<String, MappingConfig> getLoadedMappings() {
-        return localConfigMap;
+        return localMappingConfigMap;
     }
+
+    public static Map<Integer, String> getLoadedGlobalErrors() {
+        return localGlobalErrorsMap;
+    }
+
+    public static void updateError(Integer status, String message) {
+        localGlobalErrorsMap.put(status, message);
+    }
+
+    public static void removeError(Integer status) {
+        localGlobalErrorsMap.remove(status);
+    }
+
+    protected static IMap<Integer, String> getHazelcastErrorsConfig() {
+        return HazelcastConfigInstance.instance().getGlobalErrors();
+    }
+
 }

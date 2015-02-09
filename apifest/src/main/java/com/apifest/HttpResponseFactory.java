@@ -44,6 +44,13 @@ public class HttpResponseFactory {
     public static HttpResponse createISEResponse() {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
+        String errorMessage = ConfigLoader.getLoadedGlobalErrors().get(HttpResponseStatus.INTERNAL_SERVER_ERROR.getCode());
+        if (errorMessage == null) {
+            errorMessage = "";
+        }
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(errorMessage.getBytes(CharsetUtil.UTF_8));
+        response.setContent(buf);
+        response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         return response;
     }
 
@@ -57,7 +64,11 @@ public class HttpResponseFactory {
     public static HttpResponse createUnauthorizedResponse(String message) {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes(CharsetUtil.UTF_8));
+        String errorMessage = ConfigLoader.getLoadedGlobalErrors().get(HttpResponseStatus.UNAUTHORIZED.getCode());
+        if (errorMessage == null) {
+            errorMessage = message;
+        }
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(errorMessage.getBytes(CharsetUtil.UTF_8));
         response.setContent(buf);
         response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         return response;
@@ -71,7 +82,12 @@ public class HttpResponseFactory {
     public static HttpResponse createNotFoundResponse() {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(NOT_FOUND_CONTENT.getBytes(CharsetUtil.UTF_8));
+
+        String errorMessage = ConfigLoader.getLoadedGlobalErrors().get(HttpResponseStatus.NOT_FOUND.getCode());
+        if (errorMessage == null) {
+            errorMessage = HttpResponseFactory.NOT_FOUND_CONTENT;
+        }
+        ChannelBuffer buf = ChannelBuffers.copiedBuffer(errorMessage.getBytes(CharsetUtil.UTF_8));
         response.setContent(buf);
         response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         return response;

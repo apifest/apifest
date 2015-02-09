@@ -157,7 +157,7 @@ public class MappingConfig implements Serializable {
         Class<?> clazz;
         try {
             // load class from custom jar
-            clazz = MappingConfigLoader.loadCustomClass(actionClass);
+            clazz = ConfigLoader.loadCustomClass(actionClass);
         } catch (ClassNotFoundException e) {
             try {
                 clazz = Class.forName(actionClass);
@@ -195,7 +195,7 @@ public class MappingConfig implements Serializable {
         Class<?> clazz;
         try {
             // load class from custom jar
-            clazz = MappingConfigLoader.loadCustomClass(filterClass);
+            clazz = ConfigLoader.loadCustomClass(filterClass);
         } catch (ClassNotFoundException e) {
             try {
                 clazz = Class.forName(filterClass);

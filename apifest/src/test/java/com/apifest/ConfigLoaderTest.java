@@ -54,7 +54,7 @@ import com.hazelcast.core.IMap;
 /**
  * @author Rossitsa Borissova
  */
-public class MappingConfigLoaderTest {
+public class ConfigLoaderTest {
 
     @BeforeTest
     public void setup() throws Exception {
@@ -83,10 +83,10 @@ public class MappingConfigLoaderTest {
     public void when_load_read_mapping() throws Exception {
 
         // WHEN
-        MappingConfigLoader.load(false);
+        ConfigLoader.load(false);
 
         // THEN
-        List<MappingConfig> config = MappingConfigLoader.getConfig();
+        List<MappingConfig> config = ConfigLoader.getConfig();
         Map<String, String> actions = config.get(0).getActions();
         assertEquals(actions.get("ReplaceCustomerId"), "com.apifest.example.ReplaceCustomerIdAction");
         assertEquals(actions.get("AddSenderIdInBody"), "com.apifest.example.AddSenderIdInBody");
@@ -113,17 +113,17 @@ public class MappingConfigLoaderTest {
     @Test
     public void when_actionClassname_is_null_get_className_from_actions_config() throws Exception {
         // GIVEN
-        MappingConfigLoader.load(false);
+        ConfigLoader.load(false);
         MappingAction mappingAction = new MappingAction();
         mappingAction.setName("ReplaceCustomerId");
         MappingEndpoint endpoint = new MappingEndpoint();
         endpoint.setAction(mappingAction);
 
-        MappingConfigLoader.jarClassLoader = mock(URLClassLoader.class);
-        doReturn(ReplaceCustomerIdAction.class).when(MappingConfigLoader.jarClassLoader).loadClass(ReplaceCustomerIdAction.class.getCanonicalName());
+        ConfigLoader.jarClassLoader = mock(URLClassLoader.class);
+        doReturn(ReplaceCustomerIdAction.class).when(ConfigLoader.jarClassLoader).loadClass(ReplaceCustomerIdAction.class.getCanonicalName());
 
         // WHEN
-        BasicAction action = MappingConfigLoader.getConfig().get(0).getAction(mappingAction);
+        BasicAction action = ConfigLoader.getConfig().get(0).getAction(mappingAction);
 
         // THEN
         assertTrue(action instanceof ReplaceCustomerIdAction);
@@ -139,7 +139,7 @@ public class MappingConfigLoaderTest {
         endpoint.setVarName("paymentId");
 
         // WHEN
-        Pattern p = MappingConfigLoader.constructPattern(endpoint);
+        Pattern p = ConfigLoader.constructPattern(endpoint);
 
         // THEN
         assertEquals(p.toString(), "/v0.1/payments/(\\d*)$");
@@ -155,7 +155,7 @@ public class MappingConfigLoaderTest {
         endpoint.setVarName("paymentId");
 
         // WHEN
-        Pattern p = MappingConfigLoader.constructPattern(endpoint);
+        Pattern p = ConfigLoader.constructPattern(endpoint);
 
         // THEN
         assertEquals(p.toString(), "/v0.1/payments/(\\d*)/info");
@@ -164,10 +164,10 @@ public class MappingConfigLoaderTest {
     @Test
     public void when_endpoint_contains_RE_return_it_from_RE_mappings() throws Exception {
         // GIVEN
-        MappingConfigLoader.load(false);
+        ConfigLoader.load(false);
 
         // WHEN
-        MappingEndpoint endpoint = MappingConfigLoader.getConfig().get(0).getMappingEndpoint("/v0.1/payments/12345", "GET");
+        MappingEndpoint endpoint = ConfigLoader.getConfig().get(0).getMappingEndpoint("/v0.1/payments/12345", "GET");
 
         // THEN
         assertEquals(endpoint.getInternalEndpoint(), "/payments/12345");
@@ -176,10 +176,10 @@ public class MappingConfigLoaderTest {
     @Test
     public void when_mapping_list_contains_method_and_uri_return_that_mapping_endpoint() throws Exception {
         // GIVEN
-        MappingConfigLoader.load(false);
+        ConfigLoader.load(false);
 
         // WHEN
-        MappingEndpoint meEndpoint = MappingConfigLoader.getConfig().get(0).getMappingEndpoint("/v0.1/me", "GET");
+        MappingEndpoint meEndpoint = ConfigLoader.getConfig().get(0).getMappingEndpoint("/v0.1/me", "GET");
 
         // THEN
         assertEquals(meEndpoint.getExternalEndpoint(), "/v0.1/me");
@@ -189,16 +189,16 @@ public class MappingConfigLoaderTest {
     @Test
     public void when_action_class_is_not_null_do_not_invoke_getAction_from_actions_map() throws Exception {
         // GIVEN
-        MappingConfigLoader.load(false);
+        ConfigLoader.load(false);
         MappingAction action = new MappingAction();
         action.setName("testAction");
         action.setActionClassName("com.apifest.example.AddSenderIdInBodyAction");
 
-        MappingConfigLoader.jarClassLoader = mock(URLClassLoader.class);
-        doReturn(AddSenderIdInBodyAction.class).when(MappingConfigLoader.jarClassLoader).loadClass(action.getActionClassName());
+        ConfigLoader.jarClassLoader = mock(URLClassLoader.class);
+        doReturn(AddSenderIdInBodyAction.class).when(ConfigLoader.jarClassLoader).loadClass(action.getActionClassName());
 
         // WHEN
-        BasicAction actionClass = MappingConfigLoader.getConfig().get(0).getAction(action);
+        BasicAction actionClass = ConfigLoader.getConfig().get(0).getAction(action);
 
         // THEN
         assertTrue(actionClass instanceof AddSenderIdInBodyAction);
@@ -207,10 +207,10 @@ public class MappingConfigLoaderTest {
     @Test
     public void when_endpoint_contains_two_variables_replace_them_all() throws Exception {
         // GIVEN
-        MappingConfigLoader.load(false);
+        ConfigLoader.load(false);
 
         // WHEN
-        MappingEndpoint endpoint = MappingConfigLoader.getConfig().get(0).getMappingEndpoint("/v0.1/contacts/mobile/support", "GET");
+        MappingEndpoint endpoint = ConfigLoader.getConfig().get(0).getMappingEndpoint("/v0.1/contacts/mobile/support", "GET");
 
         // THEN
         assertEquals(endpoint.getInternalEndpoint(), "/contacts/mobile/support");
@@ -219,12 +219,12 @@ public class MappingConfigLoaderTest {
     @Test
     public void when_no_custom_jar_do_not_load_custom_class_and_throw_exception() throws Exception {
         // GIVEN
-        MappingConfigLoader.jarClassLoader = null;
+        ConfigLoader.jarClassLoader = null;
 
         // WHEN
         String errorMsg = null;
         try {
-            MappingConfigLoader.loadCustomClass(AddSenderIdInBodyAction.class.getCanonicalName());
+            ConfigLoader.loadCustomClass(AddSenderIdInBodyAction.class.getCanonicalName());
         } catch (MappingException e) {
             errorMsg = e.getMessage();
         }

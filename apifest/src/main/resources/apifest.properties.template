@@ -1,6 +1,7 @@
 apifest.host=
 apifest.port=
 apifest.mappings=
+apifest.global-errors=
 token.validate.host=
 token.validate.port=
 connect.timeout=

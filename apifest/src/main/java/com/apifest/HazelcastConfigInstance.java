@@ -56,7 +56,8 @@ public class HazelcastConfigInstance {
     private HazelcastInstance hzInstance;
     protected static HazelcastConfigInstance configInstance; // NOSONAR, used to mock in unit tests
 
-    private static final String HZ_MAP_NAME = "mappings";
+    private static final String HZ_MAPPINGS_MAP_NAME = "mappings";
+    private static final String HZ_ERRORS_MAP_NAME = "errors";
     private static final int MAX_POOL_SIZE = 64;
 
     private HazelcastConfigInstance() {
@@ -67,9 +68,13 @@ public class HazelcastConfigInstance {
         cfg.setGroupConfig(new GroupConfig("apifest-map", ServerConfig.getHazelcastPassword()));
         hzInstance = Hazelcast.newHazelcastInstance(cfg);
         log.debug("Hazelcast instance created");
-        ConfigChangeListener listener = new ConfigChangeListener();
-        IMap<String, MappingConfig> map = hzInstance.getMap(HZ_MAP_NAME);
-        map.addEntryListener(listener, true);
+        MappingConfigChangeListener listener = new MappingConfigChangeListener();
+        IMap<String, MappingConfig> mappingMap = hzInstance.getMap(HZ_MAPPINGS_MAP_NAME);
+        mappingMap.addEntryListener(listener, true);
+
+        ErrorsConfigChangeListener errorsListener = new ErrorsConfigChangeListener();
+        IMap<Integer, String> errorsMap = hzInstance.getMap(HZ_ERRORS_MAP_NAME);
+        errorsMap.addEntryListener(errorsListener, true);
     }
 
     public static HazelcastConfigInstance instance() {
@@ -81,13 +86,20 @@ public class HazelcastConfigInstance {
     }
 
     public IMap<String, com.apifest.MappingConfig> getMappingConfigs() {
-        return hzInstance.getMap(HZ_MAP_NAME);
+        return hzInstance.getMap(HZ_MAPPINGS_MAP_NAME);
+    }
+
+    public IMap<Integer, String> getGlobalErrors() {
+        return hzInstance.getMap(HZ_ERRORS_MAP_NAME);
     }
 
     protected Config createConfiguration() {
         Config config = new Config();
-        Map<String, MapConfig> mapCfg = createMapConfigs();
-        config.setMapConfigs(mapCfg);
+        Map<String, MapConfig> mappingMapCfg = createMapConfig(HZ_MAPPINGS_MAP_NAME);
+        config.setMapConfigs(mappingMapCfg);
+
+        Map<String, MapConfig> errorsMapCfg = createMapConfig(HZ_ERRORS_MAP_NAME);
+        config.setMapConfigs(errorsMapCfg);
 
         NetworkConfig networkCfg = createNetworkConfigs();
         config.setNetworkConfig(networkCfg);
@@ -141,8 +153,8 @@ public class HazelcastConfigInstance {
         return nodes;
     }
 
-    private Map<String, MapConfig> createMapConfigs() {
-        MapConfig mapConfig = new MapConfig(HZ_MAP_NAME);
+    private Map<String, MapConfig> createMapConfig(String mapName) {
+        MapConfig mapConfig = new MapConfig(mapName);
         mapConfig.setInMemoryFormat(InMemoryFormat.BINARY);
         mapConfig.setBackupCount(1);
         mapConfig.setAsyncBackupCount(0);

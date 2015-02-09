@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<global-errors>
+    <error status="401" message='{"error":"custom unauthorized response"}'/>
+    <error status="404" message='{"error":"custom resource not found"}'/>
+    <error status="500" message='{"error":"custom ISE response"}'/>
+</global-errors>

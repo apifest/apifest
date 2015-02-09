@@ -57,6 +57,7 @@ public class HttpResponseHandlerTest {
 
         String path = getClass().getClassLoader().getResource("test_mapping.xml").getPath();
         ServerConfig.mappingsPath = path.replace("/test_mapping.xml", "");
+        ServerConfig.globalErrors = null;
 
         HazelcastConfigInstance.configInstance = mock(HazelcastConfigInstance.class);
 
@@ -64,13 +65,13 @@ public class HttpResponseHandlerTest {
         IMap<String, com.apifest.MappingConfig> map = mock(IMap.class);
         doReturn(map).when(HazelcastConfigInstance.configInstance).getMappingConfigs();
 
-        MappingConfigLoader.load(false);
+        ConfigLoader.load(false);
 
         Channel channel = mock(Channel.class);
         doReturn(channel).when(ctx).getChannel();
         doReturn(null).when(channel).close();
         ResponseListener listener = mock(ResponseListener.class);
-        Map<String, String> errors = MappingConfigLoader.getConfig().get(0).getErrors();
+        Map<String, String> errors = ConfigLoader.getConfig().get(0).getErrors();
         for (String status : errors.keySet()) {
             doReturn(errors.get(status)).when(listener).getErrorMessage(Integer.valueOf(status));
         }
@@ -136,7 +137,7 @@ public class HttpResponseHandlerTest {
         response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.CREATED);
         doReturn(response).when(e).getMessage();
 
-        MappingConfigLoader.load(false);
+        ConfigLoader.load(false);
 
         // WHEN
         handler.messageReceived(ctx, e);
