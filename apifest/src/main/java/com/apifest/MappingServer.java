@@ -53,7 +53,7 @@ public final class MappingServer {
             System.exit(1);
         }
 
-        if (ServerConfig.getCustomJarPath() != null && ServerConfig.getCustomJarPath().length() > 0) {
+        if (ServerConfig.getCustomJarPath() != null && !ServerConfig.getCustomJarPath().isEmpty()) {
             try {
                 ConfigLoader.loadCustomHandlers();
             } catch (MappingException e) {
@@ -85,11 +85,22 @@ public final class MappingServer {
 
         bootstrap.bind(new InetSocketAddress(ServerConfig.getHost(), ServerConfig.getPort()));
 
-        try {
-            ConfigLoader.load(false);
-        } catch (MappingException e) {
-            log.error("Cannot load mappings", e);
-            System.exit(1);
+        if (ServerConfig.getMappingsPath() != null && !ServerConfig.getMappingsPath().isEmpty()) {
+            try {
+                ConfigLoader.loadMappingsConfig(false);
+            } catch (MappingException e) {
+                log.error("Cannot load mappings config", e);
+                System.exit(1);
+            }
+        }
+
+        if (ServerConfig.getGlobalErrorsFile() != null && !ServerConfig.getGlobalErrorsFile().isEmpty()) {
+            try {
+                ConfigLoader.loadGlobalErrorsConfig(false);
+            } catch (MappingException e) {
+                log.error("Cannot load global errors config", e);
+                System.exit(1);
+            }
         }
         log.info("ApiFest Mapping Server started at " + ServerConfig.getHost() + ":" + ServerConfig.getPort());
     }
@@ -101,7 +112,7 @@ public final class MappingServer {
         try {
             ServerConfig.readProperties();
         } catch (NumberFormatException e) {
-            log.error("Property values not valid");
+            log.error("Property value not valid", e);
             return false;
         } catch (IOException e) {
             log.error("Cannot load properties file");

@@ -65,7 +65,7 @@ public class HttpResponseHandlerTest {
         IMap<String, com.apifest.MappingConfig> map = mock(IMap.class);
         doReturn(map).when(HazelcastConfigInstance.configInstance).getMappingConfigs();
 
-        ConfigLoader.load(false);
+        ConfigLoader.loadMappingsConfig(false);
 
         Channel channel = mock(Channel.class);
         doReturn(channel).when(ctx).getChannel();
@@ -137,7 +137,7 @@ public class HttpResponseHandlerTest {
         response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.CREATED);
         doReturn(response).when(e).getMessage();
 
-        ConfigLoader.load(false);
+        ConfigLoader.loadMappingsConfig(false);
 
         // WHEN
         handler.messageReceived(ctx, e);

@@ -188,8 +188,13 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                     };
 
                     channel.getPipeline().getContext("handler").setAttachment(validatorListener);
-                    HttpRequest validateReq = createTokenValidateRequest(accessToken);
-                    client.sendValidation(validateReq, ServerConfig.tokenValidateHost, ServerConfig.tokenValidatePort, validatorListener);
+                    if (ServerConfig.tokenValidateHost == null || ServerConfig.tokenValidateHost.isEmpty() || ServerConfig.tokenValidatePort == null) {
+                        log.error("token.validation.host and token.validation.port properties are not set. Cannot validate access token.");
+                        writeResponseToChannel(channel, request, HttpResponseFactory.createUnauthorizedResponse(INVALID_ACCESS_TOKEN));
+                    } else {
+                        HttpRequest validateReq = createTokenValidateRequest(accessToken);
+                        client.sendValidation(validateReq, ServerConfig.tokenValidateHost, ServerConfig.tokenValidatePort, validatorListener);
+                    }
                 } else {
                     try {
                         BasicFilter filter = getMappingFilter(mapping, config, channel);
@@ -312,7 +317,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         future.addListener(ChannelFutureListener.CLOSE);
     }
 
-    private void getLoadedGlobalErrors(Channel channel) {
+    protected void getLoadedGlobalErrors(Channel channel) {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "application/json");
         Map<Integer, String> mappings = ConfigLoader.getLoadedGlobalErrors();

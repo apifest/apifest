@@ -116,7 +116,7 @@ public final class MappingClient {
         });
     }
 
-    public void sendValidation(final HttpRequest request, String host, int port, final TokenValidationListener validatorListener) {
+    public void sendValidation(final HttpRequest request, String host, Integer port, final TokenValidationListener validatorListener) {
         ChannelFuture future = bootstrap.connect(new InetSocketAddress(host, port));
         future.addListener(new ChannelFutureListener() {
             @Override
