@@ -55,7 +55,7 @@ public final class MappingServer {
 
         if (ServerConfig.getCustomJarPath() != null && ServerConfig.getCustomJarPath().length() > 0) {
             try {
-                MappingConfigLoader.loadCustomHandlers();
+                ConfigLoader.loadCustomHandlers();
             } catch (MappingException e) {
                 log.error("Cannot load custom jar", e);
                 System.exit(1);
@@ -86,7 +86,7 @@ public final class MappingServer {
         bootstrap.bind(new InetSocketAddress(ServerConfig.getHost(), ServerConfig.getPort()));
 
         try {
-            MappingConfigLoader.load(false);
+            ConfigLoader.load(false);
         } catch (MappingException e) {
             log.error("Cannot load mappings", e);
             System.exit(1);

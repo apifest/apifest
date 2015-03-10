@@ -43,6 +43,7 @@ public final class ServerConfig {
     protected static String customJarPath;
     protected static String apifestNodes;
     protected static String hazelcastPassword;
+    protected static String globalErrors;
 
     private ServerConfig() {
     }
@@ -81,6 +82,7 @@ public final class ServerConfig {
         host = props.getProperty("apifest.host", "localhost");
         port = Integer.valueOf(props.getProperty("apifest.port", "8080"));
         mappingsPath = props.getProperty("apifest.mappings");
+        globalErrors = props.getProperty("apifest.global-errors");
 
         tokenValidateHost = props.getProperty("token.validate.host");
         if (tokenValidateHost == null || tokenValidateHost.isEmpty()) {
@@ -130,4 +132,9 @@ public final class ServerConfig {
     public static String getHazelcastPassword() {
         return hazelcastPassword;
     }
+
+    public static String getGlobalErrorsFile() {
+        return globalErrors;
+    }
+
 }

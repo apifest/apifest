@@ -43,18 +43,12 @@ public class HttpResponseHandler extends SimpleChannelUpstreamHandler {
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
         HttpResponse response = null;
+        Integer statusCode = null;
         if(e.getMessage() instanceof HttpResponse){
             response = (HttpResponse) e.getMessage();
-            int statusCode = response.getStatus().getCode();
-            // TODO: check error response for version
-            if (statusCode >= HTTP_STATUS_300 && (MappingConfigLoader.getConfig().get(0).getErrorMessage(statusCode) != null)) {
-                String content = MappingConfigLoader.getConfig().get(0).getErrorMessage(statusCode);
-                if (content != null) {
-                    response.setContent(ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8)));
-                    response.headers().add(HttpHeaders.Names.CONTENT_LENGTH, content.getBytes(CharsetUtil.UTF_8).length);
-                }
-            }
+            statusCode = response.getStatus().getCode();
         }
+
         Channel channel = ctx.getChannel();
         channel.close();
         if(ctx.getAttachment() instanceof TokenValidationListener) {
@@ -62,6 +56,15 @@ public class HttpResponseHandler extends SimpleChannelUpstreamHandler {
             listener.responseReceived(response);
         } else {
             ResponseListener listener = (ResponseListener) ctx.getAttachment();
+            // check listener errors map
+            if (statusCode != null && statusCode >= HTTP_STATUS_300 && (listener.getErrorMessage(statusCode) != null)) {
+                String content = listener.getErrorMessage(statusCode);
+                if (content != null) {
+                    response.headers().set(HttpHeaders.Names.CONTENT_TYPE, HttpResponseFactory.APPLICATION_JSON);
+                    response.setContent(ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8)));
+                    response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, content.getBytes(CharsetUtil.UTF_8).length);
+                }
+            }
             listener.responseReceived(response);
         }
     }

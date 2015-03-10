@@ -25,9 +25,9 @@ import com.hazelcast.core.EntryListener;
 /**
  * @author Rossitsa Borissova
  */
-public class ConfigChangeListener implements EntryListener<String, MappingConfig> {
+public class MappingConfigChangeListener implements EntryListener<String, MappingConfig> {
 
-    private static Logger log = LoggerFactory.getLogger(ConfigChangeListener.class);
+    private static Logger log = LoggerFactory.getLogger(MappingConfigChangeListener.class);
 
     /*
      * @see com.hazelcast.core.EntryListener#entryAdded(com.hazelcast.core.EntryEvent)
@@ -35,7 +35,7 @@ public class ConfigChangeListener implements EntryListener<String, MappingConfig
     @Override
     public void entryAdded(EntryEvent<String, MappingConfig> event) {
         log.debug("entry added, key {}, value {}", event.getKey(), event.getValue());
-        MappingConfigLoader.updateMapping(event.getKey(), event.getValue());
+        ConfigLoader.updateMapping(event.getKey(), event.getValue());
     }
 
     /*
@@ -44,7 +44,7 @@ public class ConfigChangeListener implements EntryListener<String, MappingConfig
     @Override
     public void entryRemoved(EntryEvent<String, MappingConfig> event) {
         log.debug("entry removed, key {}, value {}", event.getKey(), event.getValue());
-        MappingConfigLoader.removeMapping(event.getKey());
+        ConfigLoader.removeMapping(event.getKey());
     }
 
     /*
@@ -53,7 +53,7 @@ public class ConfigChangeListener implements EntryListener<String, MappingConfig
     @Override
     public void entryUpdated(EntryEvent<String, MappingConfig> event) {
         log.debug("entry updated, key {}, value {}", event.getKey(), event.getValue());
-        MappingConfigLoader.updateMapping(event.getKey(), event.getValue());
+        ConfigLoader.updateMapping(event.getKey(), event.getValue());
     }
 
     /*
@@ -62,7 +62,7 @@ public class ConfigChangeListener implements EntryListener<String, MappingConfig
     @Override
     public void entryEvicted(EntryEvent<String, MappingConfig> event) {
         log.debug("entry evicted, key {}, value {}", event.getKey(), event.getValue());
-        MappingConfigLoader.removeMapping(event.getKey());
+        ConfigLoader.removeMapping(event.getKey());
     }
 
 }

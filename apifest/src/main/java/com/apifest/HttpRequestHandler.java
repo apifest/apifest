@@ -58,6 +58,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
     protected static final String RELOAD_URI = "/apifest-reload";
     protected static final String MAPPINGS_URI = "/apifest-mappings";
+    protected static final String GLOBAL_ERRORS_URI = "/apifest-global-errors";
 
     protected static final String ACCESS_TOKEN_REQUIRED = "{\"error\":\"access token required\"}";
     protected static final String INVALID_ACCESS_TOKEN_SCOPE = "{\"error\":\"access token scope not valid\"}";
@@ -91,7 +92,12 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 return;
             }
 
-            List<MappingConfig> configList = MappingConfigLoader.getConfig();
+            if (GLOBAL_ERRORS_URI.equals(uri) && method.equals(HttpMethod.GET)) {
+                getLoadedGlobalErrors(channel);
+                return;
+            }
+
+            List<MappingConfig> configList = ConfigLoader.getConfig();
             MappingEndpoint mapping = null;
             MappingConfig config = null;
             for (MappingConfig mconfig : configList) {
@@ -127,7 +133,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                         return;
                     }
 
-                    final ResponseListener responseListener = createResponseListener(filter, channel, req);
+                    final ResponseListener responseListener = createResponseListener(filter, config.getErrors(), channel, req);
 
                     final HttpRequest request = req;
                     final MappingEndpoint endpoint = mapping;
@@ -187,7 +193,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 } else {
                     try {
                         BasicFilter filter = getMappingFilter(mapping, config, channel);
-                        ResponseListener responseListener = createResponseListener(filter, channel, req);
+                        ResponseListener responseListener = createResponseListener(filter, config.getErrors(), channel, req);
 
                         channel.getPipeline().getContext("handler").setAttachment(responseListener);
 
@@ -216,8 +222,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         }
     }
 
-    protected ResponseListener createResponseListener(BasicFilter filter, final Channel channel, final HttpRequest request) {
-        ResponseListener responseListener = new ResponseListener(filter) {
+    protected ResponseListener createResponseListener(BasicFilter filter, Map<String, String> errors, final Channel channel, final HttpRequest request) {
+        ResponseListener responseListener = new ResponseListener(filter, errors) {
             @Override
             public void responseReceived(HttpMessage response) {
                 HttpMessage newResponse = response;
@@ -269,7 +275,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     protected void reloadMappingConfig(final Channel channel) {
         HttpResponse response = null;
         try {
-            MappingConfigLoader.reloadConfigs();
+            ConfigLoader.reloadConfigs();
             response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
         } catch (MappingException e) {
             response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
@@ -298,11 +304,23 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     protected void getLoadedMappings(Channel channel) {
         HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "application/json");
-        Map<String, MappingConfig> mappings = MappingConfigLoader.getLoadedMappings();
+        Map<String, MappingConfig> mappings = ConfigLoader.getLoadedMappings();
         Gson gson = new Gson();
         String jsonObj = gson.toJson(mappings);
         response.setContent(ChannelBuffers.copiedBuffer(jsonObj.getBytes(CharsetUtil.UTF_8)));
         ChannelFuture future = channel.write(response);
         future.addListener(ChannelFutureListener.CLOSE);
+    }
+
+    private void getLoadedGlobalErrors(Channel channel) {
+        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "application/json");
+        Map<Integer, String> mappings = ConfigLoader.getLoadedGlobalErrors();
+        Gson gson = new Gson();
+        String jsonObj = gson.toJson(mappings);
+        response.setContent(ChannelBuffers.copiedBuffer(jsonObj.getBytes(CharsetUtil.UTF_8)));
+        ChannelFuture future = channel.write(response);
+        future.addListener(ChannelFutureListener.CLOSE);
+
     }
 }
