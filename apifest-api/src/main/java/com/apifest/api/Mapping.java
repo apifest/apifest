@@ -38,7 +38,7 @@ public class Mapping implements Serializable {
 
     private static final long serialVersionUID = 6087428073230165216L;
 
-    @XmlAttribute(name = "version")
+    @XmlAttribute(name = "version", required = true)
     private String version;
 
     @XmlElement(name = "actions", type = ActionsWrapper.class)
@@ -47,7 +47,7 @@ public class Mapping implements Serializable {
     @XmlElement(name = "filters", type = FiltersWrapper.class)
     private FiltersWrapper filtersWrapper;
 
-    @XmlElement(name = "backend", type = Backend.class)
+    @XmlElement(name = "backend", type = Backend.class, required = true)
     private Backend backend;
 
     @XmlElement(name = "endpoints", type = EndpointsWrapper.class, required = true)
@@ -111,7 +111,7 @@ public class Mapping implements Serializable {
 
         private List<MappingEndpoint> endpoints;
 
-        @XmlElement(name = "endpoint", type = MappingEndpoint.class)
+        @XmlElement(name = "endpoint", type = MappingEndpoint.class, required = true)
         public List<MappingEndpoint> getEndpoints() {
             return endpoints;
         }
@@ -171,7 +171,7 @@ public class Mapping implements Serializable {
             this.backendPort = backendPort;
         }
 
-        @XmlAttribute(name = "host")
+        @XmlAttribute(name = "host", required = true)
         public String getBackendHost() {
             return backendHost;
         }
@@ -180,7 +180,7 @@ public class Mapping implements Serializable {
             this.backendHost = backendHost;
         }
 
-        @XmlAttribute(name = "port")
+        @XmlAttribute(name = "port", required = true)
         public Integer getBackendPort() {
             return backendPort;
         }
@@ -201,7 +201,7 @@ public class Mapping implements Serializable {
             this.errors = errors;
         }
 
-        @XmlElement(name = "error", type = MappingError.class)
+        @XmlElement(name = "error", type = MappingError.class, required = true)
         public List<MappingError> getErrors() {
             return errors;
         }

@@ -80,7 +80,10 @@ public final class ConfigLoader {
                         if (!mappingFile.isFile() || !mappingFile.getName().endsWith(".xml")) {
                             continue;
                         }
-                        //REVISIT: first, check whether the mapping is valid against the schema
+                        // whether the mappings configuration file is valid against the schema
+                        if (!MappingConfigValidator.validate(mappingFile)) {
+                            throw new MappingException("{\"error\":\"mappings configuration file " + mappingFile.getName() + " is not valid against schema\"}");
+                        }
                         MappingConfig config = new MappingConfig();
                         Mapping mappings = (Mapping) unmarshaller.unmarshal(mappingFile);
 
@@ -145,7 +148,10 @@ public final class ConfigLoader {
             Map<Integer, String> errors = new HashMap<Integer, String>();
             if (errorsFile.isFile() && errorsFile.getName().endsWith(".xml")) {
                 try {
-                    //REVISIT: first, check whether the file is valid against the schema
+                    // whether the global errors configuration file is valid against the schema
+                    if (!GlobalErrorsConfigValidator.validate(errorsFile)) {
+                        throw new MappingException("{\"error\":\"global errors configuration file " + errorsFile.getName() + " is not valid against schema\"}");
+                    }
                     JAXBContext jaxbContext = JAXBContext.newInstance(GlobalErrors.class);
                     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
                     GlobalErrors globalErrors = (GlobalErrors) unmarshaller.unmarshal(errorsFile);
@@ -312,7 +318,7 @@ public final class ConfigLoader {
             // construct regular expression
             Pattern p = constructPattern(endpoint);
             MappingPattern pattern = new MappingPattern(p, endpoint.getMethod());
-            if (endpoint.getBackendHost() == null) {
+            if (endpoint.getBackendHost() == null || endpoint.getBackendPort() == null) {
                 endpoint.setBackendHost(backend.getBackendHost());
                 endpoint.setBackendPort(backend.getBackendPort());
             }

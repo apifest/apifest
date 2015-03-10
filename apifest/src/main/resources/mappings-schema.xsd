@@ -28,7 +28,7 @@
 
   <xs:complexType name="endpointsWrapper">
     <xs:sequence>
-      <xs:element name="endpoint" type="endpoint" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="endpoint" type="endpoint" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -74,13 +74,13 @@
 
   <xs:complexType name="backend">
     <xs:sequence/>
-    <xs:attribute name="host" type="xs:string"/>
-    <xs:attribute name="port" type="xs:int"/>
+    <xs:attribute name="host" type="xs:string" use="required"/>
+    <xs:attribute name="port" type="xs:int" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="errorsWrapper">
     <xs:sequence>
-      <xs:element name="error" type="error" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="error" type="error" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -94,10 +94,10 @@
     <xs:sequence>
       <xs:element name="actions" type="actionsWrapper" minOccurs="0"/>
       <xs:element name="filters" type="filtersWrapper" minOccurs="0"/>
-      <xs:element name="backend" type="backend" minOccurs="0"/>
+      <xs:element name="backend" type="backend"/>
       <xs:element name="endpoints" type="endpointsWrapper"/>
       <xs:element name="errors" type="errorsWrapper" minOccurs="0"/>
     </xs:sequence>
-    <xs:attribute name="version" type="xs:string"/>
+    <xs:attribute name="version" type="xs:string" use="required"/>
   </xs:complexType>
 </xs:schema>

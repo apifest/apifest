@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, ApiFest project
+ * Copyright 2015, ApiFest project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.apifest;
 
 import java.io.File;
@@ -31,16 +30,17 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 /**
- * Validates a mapping file against mappings-schema.xsd.
+ * Validates a global errors file against global-errors-schema.xsd.
  *
- * @author Rossitsa Borissova
+ * @author rossitsaborissova
+ *
  */
-public final class MappingConfigValidator {
+public final class GlobalErrorsConfigValidator {
 
-    private static Logger log = LoggerFactory.getLogger(MappingConfigValidator.class);
+    private static Logger log = LoggerFactory.getLogger(GlobalErrorsConfigValidator.class);
     private static volatile Schema schema;
 
-    private MappingConfigValidator() {
+    private GlobalErrorsConfigValidator() {
     }
 
     public static void main(String[] args) {
@@ -50,7 +50,7 @@ public final class MappingConfigValidator {
         } else {
             throw new IllegalArgumentException("ERROR: schema file is not passed as arguments");
         }
-        String mappingFile = System.getProperty("mappings.file");
+        String mappingFile = System.getProperty("global-errors.file");
         if (mappingFile == null) {
             throw new IllegalArgumentException("ERROR: mappings.file property not set");
         } else {
@@ -80,10 +80,10 @@ public final class MappingConfigValidator {
         try {
             if (schema == null) {
                 SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-                xsdFile = ClassLoader.getSystemResourceAsStream("mappings-schema.xsd");
+                xsdFile = ClassLoader.getSystemResourceAsStream("global-errors-schema.xsd");
                 schema = factory.newSchema(new StreamSource(xsdFile));
             }
-        }catch (SAXException e) {
+        } catch (SAXException e) {
             log.error("schema file not valid: {}", e.getMessage());
         } finally {
             if (xsdFile != null) {

@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 public final class ServerConfig {
 
     protected static final Integer DEFAULT_CONNECT_TIMEOUT = 10;
-    protected static final Integer DEFAULT_APIFEST_PORT = 8080;
+    protected static final Integer DEFAULT_APIFEST_PORT = 8181;
     protected static final String DEFAULT_APIFEST_HOST = "localhost";
     protected static final String DEFAULT_HAZELCAST_PASS = "dev-pass";
 

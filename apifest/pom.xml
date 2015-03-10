@@ -144,7 +144,33 @@
                 <configuration>
                   <mainClass>com.apifest.MappingConfigValidator</mainClass>
                   <arguments>
-                    <argument>${basedir}\src\main\resources\schema.xsd</argument>
+                    <argument>${basedir}\src\main\resources\mappings-schema.xsd</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>global-errors-validation</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>1.2.1</version>
+            <executions>
+              <execution>
+                <phase>validate</phase>
+                <goals>
+                  <goal>java</goal>
+                </goals>
+                <configuration>
+                  <mainClass>com.apifest.GlobalErrorsConfigValidator</mainClass>
+                  <arguments>
+                    <argument>${basedir}\src\main\resources\global-errors-schema.xsd</argument>
                   </arguments>
                 </configuration>
               </execution>

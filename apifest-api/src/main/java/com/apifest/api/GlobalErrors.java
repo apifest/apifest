@@ -39,7 +39,7 @@ public class GlobalErrors implements Serializable {
 
     private static final long serialVersionUID = 1429025245719263465L;
 
-    @XmlElement(name = "error", type = MappingError.class)
+    @XmlElement(name = "error", type = MappingError.class, required = true)
     private List<MappingError> errors;
 
     public void setErrors(List<MappingError> errors) {

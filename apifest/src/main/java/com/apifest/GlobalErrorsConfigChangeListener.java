@@ -25,7 +25,7 @@ import com.hazelcast.core.EntryListener;
  * @author Rossitsa Borissova
  *
  */
-public class ErrorsConfigChangeListener implements EntryListener<Integer, String> {
+public class GlobalErrorsConfigChangeListener implements EntryListener<Integer, String> {
 
     private static Logger log = LoggerFactory.getLogger(MappingConfigChangeListener.class);
 
