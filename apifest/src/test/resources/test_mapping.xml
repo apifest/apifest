@@ -25,8 +25,8 @@
     <backend host="127.0.0.1" port="5000"/>
     <endpoints>
         <endpoint external="/v0.1/me" internal="/customer/{customerId}" method="GET">
-            <action name="ReplaceCustomerId"/>
-            <filter name="RemoveBalance" />
+            <action name="ReplaceCustomerId" class="com.apifest.example.ReplaceCustomerIdAction"/>
+            <filter name="RemoveBalance" class="com.apifest.example.RemoveBalanceFilter"/>
         </endpoint>
         <endpoint external="/v0.1/payments/{paymentId}" internal="/payments/{paymentId}" method="GET" varExpression="\d*" varName="paymentId"/>
         <endpoint external="/v0.1/contacts/{type}/{level}" internal="/contacts/{type}/{level}" method="GET" varExpression="phone|mobile|address support|finance|manager" varName="type level"/>

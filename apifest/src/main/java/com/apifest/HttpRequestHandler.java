@@ -237,6 +237,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                         newResponse = getFilter().execute((HttpResponse) response);
                     }
                 }
+                LifecycleEventHandlers.invokeResponseEventHandlers(request, (HttpResponse) newResponse);
                 ChannelFuture future = channel.write(newResponse);
                 if (!HttpHeaders.isKeepAlive(request)) {
                     future.addListener(ChannelFutureListener.CLOSE);
@@ -285,6 +286,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         } catch (MappingException e) {
             response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
             ChannelBuffer content = ChannelBuffers.copiedBuffer(e.getMessage().getBytes(CharsetUtil.UTF_8));
+            response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "application/json");
             response.setContent(content);
         }
         ChannelFuture future = channel.write(response);

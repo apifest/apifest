@@ -72,7 +72,7 @@ public class HazelcastConfigInstance {
         IMap<String, MappingConfig> mappingMap = hzInstance.getMap(HZ_MAPPINGS_MAP_NAME);
         mappingMap.addEntryListener(listener, true);
 
-        ErrorsConfigChangeListener errorsListener = new ErrorsConfigChangeListener();
+        GlobalErrorsConfigChangeListener errorsListener = new GlobalErrorsConfigChangeListener();
         IMap<Integer, String> errorsMap = hzInstance.getMap(HZ_ERRORS_MAP_NAME);
         errorsMap.addEntryListener(errorsListener, true);
     }

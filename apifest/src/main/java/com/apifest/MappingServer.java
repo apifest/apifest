@@ -91,6 +91,9 @@ public final class MappingServer {
             } catch (MappingException e) {
                 log.error("Cannot load mappings config", e);
                 System.exit(1);
+            } catch (NumberFormatException e) {
+                log.error("Cannot load mappings config", e);
+                System.exit(1);
             }
         }
 

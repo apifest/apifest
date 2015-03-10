@@ -44,7 +44,7 @@
 
   <profiles>
     <profile>
-      <id>generate-schema</id>
+      <id>generate-mappings-schema</id>
       <build>
         <plugins>
           <plugin>
@@ -60,7 +60,6 @@
               </execution>
             </executions>
             <configuration>
-              <!-- <project>apifest</project> -->
               <destdir>target/schemas</destdir>
               <srcdir>src/main/java/com/apifest/api</srcdir>
               <includes>
@@ -71,6 +70,57 @@
                 <include>**/MappingEndpoint.java</include>
                 <include>**/MappingError.java</include>
                 <include>**/ResponseFilter.java</include>
+              </includes>
+              <verbose>true</verbose>
+            </configuration>
+            <dependencies>
+              <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>2.2</version>
+              </dependency>
+              <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-xjc</artifactId>
+                <version>2.2</version>
+              </dependency>
+              <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-impl</artifactId>
+                <version>2.2</version>
+              </dependency>
+              <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-xjc</artifactId>
+                <version>2.2</version>
+              </dependency>
+            </dependencies>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>generate-global-errors-schema</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.sun.tools.jxc.maven2</groupId>
+            <artifactId>maven-jaxb-schemagen-plugin</artifactId>
+            <version>1.2</version>
+            <executions>
+              <execution>
+                <phase>generate-resources</phase>
+                <goals>
+                  <goal>generate</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <destdir>target/schemas</destdir>
+              <srcdir>src/main/java/com/apifest/api</srcdir>
+              <includes>
+                <include>**/MappingError.java</include>
+                <include>**/GlobalErrors.java</include>
               </includes>
               <verbose>true</verbose>
             </configuration>

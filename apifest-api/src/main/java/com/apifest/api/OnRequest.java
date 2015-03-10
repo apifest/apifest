@@ -20,7 +20,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Annotation for classes that will be invoked before an access token is issued.
+ * Annotation for classes that will be invoked before a request is handled.
  *
  * @author Rossitsa Borissova
  */
