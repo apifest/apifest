@@ -117,4 +117,23 @@ public class HttpRequestHandlerTest {
         verify(handler).getLoadedMappings(any(Channel.class));
     }
 
+    @Test
+    public void when_apifest_global_errors_invoke_getLoadedGlobalErrors() throws Exception {
+        // GIVEN
+        MessageEvent message = mock(MessageEvent.class);
+        HttpRequest req = mock(HttpRequest.class);
+        doReturn(req).when(message).getMessage();
+        ChannelHandlerContext ctx = mock(ChannelHandlerContext.class);
+        doReturn(ChannelBuffers.EMPTY_BUFFER).when(req).getContent();
+        doReturn(HttpRequestHandler.GLOBAL_ERRORS_URI).when(req).getUri();
+        doReturn(HttpMethod.GET).when(req).getMethod();
+        doNothing().when(handler).getLoadedGlobalErrors(any(Channel.class));
+        doNothing().when(handler).setConnectTimeout(any(Channel.class));
+
+        // WHEN
+        handler.messageReceived(ctx, message);
+
+        // THEN
+        verify(handler).getLoadedGlobalErrors(any(Channel.class));
+    }
 }

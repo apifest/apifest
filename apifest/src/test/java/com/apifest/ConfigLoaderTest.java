@@ -58,19 +58,23 @@ public class ConfigLoaderTest {
 
     @BeforeTest
     public void setup() throws Exception {
-        String hzPath = getClass().getClassLoader().getResource("test_mapping.xml").getPath();
-        ServerConfig.mappingsPath = hzPath.replace("/test_mapping.xml", "");
+        String mappingPath = getClass().getClassLoader().getResource("test_mapping.xml").getPath();
+        ServerConfig.mappingsPath = mappingPath.replace("/test_mapping.xml", "");
+        ServerConfig.globalErrors = getClass().getClassLoader().getResource("global-errors/test_global_errors.xml").getPath();
         ServerConfig.customJarPath = null;
 
         HazelcastConfigInstance.configInstance = mock(HazelcastConfigInstance.class);
 
         @SuppressWarnings("unchecked")
-        IMap<String, com.apifest.MappingConfig> map = mock(IMap.class);
+        IMap<String, com.apifest.MappingConfig> mappingsMap = mock(IMap.class);
 
         MappingConfig config = mock(MappingConfig.class);
         doReturn(mock(BasicAction.class)).when(config).getAction(any(MappingAction.class));
-        map.put("v0.1", config);
-        doReturn(map).when(HazelcastConfigInstance.configInstance).getMappingConfigs();
+        mappingsMap.put("v0.1", config);
+        doReturn(mappingsMap).when(HazelcastConfigInstance.configInstance).getMappingConfigs();
+
+        IMap<Integer, String> globalErrorsMap = mock(IMap.class);
+        doReturn(globalErrorsMap).when(HazelcastConfigInstance.configInstance).getGlobalErrors();
 
         // mock loggers
         AddSenderIdInBodyAction.log = mock(Logger.class);
@@ -83,7 +87,7 @@ public class ConfigLoaderTest {
     public void when_load_read_mapping() throws Exception {
 
         // WHEN
-        ConfigLoader.load(false);
+        ConfigLoader.loadMappingsConfig(false);
 
         // THEN
         List<MappingConfig> config = ConfigLoader.getConfig();
@@ -113,7 +117,7 @@ public class ConfigLoaderTest {
     @Test
     public void when_actionClassname_is_null_get_className_from_actions_config() throws Exception {
         // GIVEN
-        ConfigLoader.load(false);
+        ConfigLoader.loadMappingsConfig(false);
         MappingAction mappingAction = new MappingAction();
         mappingAction.setName("ReplaceCustomerId");
         MappingEndpoint endpoint = new MappingEndpoint();
@@ -164,7 +168,7 @@ public class ConfigLoaderTest {
     @Test
     public void when_endpoint_contains_RE_return_it_from_RE_mappings() throws Exception {
         // GIVEN
-        ConfigLoader.load(false);
+        ConfigLoader.loadMappingsConfig(false);
 
         // WHEN
         MappingEndpoint endpoint = ConfigLoader.getConfig().get(0).getMappingEndpoint("/v0.1/payments/12345", "GET");
@@ -176,7 +180,7 @@ public class ConfigLoaderTest {
     @Test
     public void when_mapping_list_contains_method_and_uri_return_that_mapping_endpoint() throws Exception {
         // GIVEN
-        ConfigLoader.load(false);
+        ConfigLoader.loadMappingsConfig(false);
 
         // WHEN
         MappingEndpoint meEndpoint = ConfigLoader.getConfig().get(0).getMappingEndpoint("/v0.1/me", "GET");
@@ -189,7 +193,7 @@ public class ConfigLoaderTest {
     @Test
     public void when_action_class_is_not_null_do_not_invoke_getAction_from_actions_map() throws Exception {
         // GIVEN
-        ConfigLoader.load(false);
+        ConfigLoader.loadMappingsConfig(false);
         MappingAction action = new MappingAction();
         action.setName("testAction");
         action.setActionClassName("com.apifest.example.AddSenderIdInBodyAction");
@@ -207,7 +211,7 @@ public class ConfigLoaderTest {
     @Test
     public void when_endpoint_contains_two_variables_replace_them_all() throws Exception {
         // GIVEN
-        ConfigLoader.load(false);
+        ConfigLoader.loadMappingsConfig(false);
 
         // WHEN
         MappingEndpoint endpoint = ConfigLoader.getConfig().get(0).getMappingEndpoint("/v0.1/contacts/mobile/support", "GET");
@@ -233,6 +237,18 @@ public class ConfigLoaderTest {
         assertEquals(errorMsg, "cannot load custom jar");
     }
 
+    @Test
+    public void when_load_read_global_errors() throws Exception {
+
+        // WHEN
+        ConfigLoader.loadGlobalErrorsConfig(false);
+
+        // THEN
+        Map<Integer, String> errors = ConfigLoader.getLoadedGlobalErrors();
+        assertEquals(errors.get(401), "{\"error\":\"custom unauthorized response\"}");
+        assertEquals(errors.get(404), "{\"error\":\"custom resource not found\"}");
+        assertEquals(errors.get(500), "{\"error\":\"custom ISE response\"}");
+    }
 
     private String marshal() {
         String result = null;

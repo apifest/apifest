@@ -167,7 +167,7 @@ public class HttpResponseFactoryTest {
         mappingMap.put("v0.1", config);
         doReturn(mappingMap).when(HazelcastConfigInstance.configInstance).getMappingConfigs();
 
-        ConfigLoader.load(false);
+        ConfigLoader.loadGlobalErrorsConfig(false);
     }
 
     private void mockNoGlobalErrors() throws Exception {

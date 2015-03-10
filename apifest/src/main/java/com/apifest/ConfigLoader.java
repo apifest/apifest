@@ -65,113 +65,117 @@ public final class ConfigLoader {
     private ConfigLoader() {
     }
 
-    protected static void load(boolean reload) throws MappingException {
+    protected static void loadMappingsConfig(boolean reload) throws MappingException {
         String mappingFileDir = ServerConfig.getMappingsPath();
-        if (mappingFileDir == null || mappingFileDir.isEmpty()) {
-            throw new MappingException("apifest.mappings property not set");
-        }
-        Map<String, MappingConfig> local = new HashMap<String, MappingConfig>();
-        try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(Mapping.class, GlobalErrors.class);
-            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-            File configPath = new File(mappingFileDir);
-            if (configPath.isDirectory()) {
-                File[] files = configPath.listFiles();
-                // load all config files
-                for (File mappingFile : files) {
-                    if (!mappingFile.isFile() || !mappingFile.getName().endsWith(".xml")) {
-                        continue;
-                    }
-                    //REVISIT: first, check whether the mapping is valid against the schema
-                    MappingConfig config = new MappingConfig();
-                    Mapping mappings = (Mapping) unmarshaller.unmarshal(mappingFile);
+        if (ServerConfig.getMappingsPath() != null && !ServerConfig.getMappingsPath().isEmpty()) {
+            Map<String, MappingConfig> local = new HashMap<String, MappingConfig>();
+            try {
+                JAXBContext jaxbContext = JAXBContext.newInstance(Mapping.class);
+                Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+                File configPath = new File(mappingFileDir);
+                if (configPath.isDirectory()) {
+                    File[] files = configPath.listFiles();
+                    // load all config files
+                    for (File mappingFile : files) {
+                        if (!mappingFile.isFile() || !mappingFile.getName().endsWith(".xml")) {
+                            continue;
+                        }
+                        //REVISIT: first, check whether the mapping is valid against the schema
+                        MappingConfig config = new MappingConfig();
+                        Mapping mappings = (Mapping) unmarshaller.unmarshal(mappingFile);
 
-                    List<MappingEndpoint> mappingEndpoints = mappings.getEndpointsWrapper().getEndpoints();
-                    config.setMappings(getMappingsMap(mappingEndpoints, mappings.getBackend()));
+                        List<MappingEndpoint> mappingEndpoints = mappings.getEndpointsWrapper().getEndpoints();
+                        config.setMappings(getMappingsMap(mappingEndpoints, mappings.getBackend()));
 
-                    setConfigActions(config, mappings);
+                        setConfigActions(config, mappings);
 
-                    setConfigFilters(config, mappings);
+                        setConfigFilters(config, mappings);
 
-                    if (mappings.getErrorsWrapper() != null) {
-                        config.setErrors(getErrorsMap(mappings));
-                    }
-                    // load all actions and filters
-                    if (ServerConfig.getCustomJarPath() != null && ServerConfig.getCustomJarPath().length() > 0) {
-                        try {
-                            loadCustomClasses(config.getActions().values());
-                        } catch (MalformedURLException e) {
-                            log.error("Cannot load custom jar file", e);
-                            throw new IllegalArgumentException(e);
+                        if (mappings.getErrorsWrapper() != null) {
+                            config.setErrors(getErrorsMap(mappings));
+                        }
+                        // load all actions and filters
+                        if (ServerConfig.getCustomJarPath() != null && ServerConfig.getCustomJarPath().length() > 0) {
+                            try {
+                                loadCustomClasses(config.getActions().values());
+                            } catch (MalformedURLException e) {
+                                log.error("Cannot load custom jar file", e);
+                                throw new IllegalArgumentException(e);
+                            }
+                        }
+                        MappingConfig currentConfig = local.get(mappings.getVersion());
+                        if (currentConfig != null) {
+                            MappingConfig mergedConfig = currentConfig.mergeConfig(config);
+                            local.put(mappings.getVersion(), mergedConfig);
+                        } else {
+                            local.put(mappings.getVersion(), config);
                         }
                     }
-                    MappingConfig currentConfig = local.get(mappings.getVersion());
-                    if (currentConfig != null) {
-                        MappingConfig mergedConfig = currentConfig.mergeConfig(config);
-                        local.put(mappings.getVersion(), mergedConfig);
+                    IMap<String, MappingConfig> map = getHazelcastConfig();
+                    if (reload) {
+                        //clear all keys one by one in order to fire events in Hazelcast
+                        for (String key : map.keySet()) {
+                            map.remove(key);
+                        }
+                    }
+                    if (local.size() > 0) {
+                        map.putAll(local);
+                        local.putAll(map);
                     } else {
-                        local.put(mappings.getVersion(), config);
+                        local.putAll(map);
                     }
-                }
-                IMap<String, MappingConfig> map = getHazelcastConfig();
-                if (reload) {
-                    //clear all keys one by one in order to fire events in Hazelcast
-                    for (String key : map.keySet()) {
-                        map.remove(key);
-                    }
-                }
-                if (local.size() > 0) {
-                    map.putAll(local);
-                    local.putAll(map);
+                    localMappingConfigMap = local;
                 } else {
-                    local.putAll(map);
+                    throw new MappingException("Cannot load mapping configuration from directory " + mappingFileDir);
                 }
-                localMappingConfigMap = local;
-            } else {
-                log.error("Cannot load mapping configuration from directory {}", mappingFileDir);
-                throw new MappingException("Cannot load mapping configuration from directory " + mappingFileDir);
+            } catch (JAXBException e) {
+                String errorMessage = e.getMessage();
+                if (errorMessage == null && e.getLinkedException() != null) {
+                    errorMessage = e.getLinkedException().getMessage();
+                }
+                throw new MappingException(errorMessage, e);
             }
-
-            loadGlobalErrorsConfig(reload, unmarshaller);
-        } catch (JAXBException e) {
-            log.error("Cannot load mapping configuration, directory {}", mappingFileDir);
-            String errorMessage = e.getMessage();
-            if (errorMessage == null && e.getLinkedException() != null) {
-                errorMessage = e.getLinkedException().getMessage();
-            }
-            throw new MappingException(errorMessage, e);
         }
     }
 
-    protected static void loadGlobalErrorsConfig(boolean reload, Unmarshaller unmarshaller) throws JAXBException, MappingException {
+    protected static void loadGlobalErrorsConfig(boolean reload) throws MappingException {
         String globalErrorsFile = ServerConfig.getGlobalErrorsFile();
         if (globalErrorsFile != null && !globalErrorsFile.isEmpty()) {
             File errorsFile = new File(globalErrorsFile);
             Map<Integer, String> errors = new HashMap<Integer, String>();
             if (errorsFile.isFile() && errorsFile.getName().endsWith(".xml")) {
-                //REVISIT: first, check whether the file is valid against the schema
-                GlobalErrors globalErrors = (GlobalErrors) unmarshaller.unmarshal(errorsFile);
+                try {
+                    //REVISIT: first, check whether the file is valid against the schema
+                    JAXBContext jaxbContext = JAXBContext.newInstance(GlobalErrors.class);
+                    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+                    GlobalErrors globalErrors = (GlobalErrors) unmarshaller.unmarshal(errorsFile);
 
-                for (MappingError error : globalErrors.getErrors()) {
-                    errors.put(Integer.valueOf(error.getStatus()), error.getMessage());
-                }
-
-                IMap<Integer, String> errorsMap = getHazelcastErrorsConfig();
-                if (reload) {
-                    //clear all keys one by one in order to fire events in Hazelcast
-                    for (Integer key : errorsMap.keySet()) {
-                        errorsMap.remove(key);
+                    for (MappingError error : globalErrors.getErrors()) {
+                        errors.put(Integer.valueOf(error.getStatus()), error.getMessage());
                     }
+
+                    IMap<Integer, String> errorsMap = getHazelcastErrorsConfig();
+                    if (reload) {
+                        //clear all keys one by one in order to fire events in Hazelcast
+                        for (Integer key : errorsMap.keySet()) {
+                            errorsMap.remove(key);
+                        }
+                    }
+                    if (errors.size() > 0) {
+                        errorsMap.putAll(errors);
+                    } else {
+                        errors.putAll(errorsMap);
+                    }
+                    localGlobalErrorsMap = errors;
+                } catch (JAXBException e) {
+                    String errorMessage = e.getMessage();
+                    if (errorMessage == null && e.getLinkedException() != null) {
+                        errorMessage = e.getLinkedException().getMessage();
+                    }
+                    throw new MappingException(errorMessage, e);
                 }
-                if (errors.size() > 0) {
-                    errorsMap.putAll(errors);
-                } else {
-                    errors.putAll(errorsMap);
-                }
-                localGlobalErrorsMap = errors;
             } else {
-                log.error("Cannot load errors configuration from directory {}", globalErrorsFile);
-                throw new MappingException("Cannot load errors configuration from directory " + globalErrorsFile);
+                throw new MappingException("Cannot load global errors configuration from directory " + globalErrorsFile);
             }
         }
     }
@@ -383,7 +387,8 @@ public final class ConfigLoader {
      */
     public static void reloadConfigs() throws MappingException {
         jarClassLoader = null;
-        load(true);
+        loadMappingsConfig(true);
+        loadGlobalErrorsConfig(true);
     }
 
     /**
