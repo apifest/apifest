@@ -50,12 +50,13 @@ public final class GlobalErrorsConfigValidator {
         } else {
             throw new IllegalArgumentException("ERROR: schema file is not passed as arguments");
         }
-        String mappingFile = System.getProperty("global-errors.file");
-        if (mappingFile == null) {
-            throw new IllegalArgumentException("ERROR: mappings.file property not set");
+        String globalErrorsFile = System.getProperty("global-errors.file");
+        if (globalErrorsFile == null) {
+            throw new IllegalArgumentException("ERROR: global-errors.file property not set");
         } else {
-            ConfigValidator.validate(xsdFile, mappingFile);
+            ConfigValidator.validate(xsdFile, globalErrorsFile);
         }
+        log.info("global errors file {} is valid", globalErrorsFile);
     }
 
     public static boolean validate(File mappingFile) {
@@ -68,7 +69,7 @@ public final class GlobalErrorsConfigValidator {
             validator.validate(new StreamSource(mappingFile));
             ok = true;
         } catch (SAXException ex) {
-            log.error("mapping file NOT valid: {}", ex.getMessage());
+            log.error("global errors file NOT valid: {}", ex.getMessage());
         } catch (IOException e) {
             log.error("schema file not loaded: {}", e.getMessage());
         }

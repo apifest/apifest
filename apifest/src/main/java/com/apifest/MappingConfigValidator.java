@@ -56,6 +56,7 @@ public final class MappingConfigValidator {
         } else {
             ConfigValidator.validate(xsdFile, mappingFile);
         }
+        log.info("mapping file {} is valid", mappingFile);
     }
 
     public static boolean validate(File mappingFile) {
