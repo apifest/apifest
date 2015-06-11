@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -36,6 +37,9 @@ public class MappingEndpointDocumentation implements Serializable {
 
     @XmlElement(name = "params", type = MappingEndpointParamDocumentation.class)
     private List<MappingEndpointParamDocumentation> mappingEndpontParamsDocumentation;
+
+    @XmlTransient
+    private boolean isHidden;
 
     public MappingEndpointDocumentation() {
         this.mappingEndpontParamsDocumentation = new ArrayList<MappingEndpointParamDocumentation>();
@@ -95,5 +99,15 @@ public class MappingEndpointDocumentation implements Serializable {
 
     public void setGroup(String group) {
         this.group = group;
+    }
+
+    public boolean isHidden()
+    {
+        return isHidden;
+    }
+
+    public void setHidden(boolean isHidden)
+    {
+        this.isHidden = isHidden;
     }
 }
