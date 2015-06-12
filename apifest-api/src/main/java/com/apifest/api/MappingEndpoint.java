@@ -22,6 +22,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 /**
@@ -73,6 +74,9 @@ public class MappingEndpoint implements Serializable {
 
     @XmlElement(name = "filter", type = ResponseFilter.class)
     private ResponseFilter filter;
+
+    @XmlTransient
+    private boolean isHidden;
 
     public MappingEndpoint() {
     }
@@ -179,6 +183,16 @@ public class MappingEndpoint implements Serializable {
 
     public void setBackendHost(String backendHost) {
         this.backendHost = backendHost;
+    }
+
+    public boolean isHidden()
+    {
+        return isHidden;
+    }
+
+    public void setHidden(boolean isHidden)
+    {
+        this.isHidden = isHidden;
     }
 
     /**
