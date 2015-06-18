@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, ApiFest project
+ * Copyright 2013-2015, ApiFest project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,11 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
+/**
+ * A wrapper type that holds the documentation for a endpoint parameter.
+ * @author Ivan Georgiev
+ *
+ */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "endpoint_param_documentation")
 public class MappingEndpointParamDocumentation implements Serializable {

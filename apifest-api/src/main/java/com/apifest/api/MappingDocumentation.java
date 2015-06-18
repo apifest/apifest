@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, ApiFest project
+ * Copyright 2013-2015, ApiFest project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,11 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+/**
+ * A wrapper type that holds all the documentation for the mappings.
+ * @author Ivan Georgiev
+ *
+ */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "mappings_docs")
 public class MappingDocumentation implements Serializable {
@@ -36,7 +41,7 @@ public class MappingDocumentation implements Serializable {
     private String version;
 
     @XmlElement(name = "endpoints", type = MappingEndpointDocumentation.class, required = true)
-    private List<MappingEndpointDocumentation> mappingEndpontDocumentation;
+    private List<MappingEndpointDocumentation> mappingEndpointDocumentation;
 
     public String getVersion() {
         return version;
@@ -47,14 +52,14 @@ public class MappingDocumentation implements Serializable {
     }
 
     public MappingDocumentation() {
-        this.setMappingEndpontDocumentation(new ArrayList<MappingEndpointDocumentation>());
+        this.setMappingEndpointDocumentation(new ArrayList<MappingEndpointDocumentation>());
     }
 
-    public List<MappingEndpointDocumentation> getMappingEndpontDocumentation() {
-        return mappingEndpontDocumentation;
+    public List<MappingEndpointDocumentation> getMappingEndpiontDocumentation() {
+        return mappingEndpointDocumentation;
     }
 
-    public void setMappingEndpontDocumentation(List<MappingEndpointDocumentation> mappingEndpontDocumentation) {
-        this.mappingEndpontDocumentation = mappingEndpontDocumentation;
+    public void setMappingEndpointDocumentation(List<MappingEndpointDocumentation> mappingEndpointDocumentation) {
+        this.mappingEndpointDocumentation = mappingEndpointDocumentation;
     }
 }

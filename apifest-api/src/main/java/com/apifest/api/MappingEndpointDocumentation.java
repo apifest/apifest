@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, ApiFest project
+ * Copyright 2013-2015, ApiFest project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,11 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
+/**
+ * A wrapper type that holds all the documentation an endpoint. 
+ * @author Ivan Georgiev
+ *
+ */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "endpoint_documentation")
 public class MappingEndpointDocumentation implements Serializable {
