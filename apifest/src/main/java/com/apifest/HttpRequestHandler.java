@@ -117,7 +117,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                             break;
                         }
                     }
-
+                    if(accessToken == null) {
+                        accessToken = AccessTokenValidator.extractAccessToken(uri);
+                    }
                     if (accessToken == null) {
                         writeResponseToChannel(channel, req, HttpResponseFactory.createUnauthorizedResponse(ACCESS_TOKEN_REQUIRED));
                         return;
