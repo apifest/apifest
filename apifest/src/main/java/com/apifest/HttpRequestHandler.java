@@ -124,7 +124,13 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                     //If there is no access token in request header, try to find it in request body
                     //This is used for authorized file download requests when authorization header is not provided 
                     if (accessToken == null) {
-                    	accessToken = getAccessTokenFromHttpRequestBody(req);
+                        String contentType = req.headers().get(HttpHeaders.Names.CONTENT_TYPE);
+                        if (contentType != null && contentType
+                                        .contains(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED)
+                                && method.equals(HttpMethod.POST)) {
+                            String content = req.getContent().toString(CharsetUtil.UTF_8);
+                            accessToken = getAccessTokenFromHttpRequestBody(content);
+                        }
                     }
                     if (accessToken == null) {
                         writeResponseToChannel(channel, req, HttpResponseFactory.createUnauthorizedResponse(ACCESS_TOKEN_REQUIRED));
@@ -234,16 +240,17 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             log.debug("write response here from the BE");
         }
     }
-    
-    protected String getAccessTokenFromHttpRequestBody(HttpRequest req) {
-    	String content = req.getContent().toString(CharsetUtil.UTF_8);
-        List<NameValuePair> values = URLEncodedUtils.parse(content, Charset.forName("UTF-8"));
-        for (NameValuePair pair : values) {
-            if(ACCESS_TOKEN.equals(pair.getName())) {
-            	return pair.getValue();
+
+    protected String getAccessTokenFromHttpRequestBody(String content) {
+        if (content != null) {
+            List<NameValuePair> values = URLEncodedUtils.parse(content, Charset.forName("UTF-8"));
+            for (NameValuePair pair : values) {
+                if (ACCESS_TOKEN.equals(pair.getName())) {
+                    return pair.getValue();
+                }
             }
         }
-    	return null;
+        return null;
     }
 
     protected ResponseListener createResponseListener(BasicFilter filter, Map<String, String> errors, final Channel channel, final HttpRequest request) {
