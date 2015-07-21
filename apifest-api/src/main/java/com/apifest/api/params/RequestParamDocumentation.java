@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package com.apifest.api;
+package com.apifest.api.params;
 
 import java.io.Serializable;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlType;
 
 /**
  * A wrapper type that holds the documentation for a endpoint parameter.
@@ -29,8 +28,7 @@ import javax.xml.bind.annotation.XmlType;
  *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "endpoint_param_documentation")
-public class MappingEndpointParamDocumentation implements Serializable {
+public class RequestParamDocumentation implements Serializable {
 
     private static final long serialVersionUID = 2055836426063609094L;
 
@@ -40,13 +38,19 @@ public class MappingEndpointParamDocumentation implements Serializable {
     @XmlAttribute(name = "name", required = true)
     private String name;
 
+    @XmlAttribute(name = "description", required = true)
+    private String description;
+
     @XmlAttribute(name = "required", required = true)
     private boolean required;
 
-    public MappingEndpointParamDocumentation() {
+    @XmlAttribute(name="exampleValue")
+    private String exampleValue;
+
+    public RequestParamDocumentation() {
     }
 
-    public MappingEndpointParamDocumentation(String name, String type, boolean required) {
+    public RequestParamDocumentation(String name, String type, boolean required) {
         this.setName(name);
         this.setType(type);
         this.setRequired(required);
@@ -68,6 +72,16 @@ public class MappingEndpointParamDocumentation implements Serializable {
         this.name = name;
     }
 
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription(String description)
+    {
+        this.description = description;
+    }
+
     public boolean isRequired() {
         return required;
     }
@@ -75,4 +89,15 @@ public class MappingEndpointParamDocumentation implements Serializable {
     public void setRequired(boolean required) {
         this.required = required;
     }
+
+    public String getExampleValue()
+    {
+        return exampleValue;
+    }
+
+    public void setExampleValue(String exampleValue)
+    {
+        this.exampleValue = exampleValue;
+    }
+
 }

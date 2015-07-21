@@ -27,8 +27,12 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
+import com.apifest.api.params.ExceptionDocumentation;
+import com.apifest.api.params.RequestParamDocumentation;
+import com.apifest.api.params.ResultParamDocumentation;
+
 /**
- * A wrapper type that holds all the documentation an endpoint. 
+ * A wrapper type that holds all the documentation an endpoint.
  * @author Ivan Georgiev
  *
  */
@@ -50,20 +54,41 @@ public class MappingEndpointDocumentation implements Serializable {
     @XmlAttribute(name = "description", required = true)
     private String description;
 
+    @XmlAttribute(name = "paramsDescription", required = true)
+    private String paramsDescription;
+
+    @XmlAttribute(name = "resultsDescription", required = true)
+    private String resultsDescription;
+
     @XmlAttribute(name = "summary", required = true)
     private String summary;
 
     @XmlAttribute(name = "group", required = true)
     private String group;
 
-    @XmlElement(name = "params", type = MappingEndpointParamDocumentation.class)
-    private List<MappingEndpointParamDocumentation> mappingEndpontParamsDocumentation;
+    @XmlTransient
+    private int order;
+
+    @XmlElement(name = "requestParams", type = RequestParamDocumentation.class)
+    private List<RequestParamDocumentation> requestParamsDocumentation;
+
+    @XmlElement(name = "resultParams", type = RequestParamDocumentation.class)
+    private List<ResultParamDocumentation> resultParamsDocumentation;
+
+    @XmlElement(name = "exceptions", type = ExceptionDocumentation.class)
+    private List<ExceptionDocumentation> exceptionsDocumentation;
+
+    @XmlElement(name="exampleRequest")
+    private String exampleRequest;
+
+    @XmlElement(name="exampleResult")
+    private String exampleResult;
 
     @XmlTransient
     private boolean hidden;
 
     public MappingEndpointDocumentation() {
-        this.mappingEndpontParamsDocumentation = new ArrayList<MappingEndpointParamDocumentation>();
+        this.requestParamsDocumentation = new ArrayList<RequestParamDocumentation>();
     }
 
     public String getScope() {
@@ -90,12 +115,24 @@ public class MappingEndpointDocumentation implements Serializable {
         this.endpoint = endpoint;
     }
 
-    public List<MappingEndpointParamDocumentation> getMappingEndpontParamsDocumentation() {
-        return mappingEndpontParamsDocumentation;
+    public List<RequestParamDocumentation> getRequestParamsDocumentation()
+    {
+        return requestParamsDocumentation;
     }
 
-    public void setMappingEndpontParamsDocumentation(List<MappingEndpointParamDocumentation> mappingEndpontParamsDocumentation) {
-        this.mappingEndpontParamsDocumentation = mappingEndpontParamsDocumentation;
+    public void setRequestParamsDocumentation(List<RequestParamDocumentation> requestParamsDocumentation)
+    {
+        this.requestParamsDocumentation = requestParamsDocumentation;
+    }
+
+    public List<ResultParamDocumentation> getResultParamsDocumentation()
+    {
+        return resultParamsDocumentation;
+    }
+
+    public void setResultParamsDocumentation(List<ResultParamDocumentation> resultParamsDocumentation)
+    {
+        this.resultParamsDocumentation = resultParamsDocumentation;
     }
 
     public String getDescription() {
@@ -104,6 +141,26 @@ public class MappingEndpointDocumentation implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getParamsDescription()
+    {
+        return paramsDescription;
+    }
+
+    public void setParamsDescription(String paramsDescription)
+    {
+        this.paramsDescription = paramsDescription;
+    }
+
+    public String getResultsDescription()
+    {
+        return resultsDescription;
+    }
+
+    public void setResultsDescription(String resultsDescription)
+    {
+        this.resultsDescription = resultsDescription;
     }
 
     public String getSummary() {
@@ -122,11 +179,51 @@ public class MappingEndpointDocumentation implements Serializable {
         this.group = group;
     }
 
+    public int getOrder()
+    {
+        return order;
+    }
+
+    public void setOrder(int order)
+    {
+        this.order = order;
+    }
+
     public boolean isHidden() {
         return hidden;
     }
 
     public void setHidden(boolean hidden) {
         this.hidden = hidden;
+    }
+
+    public List<ExceptionDocumentation> getExceptionsDocumentation()
+    {
+        return exceptionsDocumentation;
+    }
+
+    public void setExceptionsDocumentation(List<ExceptionDocumentation> exceptionsDocumentation)
+    {
+        this.exceptionsDocumentation = exceptionsDocumentation;
+    }
+
+    public String getExampleRequest()
+    {
+        return exampleRequest;
+    }
+
+    public void setExampleRequest(String exampleRequest)
+    {
+        this.exampleRequest = exampleRequest;
+    }
+
+    public String getExampleResult()
+    {
+        return exampleResult;
+    }
+
+    public void setExampleResult(String exampleResult)
+    {
+        this.exampleResult = exampleResult;
     }
 }
