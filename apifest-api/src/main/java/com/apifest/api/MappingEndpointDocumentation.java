@@ -87,6 +87,13 @@ public class MappingEndpointDocumentation implements Serializable {
     @XmlTransient
     private boolean hidden;
 
+    // support for multiple vars?
+    @XmlAttribute(name = "varExpression")
+    private String varExpression;
+
+    @XmlAttribute(name = "varName")
+    private String varName;
+
     public MappingEndpointDocumentation() {
         this.requestParamsDocumentation = new ArrayList<RequestParamDocumentation>();
     }
@@ -225,5 +232,25 @@ public class MappingEndpointDocumentation implements Serializable {
     public void setExampleResult(String exampleResult)
     {
         this.exampleResult = exampleResult;
+    }
+
+    public String getVarExpression()
+    {
+        return varExpression;
+    }
+
+    public void setVarExpression(String varExpression)
+    {
+        this.varExpression = varExpression;
+    }
+
+    public String getVarName()
+    {
+        return varName;
+    }
+
+    public void setVarName(String varName)
+    {
+        this.varName = varName;
     }
 }
