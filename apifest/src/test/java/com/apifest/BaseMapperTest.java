@@ -79,4 +79,13 @@ public class BaseMapperTest {
         // THEN
         verify(mapper).constructNewUri("http://api.example.com/me", internalUri);
     }
+
+    @Test
+    public void when_internal_uri_has_query_params_should_mix_with_external_ones(){
+        // WHEN
+        String newUri = mapper.constructNewUri("http://localhost:7878/payments?city=Berlin", "http://otherhost:7878/payments?key=123");
+
+        // THEN
+        assertEquals(newUri, "http://otherhost:7878/payments?city=Berlin&key=123");
+    }
 }

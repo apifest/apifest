@@ -44,10 +44,20 @@ public class BaseMapper {
 
     protected String constructNewUri(String uri, String newUri) {
         QueryStringDecoder decoder = new QueryStringDecoder(uri);
+        QueryStringDecoder internalUrldecoder = new QueryStringDecoder(newUri);
+
         Map<String, List<String>> queryParams = decoder.getParameters();
-        QueryStringEncoder encoder = new QueryStringEncoder(newUri);
+        Map<String, List<String>> internalQueryParams = internalUrldecoder.getParameters();
+
+        QueryStringEncoder encoder = new QueryStringEncoder(internalUrldecoder.getPath());
         for (String key : queryParams.keySet()) {
             for (String value : queryParams.get(key)) {
+                encoder.addParam(key, value);
+            }
+        }
+
+        for (String key : internalQueryParams.keySet()) {
+            for (String value : internalQueryParams.get(key)) {
                 encoder.addParam(key, value);
             }
         }
