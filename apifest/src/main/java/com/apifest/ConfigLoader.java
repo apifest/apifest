@@ -61,6 +61,7 @@ public final class ConfigLoader {
 
     private static Map<String, MappingConfig> localMappingConfigMap = new HashMap<String, MappingConfig>();
     private static Map<Integer, String> localGlobalErrorsMap = new HashMap<Integer, String>();
+    private static ArrayList<MappingConfig> localMappingConfig= null;
 
     private ConfigLoader() {
     }
@@ -128,6 +129,7 @@ public final class ConfigLoader {
                         local.putAll(map);
                     }
                     localMappingConfigMap = local;
+                    localMappingConfig = null;
                 } else {
                     throw new MappingException("Cannot load mapping configuration from directory " + mappingFileDir);
                 }
@@ -282,7 +284,10 @@ public final class ConfigLoader {
     }
 
     public static List<MappingConfig> getConfig() {
-        return new ArrayList<MappingConfig>(localMappingConfigMap.values());
+        if (localMappingConfig == null) {
+            localMappingConfig = new ArrayList<MappingConfig>(localMappingConfigMap.values());
+        }
+        return localMappingConfig;
     }
 
     private static Map<String, String> getActionsMap(Mapping configs) {
@@ -367,6 +372,7 @@ public final class ConfigLoader {
             log.error("check custom.jar is the consistent on each running instance", e);
         }
         localMappingConfigMap.put(name, value);
+        localMappingConfig = null;
     }
 
     /**
@@ -374,6 +380,7 @@ public final class ConfigLoader {
      */
     public static void removeMapping(String name) {
         localMappingConfigMap.remove(name);
+        localMappingConfig = null;
     }
 
     private static void reloadCustomClasses(MappingConfig config) throws MappingException {
