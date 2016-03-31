@@ -23,12 +23,12 @@ import org.jboss.netty.handler.codec.http.HttpMessage;
  *
  * @author Rossitsa Borissova
  */
-public abstract class TokenValidationListener {
+public interface TokenValidationListener {
 
     /**
      * Handles the received response.
      *
      * @param response response received from OAuth20 Server
      */
-    abstract void responseReceived(HttpMessage response);
+    public void responseReceived(HttpMessage response);
 }
