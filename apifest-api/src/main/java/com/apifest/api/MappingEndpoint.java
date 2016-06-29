@@ -17,6 +17,7 @@
 package com.apifest.api;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -75,6 +76,9 @@ public class MappingEndpoint implements Serializable {
     @XmlElement(name = "filter", type = ResponseFilter.class)
     private ResponseFilter filter;
 
+    @XmlElement(name = "customAnnotations")
+    private Map<String, String> customProperties;
+
     @XmlTransient
     private boolean hidden;
 
@@ -83,7 +87,7 @@ public class MappingEndpoint implements Serializable {
 
     public MappingEndpoint(String external, String internal, String method, String authRequired, String scope,
             MappingAction action, ResponseFilter filter, String varExpr, String varName,
-            String backendHost, Integer backendPort) {
+            String backendHost, Integer backendPort, Map<String, String> customAnnotations) {
         this.externalEndpoint = external;
         this.internalEndpoint = internal;
         this.method = method;
@@ -95,6 +99,7 @@ public class MappingEndpoint implements Serializable {
         this.varName = varName;
         this.backendHost = backendHost;
         this.backendPort = backendPort;
+        this.customProperties = customAnnotations;
     }
 
     public String getExternalEndpoint() {
@@ -183,6 +188,14 @@ public class MappingEndpoint implements Serializable {
 
     public void setBackendHost(String backendHost) {
         this.backendHost = backendHost;
+    }
+
+    public Map<String, String> getCustomProperties() {
+        return customProperties;
+    }
+
+    public void setCustomProperties(Map<String, String> customProperties) {
+        this.customProperties = customProperties;
     }
 
     public boolean isHidden()

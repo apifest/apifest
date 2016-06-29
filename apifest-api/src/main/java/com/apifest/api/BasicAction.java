@@ -51,6 +51,19 @@ public abstract class BasicAction {
             throws MappingException, UpstreamException;
 
     /**
+     * Maps the request to the internal URI passed as a parameter. Modifies the request body/headers, if necessary.
+     * @param req request received from client application
+     * @param tokenValidationResponse access token validation response
+     * @return the modified request
+     * @throws MappingException if something goes wrong with request mapping
+     * @throws UpstreamException if the upstream should be stopped and a response should be returned directly
+     */
+    public HttpRequest execute(HttpRequest req, HttpResponse tokenValidationResponse, MappingEndpoint mappingEndpoint)
+            throws MappingException, UpstreamException {
+        return execute(req, mappingEndpoint.getInternalEndpoint(), tokenValidationResponse);
+    }
+
+    /**
      * Extracts userId from tokenValidationResponse.
      * @param response the response received after access token is validate
      * @return userId associated with a token
