@@ -47,8 +47,10 @@ public abstract class BasicAction {
      * @throws MappingException if something goes wrong with request mapping
      * @throws UpstreamException if the upstream should be stopped and a response should be returned directly
      */
-    public abstract HttpRequest execute(HttpRequest req, String internalURI, HttpResponse tokenValidationResponse)
-            throws MappingException, UpstreamException;
+    public HttpRequest execute(HttpRequest req, String internalURI, HttpResponse tokenValidationResponse)
+            throws MappingException, UpstreamException {
+        return req;
+    }
 
     /**
      * Maps the request to the internal URI passed as a parameter. Modifies the request body/headers, if necessary.
@@ -60,7 +62,7 @@ public abstract class BasicAction {
      */
     public HttpRequest execute(HttpRequest req, HttpResponse tokenValidationResponse, MappingEndpoint mappingEndpoint)
             throws MappingException, UpstreamException {
-        return execute(req, mappingEndpoint.getInternalEndpoint(), tokenValidationResponse);
+        return execute(req, req.getUri(), tokenValidationResponse);
     }
 
     /**
