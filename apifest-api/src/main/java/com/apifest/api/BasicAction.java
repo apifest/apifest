@@ -56,6 +56,7 @@ public abstract class BasicAction {
      * Maps the request to the internal URI passed as a parameter. Modifies the request body/headers, if necessary.
      * @param req request received from client application
      * @param tokenValidationResponse access token validation response
+     * @param mappingEndpoint configuration for this endpoint from the mapping xml
      * @return the modified request
      * @throws MappingException if something goes wrong with request mapping
      * @throws UpstreamException if the upstream should be stopped and a response should be returned directly
