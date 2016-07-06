@@ -85,6 +85,14 @@ Here is an example mapping file:
         <endpoint external="/v0.1/me/friends" internal="/customers/{customerId}/friends" method="GET" authType="user" scope="basic">
             <action name="ReplaceCustomerId" />
         </endpoint>
+		<endpoint external="/v0.1/users" internal="/users" method="GET" authType="user" scope="basic">
+            <customProperties>
+                <entry>
+                    <key>com.name.project.package.RequiredAccessRights:value</key>
+                    <value>VIEW_USERS,MANAGE_USERS</value>
+                </entry>
+            </customProperties>
+		</endpoint>
         <endpoint external="/v0.1/countries/{countryId}" internal="/countries/{countryId}" method="GET" authType="client-app" varExpression="\w{3}$" varName="countryId"/>
         <endpoint external="/v0.1/mobile-auth/{mobileId}" internal="/mobile-auth/{mobileId}" method="GET" authType="user" varExpression="\d{6,15}$" varName="mobileId"/>
         <endpoint external="/v0.1/mobile-auth/{mobileId}" internal="/mobile-auth/{mobileId}" method="POST" authType="user" varExpression="\d{6,15}$" varName="mobileId"/>
@@ -114,6 +122,7 @@ XML specific tags explained:
 - varName - the name of the variable/s used in internal/external path (space delimited);
 - varExpression - regular expression (Java format) for varName (space delimited);
 - error - customize error responses - *status* attribute value defines the HTTP status for which *message* attribute value will be returned;
+- customProperties - defines properties specific to the endpoint
 
 You can define as many mapping configuration files as many versions your API supports.
 The ApiFest Mapping Server will get all mappings files from the directory defined in the apifest.properties as 

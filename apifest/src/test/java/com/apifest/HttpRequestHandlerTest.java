@@ -94,7 +94,7 @@ public class HttpRequestHandlerTest {
         handler.mapRequest(request, mapping, config, validationResponse);
 
         // THEN
-        verify(replaceAction).execute(request, "/countries?id=BUL", validationResponse);
+        verify(replaceAction).execute(request, validationResponse, mapping);
     }
 
     @Test
