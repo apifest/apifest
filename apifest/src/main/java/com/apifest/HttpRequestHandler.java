@@ -163,6 +163,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                                         MappingEndpoint.AUTH_TYPE_CLIENT_APP.equals(endpoint.getAuthType())) {
                                     try {
                                         HttpRequest mappedReq = mapRequest(request, endpoint, conf, tokenValidationResponse);
+                                        if (mappedReq == null) {
+                                            throw new UpstreamException(HttpResponseFactory.createISEResponse());
+                                        }
                                         channel.getPipeline().getContext("handler").setAttachment(responseListener);
                                         client.send(mappedReq, endpoint.getBackendHost(), Integer.valueOf(endpoint.getBackendPort()), responseListener);
                                     } catch (MappingException e) {
@@ -173,6 +176,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                                         return;
                                     } catch (UpstreamException ue) {
                                         writeResponseToChannel(channel, request, ue.getResponse());
+                                        return;
+                                    } catch (Exception e) {  // Not nice but ensures we ALWAYS respond to the client
+                                        writeResponseToChannel(channel, request, HttpResponseFactory.createISEResponse());
                                         return;
                                     }
                                 } else {
