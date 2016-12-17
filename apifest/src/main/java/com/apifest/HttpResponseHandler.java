@@ -51,9 +51,7 @@ public class HttpResponseHandler extends SimpleChannelUpstreamHandler {
         }
         Channel channel = ctx.getChannel();
         // do not close the channel if 100 Continue
-        if (statusCode != null && statusCode.intValue() == HttpStatus.SC_CONTINUE) {
-            //do not close the channel
-        } else {
+        if ((statusCode == null) || (statusCode != null && statusCode.intValue() != HttpStatus.SC_CONTINUE)) {
             channel.close();
         }
         if(ctx.getAttachment() instanceof TokenValidationListener) {
