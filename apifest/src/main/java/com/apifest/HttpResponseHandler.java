@@ -18,6 +18,7 @@ package com.apifest;
 
 import java.net.ConnectException;
 
+import org.apache.http.HttpStatus;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -48,9 +49,13 @@ public class HttpResponseHandler extends SimpleChannelUpstreamHandler {
             response = (HttpResponse) e.getMessage();
             statusCode = response.getStatus().getCode();
         }
-
         Channel channel = ctx.getChannel();
-        channel.close();
+        // do not close the channel if 100 Continue
+        if (statusCode != null && statusCode.intValue() == HttpStatus.SC_CONTINUE) {
+            //do not close the channel
+        } else {
+            channel.close();
+        }
         if(ctx.getAttachment() instanceof TokenValidationListener) {
             TokenValidationListener listener = (TokenValidationListener) ctx.getAttachment();
             listener.responseReceived(response);
