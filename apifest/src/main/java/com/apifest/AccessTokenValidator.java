@@ -36,6 +36,7 @@ import com.google.gson.JsonParser;
 public class AccessTokenValidator {
 
     private static final Pattern AUTH_BEARER_PATTERN = Pattern.compile("(Bearer )(\\w*)");
+	private static final Pattern AUTH_QUERY_PARAM = Pattern.compile("(access_token=)(\\w*)");
 
     protected static Logger log = LoggerFactory.getLogger(AccessTokenValidator.class);
 
@@ -77,7 +78,12 @@ public class AccessTokenValidator {
         if (m.find()) {
             return m.group(2);
         }
+		m = AUTH_QUERY_PARAM.matcher(header);
+        if (m.find()) {
+            return m.group(2);
+        }
         return null;
     }
 
 }
+
