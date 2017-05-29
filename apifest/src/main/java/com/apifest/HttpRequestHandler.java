@@ -17,9 +17,12 @@
 package com.apifest;
 
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -66,6 +69,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     protected static final String INVALID_ACCESS_TOKEN_TYPE = "{\"error\":\"access token type not valid\"}";
 
     protected static final String OAUTH_TOKEN_VALIDATE_URI = "/oauth20/tokens/validate";
+    protected static final String ACCESS_TOKEN = "access_token";
 
     protected static Logger log = LoggerFactory.getLogger(HttpRequestHandler.class);
 
@@ -117,7 +121,17 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                             break;
                         }
                     }
-
+                    //If there is no access token in request header, try to find it in request body
+                    //This is used for authorized file download requests when authorization header is not provided 
+                    if (accessToken == null) {
+                        String contentType = req.headers().get(HttpHeaders.Names.CONTENT_TYPE);
+                        if (contentType != null && contentType
+                                        .contains(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED)
+                                && method.equals(HttpMethod.POST)) {
+                            String content = req.getContent().toString(CharsetUtil.UTF_8);
+                            accessToken = getAccessTokenFromHttpRequestBody(content);
+                        }
+                    }
                     if (accessToken == null) {
                         writeResponseToChannel(channel, req, HttpResponseFactory.createUnauthorizedResponse(ACCESS_TOKEN_REQUIRED));
                         return;
@@ -231,6 +245,18 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         } else {
             log.debug("write response here from the BE");
         }
+    }
+
+    protected String getAccessTokenFromHttpRequestBody(String content) {
+        if (content != null) {
+            List<NameValuePair> values = URLEncodedUtils.parse(content, Charset.forName("UTF-8"));
+            for (NameValuePair pair : values) {
+                if (ACCESS_TOKEN.equals(pair.getName())) {
+                    return pair.getValue();
+                }
+            }
+        }
+        return null;
     }
 
     protected ResponseListener createResponseListener(BasicFilter filter, Map<String, String> errors, final Channel channel, final HttpRequest request) {
