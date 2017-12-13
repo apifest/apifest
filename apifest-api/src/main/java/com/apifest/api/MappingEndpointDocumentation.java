@@ -19,6 +19,7 @@ package com.apifest.api;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -93,6 +94,10 @@ public class MappingEndpointDocumentation implements Serializable {
 
     @XmlAttribute(name = "varName")
     private String varName;
+
+    @XmlAttribute(name = "customProperties")
+    private Map<String, String> customProperties;
+
 
     public MappingEndpointDocumentation() {
         this.requestParamsDocumentation = new ArrayList<RequestParamDocumentation>();
@@ -252,5 +257,13 @@ public class MappingEndpointDocumentation implements Serializable {
     public void setVarName(String varName)
     {
         this.varName = varName;
+    }
+
+    public Map<String, String> getCustomProperties() {
+        return customProperties;
+    }
+
+    public void setCustomProperties(Map<String, String> customProperties) {
+        this.customProperties = customProperties;
     }
 }
