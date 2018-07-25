@@ -14,28 +14,31 @@
  * limitations under the License.
  */
 
-package com.apifest.example;
+package com.apifest.api;
 
-import com.apifest.api.AccessToken;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-
-import com.apifest.api.BasicAction;
+import java.util.Map;
 
 /**
- * Action that replaces {customerId} with actual customer id value.
+ * Represents user details associated with an access token.
  *
  * @author Rossitsa Borissova
  */
-public class ReplaceCustomerIdAction extends BasicAction {
+public class UserDetails {
 
-    protected static final String CUSTOMER_ID = "{customerId}";
+    String userId;
+    Map<String, String> details;
 
-    @Override
-    public HttpRequest execute(HttpRequest req, String internalURI, AccessToken validToken) {
-        String newURI = internalURI.replace(CUSTOMER_ID, validToken.getUserId());
-        req.setUri(newURI);
-        return req;
+    public UserDetails(String userId, Map<String, String> details) {
+        this.userId = userId;
+        this.details = details;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public Map<String, String> getDetails() {
+        return details;
     }
 
 }

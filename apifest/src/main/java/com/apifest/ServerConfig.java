@@ -16,14 +16,22 @@
 
 package com.apifest;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
+import com.apifest.oauth20.DBManagerFactory;
+import com.apifest.oauth20.ResourceBundleImpl;
+import com.apifest.api.ICustomGrantTypeHandler;
+import com.apifest.api.IUserAuthentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.Properties;
 
 /**
  * Initialize all server configs.
@@ -32,23 +40,46 @@ import org.slf4j.LoggerFactory;
  */
 public final class ServerConfig {
 
-    protected static final Integer DEFAULT_CONNECT_TIMEOUT = 10;
-    protected static final Integer DEFAULT_APIFEST_PORT = 8181;
-    protected static final String DEFAULT_APIFEST_HOST = "localhost";
-    protected static final String DEFAULT_HAZELCAST_PASS = "dev-pass";
+    public static final Integer DEFAULT_CONNECT_TIMEOUT = 10;
+    public static final Integer DEFAULT_APIFEST_PORT = 8181;
+    public static final String DEFAULT_APIFEST_HOST = "localhost";
+    public static final String DEFAULT_HAZELCAST_PASS = "dev-pass";
+    // expires_in in sec for grant type password
+    public static final int DEFAULT_PASSWOD_EXPIRES_IN = 900;
 
-    protected static Logger log = LoggerFactory.getLogger(ServerConfig.class);
+    // expires_in in sec for grant type client_credentials
+    public static final int DEFAULT_CC_EXPIRES_IN = 1800;
 
-    protected static String host;
-    protected static Integer port;
-    protected static String mappingsPath;
-    protected static String tokenValidateHost;
-    protected static Integer tokenValidatePort;
-    protected static Integer connectTimeout;
-    protected static String customJarPath;
-    protected static String apifestNodes;
-    protected static String hazelcastPassword;
-    protected static String globalErrors;
+    public static Logger log = LoggerFactory.getLogger(ServerConfig.class);
+
+    public static String host;
+    public static Integer port;
+    public static String mappingsPath;
+    public static String tokenValidateHost;
+    public static Integer tokenValidatePort;
+    public static Integer connectTimeout;
+    public static String customJarPath;
+    public static String apifestNodes;
+    public static String hazelcastPassword;
+    public static String globalErrors;
+
+
+    //=================
+
+    private static String customJar;
+    private static String userAuthClass;
+    private static Class<IUserAuthentication> userAuthenticationClass;
+    private static String customGrantType;
+    private static String customGrantTypeClass;
+    private static Class<ICustomGrantTypeHandler> customGrantTypeHandler;
+    private static String dbURI;
+    private static String database;
+    private static String redisSentinels;
+    private static String redisMaster;
+    private static URLClassLoader jarClassLoader;
+    private static String hazelcastClusterPassword;
+
+    private static String cassandraContactPoints;
 
     private ServerConfig() {
     }
@@ -81,7 +112,7 @@ public final class ServerConfig {
         }
     }
 
-    protected static void setDefaultConfigs() {
+    public static void setDefaultConfigs() {
         host = DEFAULT_APIFEST_HOST;
         port = DEFAULT_APIFEST_PORT;
         connectTimeout = DEFAULT_CONNECT_TIMEOUT;
@@ -89,7 +120,7 @@ public final class ServerConfig {
         hazelcastPassword = DEFAULT_HAZELCAST_PASS;
     }
 
-    protected static void loadProperties(InputStream in) throws IOException {
+    public static void loadProperties(InputStream in) throws IOException {
         Properties props = new Properties();
         props.load(in);
 
@@ -140,6 +171,113 @@ public final class ServerConfig {
 
         // dev-pass is the default password used in Hazelcast
         hazelcastPassword = props.getProperty("hazelcast.password", "dev-pass");
+
+        customJar = props.getProperty("custom.classes.jar");
+        userAuthClass = props.getProperty("user.authenticate.class");
+        customGrantType = props.getProperty("custom.grant_type");
+        customGrantTypeClass = props.getProperty("custom.grant_type.class");
+        database = props.getProperty("oauth20.database", DBManagerFactory.DEFAULT_DB);
+        redisSentinels = props.getProperty("redis.sentinels");
+        redisMaster = props.getProperty("redis.master");
+        dbURI = props.getProperty("db_uri");
+
+        // dev-pass is the default password used in Hazelcast
+        hazelcastPassword = props.getProperty("hazelcast.password", "dev-pass");
+        hazelcastClusterPassword = props.getProperty("hazelcast.password", "dev-pass");
+
+        cassandraContactPoints = props.getProperty("cassandra.contanctPoints");
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Class<IUserAuthentication> loadCustomUserAuthentication(String className)
+            throws ClassNotFoundException {
+        Class<IUserAuthentication> result = null;
+        try {
+            URLClassLoader classLoader = getJarClassLoader();
+            if (classLoader != null) {
+                Class<?> clazz = classLoader.loadClass(className);
+                if (IUserAuthentication.class.isAssignableFrom(clazz)) {
+                    result = (Class<IUserAuthentication>) clazz;
+                } else {
+                    log.error(
+                            "user.authentication.class {} does not implement IUserAuthentication interface, default authentication will be used",
+                            clazz);
+                }
+            } else {
+                log.error("cannot load custom jar, default authentication will be used");
+            }
+        } catch (MalformedURLException e) {
+            log.error("cannot load custom jar, default authentication will be used");
+        } catch (IllegalArgumentException e) {
+            log.error(e.getMessage());
+        }
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Class<ICustomGrantTypeHandler> loadCustomGrantTypeClass(String className)
+            throws ClassNotFoundException {
+        Class<ICustomGrantTypeHandler> result = null;
+        try {
+            URLClassLoader classLoader = getJarClassLoader();
+            if (classLoader != null) {
+                Class<?> clazz = classLoader.loadClass(className);
+                if (ICustomGrantTypeHandler.class.isAssignableFrom(clazz)) {
+                    result = (Class<ICustomGrantTypeHandler>) clazz;
+                } else {
+                    log.error("custom.grant_type.class {} does not implement ICustomGrantTypeHandler interface", clazz);
+                }
+            } else {
+                log.error("cannot load custom jar");
+            }
+        } catch (MalformedURLException e) {
+            log.error("cannot load custom jar");
+        } catch (IllegalArgumentException e) {
+            log.error(e.getMessage());
+        }
+        return result;
+    }
+
+    private static URLClassLoader getJarClassLoader() throws MalformedURLException {
+        if (jarClassLoader == null) {
+            if (customJar != null) {
+                File file = new File(customJar);
+                if (file.exists()) {
+                    URL jarfile = file.toURI().toURL();
+                    jarClassLoader = URLClassLoader.newInstance(new URL[] { jarfile },
+                            ServerConfig.class.getClassLoader());
+                } else {
+                    throw new IllegalArgumentException(
+                            "check property custom.classes.jar, jar does not exist, default authentication will be used");
+                }
+            }
+        }
+        return jarClassLoader;
+    }
+
+    public static void loadCustomProperties() {
+        Properties properties = new Properties();
+        InputStream in = null;
+        File file = new File(customJar + ".properties");
+        if (file.exists()) {
+            try {
+                in = new FileInputStream(file);
+                properties.load(in);
+            } catch (FileNotFoundException e) {
+                log.info("Cannot find custom properties file");
+            } catch (IOException e) {
+                log.error("Error loading custom properties file");
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        log.error("Error closing input stream", e);
+                    }
+                }
+            }
+        }
+        new ResourceBundleImpl(properties).install();
     }
 
     public static String getHost() {
@@ -180,6 +318,43 @@ public final class ServerConfig {
 
     public static String getGlobalErrorsFile() {
         return globalErrors;
+    }
+
+
+    public static String getDbURI() {
+        return dbURI;
+    }
+
+    public static String getDatabase() {
+        return database;
+    }
+
+    public static String getRedisSentinels() {
+        return redisSentinels;
+    }
+
+    public static String getRedisMaster() {
+        return redisMaster;
+    }
+
+    public static Class<IUserAuthentication> getUserAuthenticationClass() {
+        return userAuthenticationClass;
+    }
+
+    public static String getCustomGrantType() {
+        return customGrantType;
+    }
+
+    public static Class<ICustomGrantTypeHandler> getCustomGrantTypeHandler() {
+        return customGrantTypeHandler;
+    }
+
+    public static String getHazelcastClusterPassword() {
+        return hazelcastClusterPassword;
+    }
+
+    public static String getCassandraContactPoints() {
+        return cassandraContactPoints;
     }
 
 }

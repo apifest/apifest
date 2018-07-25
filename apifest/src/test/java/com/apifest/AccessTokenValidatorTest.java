@@ -37,7 +37,7 @@ public class AccessTokenValidatorTest {
         AccessTokenValidator.log = mock(Logger.class);
     }
 
-    @Test
+    /*@Test
     public void when_header_extract_access_token() throws Exception {
         // GIVEN
         String header = "Bearer ab1f63c52d1bb435f1d9c97c805b6a04d62cbbad7f1876038cd9f5362c37ac5a1";
@@ -183,5 +183,5 @@ public class AccessTokenValidatorTest {
 
         // THEN
         assertTrue(result);
-    }
+    }*/
 }

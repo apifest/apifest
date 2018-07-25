@@ -14,28 +14,20 @@
  * limitations under the License.
  */
 
-package com.apifest.example;
+package com.apifest.oauth20;
 
-import com.apifest.api.AccessToken;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-
-import com.apifest.api.BasicAction;
+import static org.mockito.Mockito.mock;
 
 /**
- * Action that replaces {customerId} with actual customer id value.
- *
  * @author Rossitsa Borissova
  */
-public class ReplaceCustomerIdAction extends BasicAction {
+public class MockDBManagerFactory extends DBManagerFactory {
 
-    protected static final String CUSTOMER_ID = "{customerId}";
-
-    @Override
-    public HttpRequest execute(HttpRequest req, String internalURI, AccessToken validToken) {
-        String newURI = internalURI.replace(CUSTOMER_ID, validToken.getUserId());
-        req.setUri(newURI);
-        return req;
+    public static void install() {
+        dbManager = mock(DBManager.class);
     }
 
+    public static void deinstall() {
+        dbManager = null;
+    }
 }

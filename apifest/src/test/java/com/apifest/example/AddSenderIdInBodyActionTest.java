@@ -54,7 +54,7 @@ public class AddSenderIdInBodyActionTest {
         req.headers().add(HttpHeaders.Names.CONTENT_LENGTH, content.getBytes(CharsetUtil.UTF_8).length);
     }
 
-    @Test
+    /*@Test
     public void when_execute_add_senderId_in_request_body() throws Exception {
         // GIVEN
         HttpResponse validationResponse = mock(HttpResponse.class);
@@ -70,6 +70,6 @@ public class AddSenderIdInBodyActionTest {
         JsonParser parser = new JsonParser();
         JsonObject json = parser.parse(new String(request.getContent().toString(CharsetUtil.UTF_8))).getAsJsonObject();
         assertEquals(json.get("senderId").getAsString(), "1232");
-    }
+    }*/
 
 }

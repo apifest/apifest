@@ -14,28 +14,26 @@
  * limitations under the License.
  */
 
-package com.apifest.example;
+package com.apifest.api;
 
-import com.apifest.api.AccessToken;
 import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
 
-import com.apifest.api.BasicAction;
 
 /**
- * Action that replaces {customerId} with actual customer id value.
+ * Interface for user authentication.
  *
  * @author Rossitsa Borissova
  */
-public class ReplaceCustomerIdAction extends BasicAction {
+public interface IUserAuthentication {
 
-    protected static final String CUSTOMER_ID = "{customerId}";
-
-    @Override
-    public HttpRequest execute(HttpRequest req, String internalURI, AccessToken validToken) {
-        String newURI = internalURI.replace(CUSTOMER_ID, validToken.getUserId());
-        req.setUri(newURI);
-        return req;
-    }
+    /**
+     * Authenticates the user using username, password and what info required from the authentication request.
+     * @param username username
+     * @param password password
+     * @param authRequest the authentication request
+     * @return details about the authenticated user
+     * @throws AuthenticationException
+     */
+    UserDetails authenticate(String username, String password, HttpRequest authRequest) throws AuthenticationException;
 
 }

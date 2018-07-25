@@ -14,28 +14,27 @@
  * limitations under the License.
  */
 
-package com.apifest.example;
+package com.apifest.oauth20;
 
-import com.apifest.api.AccessToken;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-
-import com.apifest.api.BasicAction;
+import java.util.List;
+import java.util.Map;
 
 /**
- * Action that replaces {customerId} with actual customer id value.
+ * Utility class for extracting query parameters.
  *
  * @author Rossitsa Borissova
  */
-public class ReplaceCustomerIdAction extends BasicAction {
+public final class QueryParameter {
 
-    protected static final String CUSTOMER_ID = "{customerId}";
+    public static final String TOKEN = "token";
+    public static final String CLIENT_ID = "client_id";
+    public static final String USER_ID = "user_id";
 
-    @Override
-    public HttpRequest execute(HttpRequest req, String internalURI, AccessToken validToken) {
-        String newURI = internalURI.replace(CUSTOMER_ID, validToken.getUserId());
-        req.setUri(newURI);
-        return req;
+    public static String getFirstElement(Map<String, List<String>> map, String key) {
+        String value = null;
+        if (map.get(key) != null) {
+            value = map.get(key).get(0);
+        }
+        return value;
     }
-
 }

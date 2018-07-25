@@ -46,7 +46,7 @@ public class ReplaceCustomerIdActionTest {
         req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/customer/{customerId}");
     }
 
-    @Test
+   /* @Test
     public void when_execute_replace_customerId() {
         // GIVEN
         HttpResponse validationResponse = mock(HttpResponse.class);
@@ -60,5 +60,5 @@ public class ReplaceCustomerIdActionTest {
 
         // THEN
         assertEquals(request.getUri(), "/customer/1223");
-    }
+    }*/
 }

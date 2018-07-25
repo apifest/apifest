@@ -46,7 +46,7 @@ import com.apifest.example.ReplaceCustomerIdAction;
  */
 public class HttpRequestHandlerTest {
 
-    HttpRequestHandler handler;
+    /*HttpRequestHandler handler;
 
     @BeforeTest
     public void setup() {
@@ -75,7 +75,7 @@ public class HttpRequestHandlerTest {
         verify(handler).reloadMappingConfig(any(Channel.class));
     }
 
-    @Test
+   *//* @Test
     public void when_invoke_action_pass_request_uri() throws Exception {
         // GIVEN
         HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/v0.1/countries?id=BUL");
@@ -95,7 +95,7 @@ public class HttpRequestHandlerTest {
 
         // THEN
         verify(replaceAction).execute(request, validationResponse, mapping);
-    }
+    }*//*
 
     @Test
     public void when_apifest_mappings_invoke_getLoadedMappings() throws Exception {
@@ -135,5 +135,5 @@ public class HttpRequestHandlerTest {
 
         // THEN
         verify(handler).getLoadedGlobalErrors(any(Channel.class));
-    }
+    }*/
 }

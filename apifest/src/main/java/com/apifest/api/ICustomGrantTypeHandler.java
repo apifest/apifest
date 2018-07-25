@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, ApiFest project
+ * Copyright 2014, ApiFest project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,22 @@
  * limitations under the License.
  */
 
-package com.apifest.example;
+package com.apifest.api;
 
-import com.apifest.api.AccessToken;
 import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-
-import com.apifest.api.BasicAction;
 
 /**
- * Action that replaces {customerId} with actual customer id value.
+ * Interface for custom grant_type handler.
  *
  * @author Rossitsa Borissova
  */
-public class ReplaceCustomerIdAction extends BasicAction {
+public interface ICustomGrantTypeHandler {
 
-    protected static final String CUSTOMER_ID = "{customerId}";
-
-    @Override
-    public HttpRequest execute(HttpRequest req, String internalURI, AccessToken validToken) {
-        String newURI = internalURI.replace(CUSTOMER_ID, validToken.getUserId());
-        req.setUri(newURI);
-        return req;
-    }
+    /**
+     * Executes what is required for that grant_type and returns user details.
+     * @param request issue token request
+     * @return user details that will be associated with the access token
+     */
+    UserDetails execute(final HttpRequest request) throws AuthenticationException;
 
 }

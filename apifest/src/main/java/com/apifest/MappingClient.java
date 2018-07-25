@@ -19,6 +19,7 @@ package com.apifest;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
+import com.apifest.oauth20.AuthorizationServer;
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFactory;
@@ -111,36 +112,6 @@ public final class MappingClient {
                     HttpResponse response = HttpResponseFactory.createISEResponse();
                     // HttpResponse response = HttpResponseFactory.createNotFoundResponse();
                     responseListener.responseReceived(response);
-                }
-            }
-        });
-    }
-
-    public void sendValidation(final HttpRequest request, String host, Integer port, final TokenValidationListener validatorListener) {
-        ChannelFuture future = bootstrap.connect(new InetSocketAddress(host, port));
-        future.addListener(new ChannelFutureListener() {
-            @Override
-            public void operationComplete(ChannelFuture future) {
-                final Channel channel = future.getChannel();
-                channel.getConfig().setConnectTimeoutMillis(ServerConfig.getConnectTimeout());
-                if (channel.isConnected()) {
-                    channel.getPipeline().getContext("handler").setAttachment(validatorListener);
-                    if (future.isSuccess() && channel.isOpen()) {
-                        channel.write(request);
-                    } else {
-                        // if cannot connect
-                        channel.disconnect();
-                        channel.close();
-                        HttpResponse response = HttpResponseFactory.createISEResponse();
-                        // HttpResponse response = HttpResponseFactory.createNotFoundResponse();
-                        validatorListener.responseReceived(response);
-                    }
-                } else {
-                    channel.disconnect();
-                    channel.close();
-                    HttpResponse response = HttpResponseFactory.createISEResponse();
-                    // HttpResponse response = HttpResponseFactory.createNotFoundResponse();
-                    validatorListener.responseReceived(response);
                 }
             }
         });

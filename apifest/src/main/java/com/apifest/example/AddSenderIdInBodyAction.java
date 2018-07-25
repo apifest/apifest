@@ -16,6 +16,7 @@
 
 package com.apifest.example;
 
+import com.apifest.api.AccessToken;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
@@ -43,7 +44,7 @@ public class AddSenderIdInBodyAction extends BasicAction {
      * @see com.apifest.api.BasicAction#execute(org.jboss.netty.handler.codec.http.HttpRequest, java.lang.String, org.jboss.netty.handler.codec.http.HttpResponse)
      */
     @Override
-    public HttpRequest execute(HttpRequest req, String internalURI, HttpResponse tokenValidationResponse) throws MappingException {
+    public HttpRequest execute(HttpRequest req, String internalURI, AccessToken tokenValidationResponse) throws MappingException {
         JsonParser parser = new JsonParser();
         JsonObject json= parser.parse(new String(req.getContent().toString(CharsetUtil.UTF_8))).getAsJsonObject();
         log.info("request body: " + json);
