@@ -42,7 +42,7 @@ public class InputValidator {
      * @throws JsonParseException
      * @throws IOException
      */
-    public static <T> T validate(InputStream input, final Class<T> clazz) throws JsonParseException, IOException {
+    public static <T> T validate(String input, final Class<T> clazz) throws JsonParseException, IOException {
         JsonFactory factory = mapper.getJsonFactory();
         JsonParser parser = null;
         T obj = null;

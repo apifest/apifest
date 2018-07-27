@@ -20,15 +20,17 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.ChannelFactory;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
-import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
-import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
-import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpRequestDecoder;
+import io.netty.handler.codec.http.HttpResponseEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,50 +64,58 @@ public final class MappingServer {
             }
         }
 
-        ChannelFactory factory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool());
+        EventLoopGroup bossGroup = new NioEventLoopGroup(1);
+        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        try {
+            ServerBootstrap bootstrap = new ServerBootstrap();
+            bootstrap.group(bossGroup, workerGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .childHandler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        public void initChannel(SocketChannel ch) throws Exception {
+                            ChannelPipeline p = ch.pipeline();
 
-        ServerBootstrap bootstrap = new ServerBootstrap(factory);
-        bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
+                            p.addLast(new HttpRequestDecoder());
+                            p.addLast(new HttpObjectAggregator(MAX_CONTENT_LEN));
+                            p.addLast(new HttpResponseEncoder());
+                            p.addLast(new HttpRequestHandler());
+                        }
+                    });
 
-            @Override
-            public ChannelPipeline getPipeline() {
-                ChannelPipeline pipeline = Channels.pipeline();
-                pipeline.addLast("decoder", new HttpRequestDecoder());
-                pipeline.addLast("aggregator", new HttpChunkAggregator(MAX_CONTENT_LEN));
-                pipeline.addLast("encoder", new HttpResponseEncoder());
-                pipeline.addLast("handler", new HttpRequestHandler());
-                return pipeline;
+            bootstrap.option(ChannelOption.TCP_NODELAY, true);
+            bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
+            bootstrap.option(ChannelOption.SO_LINGER, -1);
+            bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, ServerConfig.getConnectTimeout());
+
+            if (ServerConfig.getMappingsPath() != null && !ServerConfig.getMappingsPath().isEmpty()) {
+                try {
+                    ConfigLoader.loadMappingsConfig(false);
+                } catch (MappingException e) {
+                    log.error("Cannot load mappings config", e);
+                    System.exit(1);
+                } catch (NumberFormatException e) {
+                    log.error("Cannot load mappings config", e);
+                    System.exit(1);
+                }
             }
-        });
 
-        bootstrap.setOption("child.tcpNoDelay", true);
-        bootstrap.setOption("child.keepAlive", true);
-        bootstrap.setOption("child.soLinger", -1);
-        bootstrap.setOption("child.connectTimeoutMillis", ServerConfig.getConnectTimeout());
-
-        bootstrap.bind(new InetSocketAddress(ServerConfig.getHost(), ServerConfig.getPort()));
-
-        if (ServerConfig.getMappingsPath() != null && !ServerConfig.getMappingsPath().isEmpty()) {
-            try {
-                ConfigLoader.loadMappingsConfig(false);
-            } catch (MappingException e) {
-                log.error("Cannot load mappings config", e);
-                System.exit(1);
-            } catch (NumberFormatException e) {
-                log.error("Cannot load mappings config", e);
-                System.exit(1);
+            if (ServerConfig.getGlobalErrorsFile() != null && !ServerConfig.getGlobalErrorsFile().isEmpty()) {
+                try {
+                    ConfigLoader.loadGlobalErrorsConfig(false);
+                } catch (MappingException e) {
+                    log.error("Cannot load global errors config", e);
+                    System.exit(1);
+                }
             }
+            log.info("ApiFest Mapping Server started at " + ServerConfig.getHost() + ":" + ServerConfig.getPort());
+
+            bootstrap.bind(new InetSocketAddress(ServerConfig.getHost(), ServerConfig.getPort())).channel().closeFuture().sync();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        } finally {
+            bossGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully();
         }
-
-        if (ServerConfig.getGlobalErrorsFile() != null && !ServerConfig.getGlobalErrorsFile().isEmpty()) {
-            try {
-                ConfigLoader.loadGlobalErrorsConfig(false);
-            } catch (MappingException e) {
-                log.error("Cannot load global errors config", e);
-                System.exit(1);
-            }
-        }
-        log.info("ApiFest Mapping Server started at " + ServerConfig.getHost() + ":" + ServerConfig.getPort());
     }
 
     /**

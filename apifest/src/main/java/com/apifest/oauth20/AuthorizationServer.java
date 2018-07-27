@@ -23,15 +23,15 @@ import com.apifest.api.AuthenticationException;
 import com.apifest.api.ICustomGrantTypeHandler;
 import com.apifest.api.IUserAuthentication;
 import com.apifest.api.UserDetails;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.QueryStringEncoder;
+import io.netty.util.CharsetUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.jboss.netty.buffer.ChannelBufferInputStream;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.QueryStringEncoder;
-import org.jboss.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,14 +56,14 @@ public class AuthorizationServer {
     protected DBManager db = DBManagerFactory.getInstance();
     protected ScopeService scopeService = new ScopeService();
 
-    public ClientCredentials issueClientCredentials(HttpRequest req) throws OAuthException {
+    public ClientCredentials issueClientCredentials(FullHttpRequest req) throws OAuthException {
         ClientCredentials creds = null;
         String contentType = req.headers().get(HttpHeaders.Names.CONTENT_TYPE);
 
         if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
             ApplicationInfo appInfo;
             try {
-                appInfo = InputValidator.validate(new ChannelBufferInputStream(req.getContent()), ApplicationInfo.class);
+                appInfo = InputValidator.validate(req.content().toString(), ApplicationInfo.class);
                 if (appInfo.valid()) {
                     String[] scopeList = appInfo.getScope().split(" ");
                     for (String s : scopeList) {
@@ -153,7 +153,7 @@ public class AuthorizationServer {
         return enc.toString();
     }
 
-    public AccessToken issueAccessToken(HttpRequest req) throws OAuthException {
+    public AccessToken issueAccessToken(FullHttpRequest req) throws OAuthException {
         TokenRequest tokenRequest = new TokenRequest(req);
         tokenRequest.validate();
         // check valid client_id, client_secret and status of the client app should be active
@@ -255,7 +255,7 @@ public class AuthorizationServer {
                 // in case some custom response should be returned other than HTTP 401
                 // for instance, if the user authentication requires more user details as a subsequent step
                 if (e.getResponse() != null) {
-                    String responseContent = e.getResponse().getContent().toString(CharsetUtil.UTF_8);
+                    String responseContent = e.getResponse().content().toString(CharsetUtil.UTF_8);
                     throw new OAuthException(e, responseContent, e.getResponse().getStatus());
                 } else {
                     log.error("Cannot authenticate user", e);
@@ -409,7 +409,7 @@ public class AuthorizationServer {
         return String.valueOf(scopeService.getExpiresIn(tokenGrantType, scope));
     }
 
-    public boolean revokeUserAccessTokens(HttpRequest req) throws OAuthException {
+    public boolean revokeUserAccessTokens(FullHttpRequest req) throws OAuthException {
         RevokeUserTokensRequest revokeRequest = new RevokeUserTokensRequest(req);
         revokeRequest.checkMandatoryParams();
         String userId = revokeRequest.getUserId();
@@ -418,7 +418,7 @@ public class AuthorizationServer {
         return true;
     }
 
-    public boolean revokeToken(HttpRequest req) throws OAuthException {
+    public boolean revokeToken(FullHttpRequest req) throws OAuthException {
         RevokeTokenRequest revokeRequest = new RevokeTokenRequest(req);
         revokeRequest.checkMandatoryParams();
         String token = revokeRequest.getAccessToken();
@@ -436,7 +436,7 @@ public class AuthorizationServer {
         return false;
     }
 
-    public boolean updateClientApp(HttpRequest req, String clientId) throws OAuthException {
+    public boolean updateClientApp(FullHttpRequest req, String clientId) throws OAuthException {
         String contentType = req.headers().get(HttpHeaders.Names.CONTENT_TYPE);
         if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
 //            String clientId = getBasicAuthorizationClientId(req);
@@ -448,7 +448,7 @@ public class AuthorizationServer {
             }
             ApplicationInfo appInfo;
             try {
-                appInfo = InputValidator.validate(new ChannelBufferInputStream(req.getContent()), ApplicationInfo.class);
+                appInfo = InputValidator.validate(req.content().toString(), ApplicationInfo.class);
                 if (appInfo.validForUpdate()) {
                     if (appInfo.getScope() != null) {
                         String[] scopeList = appInfo.getScope().split(" ");

@@ -18,9 +18,9 @@ package com.apifest.oauth20;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.util.CharsetUtil;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.util.CharsetUtil;
 
 /**
  * Represents request when POST to /oauth20/tokens/revoke.
@@ -37,8 +37,8 @@ public class RevokeTokenRequest {
     //TODO: remove it, not used anymore
     private String clientId;
 
-    public RevokeTokenRequest(HttpRequest request) {
-        String content = request.getContent().toString(CharsetUtil.UTF_8);
+    public RevokeTokenRequest(FullHttpRequest request) {
+        String content = request.content().toString(CharsetUtil.UTF_8);
         JsonParser parser = new JsonParser();
         try {
             JsonObject jsonObj= parser.parse(content).getAsJsonObject();

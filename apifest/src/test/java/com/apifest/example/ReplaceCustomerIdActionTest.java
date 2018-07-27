@@ -16,35 +16,19 @@
 
 package com.apifest.example;
 
-import static org.mockito.BDDMockito.willReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.testng.Assert.assertEquals;
-
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
-import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpVersion;
-import org.jboss.netty.util.CharsetUtil;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
 /**
  * @author Rossitsa Borissova
  */
-public class ReplaceCustomerIdActionTest {
+public class    ReplaceCustomerIdActionTest {
 
-    ReplaceCustomerIdAction action;
+   /* ReplaceCustomerIdAction action;
     HttpRequest req;
 
     @BeforeMethod
     public void setup() {
         action = spy(new ReplaceCustomerIdAction());
         req = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/customer/{customerId}");
-    }
+    }*/
 
    /* @Test
     public void when_execute_replace_customerId() {

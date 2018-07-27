@@ -16,12 +16,14 @@
 
 package com.apifest;
 
+import com.apifest.api.AccessToken;
 import com.apifest.api.BasicAction;
 import com.apifest.api.BasicFilter;
+import com.apifest.api.ExceptionEventHandler;
+import com.apifest.api.LifecycleHandler;
 import com.apifest.api.MappingEndpoint;
 import com.apifest.api.MappingException;
 import com.apifest.api.UpstreamException;
-import com.apifest.api.AccessToken;
 import com.apifest.oauth20.ApplicationInfo;
 import com.apifest.oauth20.AuthorizationServer;
 import com.apifest.oauth20.ClientCredentials;
@@ -30,23 +32,21 @@ import com.apifest.oauth20.OAuthException;
 import com.apifest.oauth20.QueryParameter;
 import com.apifest.oauth20.Response;
 import com.apifest.oauth20.ScopeService;
-import com.apifest.api.ExceptionEventHandler;
-import com.apifest.api.LifecycleHandler;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelOption;
+import io.netty.handler.codec.http.*;
+import io.netty.util.CharsetUtil;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelFutureListener;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.jboss.netty.handler.codec.http.*;
-import org.jboss.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +65,7 @@ import java.util.regex.Pattern;
  *
  * @author Rossitsa Borissova
  */
-public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
+public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
 
     public static final String RELOAD_URI = "/apifest-reload";
     public static final String MAPPINGS_URI = "/apifest-mappings";
@@ -97,13 +97,13 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     private MappingClient client = MappingClient.getClient();
 
     @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
-        final Channel channel = ctx.getChannel();
+    public void channelRead(ChannelHandlerContext ctx, Object e) {
+        final Channel channel = ctx.channel();
 
         setConnectTimeout(channel);
-        Object message = e.getMessage();
-        if (message instanceof HttpRequest) {
-            HttpRequest req = (HttpRequest) message;
+        Object message = e;
+        if (message instanceof FullHttpRequest) {
+            FullHttpRequest req = (FullHttpRequest) message;
             LifecycleEventHandlers.invokeRequestEventHandlers(req, null);
             String rawUri = req.getUri();
             String uriPath = null;
@@ -128,7 +128,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 return;
             }
 
-            HttpResponse response = null;
+            FullHttpResponse response = null;
 
             if (APPLICATION_URI.equals(uriPath) && method.equals(HttpMethod.POST)) {
                 response = handleRegister(req);
@@ -163,7 +163,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             }
 
             if (response != null) {
-                ChannelFuture future = channel.write(response);
+                ChannelFuture future = channel.writeAndFlush(response);
 
                 if (!HttpHeaders.isKeepAlive(req)) {
                     future.addListener(ChannelFutureListener.CLOSE);
@@ -210,7 +210,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
                     final ResponseListener responseListener = createResponseListener(filter, config.getErrors(), channel, req);
 
-                    final HttpRequest request = req;
+                    final FullHttpRequest request = req;
                     final MappingEndpoint endpoint = mapping;
                     final MappingConfig conf = config;
 
@@ -231,11 +231,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                     if ((MappingEndpoint.AUTH_TYPE_USER.equals(endpoint.getAuthType()) && (userId != null && userId.length() > 0)) ||
                             MappingEndpoint.AUTH_TYPE_CLIENT_APP.equals(endpoint.getAuthType())) {
                         try {
-                            HttpRequest mappedReq = mapRequest(request, endpoint, conf, validToken);
+                            FullHttpRequest mappedReq = mapRequest(request, endpoint, conf, validToken);
                             if (mappedReq == null) {
                                 throw new UpstreamException(HttpResponseFactory.createISEResponse());
                             }
-                            channel.getPipeline().getContext("handler").setAttachment(responseListener);
                             client.send(mappedReq, endpoint.getBackendHost(), Integer.valueOf(endpoint.getBackendPort()), responseListener);
                         } catch (MappingException mappingException) {
                             log.error("cannot map request", mappingException);
@@ -260,9 +259,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                         BasicFilter filter = getMappingFilter(mapping, config, channel);
                         ResponseListener responseListener = createResponseListener(filter, config.getErrors(), channel, req);
 
-                        channel.getPipeline().getContext("handler").setAttachment(responseListener);
 
-                        HttpRequest mappedReq = mapRequest(req, mapping, config, null);
+                        FullHttpRequest mappedReq = mapRequest(req, mapping, config, null);
                         client.send(mappedReq, mapping.getBackendHost(), Integer.valueOf(mapping.getBackendPort()), responseListener);
                     } catch (MappingException e2) {
                         log.error("cannot map request", e2);
@@ -287,8 +285,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         }
     }
 
-    public HttpResponse handleGetClientApplication(HttpRequest req) {
-        HttpResponse response = null;
+    public FullHttpResponse handleGetClientApplication(HttpRequest req) {
+        FullHttpResponse response = null;
         Matcher m = APPLICATION_PATTERN.matcher(req.getUri());
         if (m.find()) {
             String clientId = m.group(1);
@@ -318,10 +316,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         return response;
     }
 
-    public HttpResponse handleTokenValidate(HttpRequest req) {
-        HttpResponse response = null;
+    public FullHttpResponse handleTokenValidate(HttpRequest req) {
+        FullHttpResponse response = null;
         QueryStringDecoder dec = new QueryStringDecoder(req.getUri());
-        Map<String, List<String>> params = dec.getParameters();
+        Map<String, List<String>> params = dec.parameters();
         String tokenParam = QueryParameter.getFirstElement(params, QueryParameter.TOKEN);
         if (tokenParam == null || tokenParam.isEmpty()) {
             response = Response.createBadRequestResponse();
@@ -339,8 +337,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         return response;
     }
 
-    public HttpResponse handleToken(HttpRequest request) {
-        HttpResponse response = null;
+    public FullHttpResponse handleToken(FullHttpRequest request) {
+        FullHttpResponse response = null;
         String contentType = request.headers().get(HttpHeaders.Names.CONTENT_TYPE);
         if (contentType != null && contentType.contains(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED)) {
             try {
@@ -374,11 +372,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         return response;
     }
 
-    public void invokeRequestEventHandlers(HttpRequest request, HttpResponse response) {
+    public void invokeRequestEventHandlers(FullHttpRequest request, FullHttpResponse response) {
         invokeHandlers(request, response, com.apifest.oauth20.LifecycleEventHandlers.getRequestEventHandlers());
     }
 
-    public void invokeResponseEventHandlers(HttpRequest request, HttpResponse response) {
+    public void invokeResponseEventHandlers(FullHttpRequest request, FullHttpResponse response) {
         invokeHandlers(request, response, com.apifest.oauth20.LifecycleEventHandlers.getResponseEventHandlers());
     }
 
@@ -398,7 +396,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         }
     }
 
-    public void invokeHandlers(HttpRequest request, HttpResponse response, List<Class<LifecycleHandler>> handlers) {
+    public void invokeHandlers(FullHttpRequest request, FullHttpResponse response, List<Class<LifecycleHandler>> handlers) {
         for (int i = 0; i < handlers.size(); i++) {
             try {
                 LifecycleHandler handler = handlers.get(i).newInstance();
@@ -413,8 +411,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         }
     }
 
-    public HttpResponse handleAuthorize(HttpRequest req) {
-        HttpResponse response = null;
+    public FullHttpResponse handleAuthorize(HttpRequest req) {
+        FullHttpResponse response = null;
         try {
             String redirectURI = auth.issueAuthorizationCode(req);
             // TODO: validation http protocol?
@@ -432,8 +430,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         return response;
     }
 
-    public HttpResponse handleRegister(HttpRequest req) {
-        HttpResponse response = null;
+    public FullHttpResponse handleRegister(FullHttpRequest req) {
+        FullHttpResponse response = null;
         try {
             ClientCredentials creds = auth.issueClientCredentials(req);
             ObjectMapper mapper = new ObjectMapper();
@@ -459,7 +457,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         return response;
     }
 
-    public HttpResponse handleUserTokenRevoke(HttpRequest req) {
+    public FullHttpResponse handleUserTokenRevoke(FullHttpRequest req) {
         boolean revoked = false;
         try {
             revoked = auth.revokeUserAccessTokens(req);
@@ -469,11 +467,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             return Response.createOAuthExceptionResponse(e);
         }
         String json = "{\"revoked\":\"" + revoked + "\"}";
-        HttpResponse response = Response.createOkResponse(json);
+        FullHttpResponse response = Response.createOkResponse(json);
         return response;
     }
 
-    public HttpResponse handleTokenRevoke(HttpRequest req) {
+    public FullHttpResponse handleTokenRevoke(FullHttpRequest req) {
         boolean revoked = false;
         try {
             revoked = auth.revokeToken(req);
@@ -485,13 +483,13 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         //String json = "{\"revoked\":\"" + revoked + "\"}";
         JsonObject json = new JsonObject();
         json.addProperty("revoked", revoked);
-        HttpResponse response = Response.createOkResponse(json.toString());
+        FullHttpResponse response = Response.createOkResponse(json.toString());
         return response;
     }
 
-    public HttpResponse handleRegisterScope(HttpRequest req) {
+    public FullHttpResponse handleRegisterScope(FullHttpRequest req) {
         ScopeService scopeService = getScopeService();
-        HttpResponse response = null;
+        FullHttpResponse response = null;
         try {
             String responseMsg = scopeService.registerScope(req);
             response = Response.createOkResponse(responseMsg);
@@ -502,8 +500,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         return response;
     }
 
-    public HttpResponse handleUpdateScope(HttpRequest req) {
-        HttpResponse response = null;
+    public FullHttpResponse handleUpdateScope(FullHttpRequest req) {
+        FullHttpResponse response = null;
         Matcher m = OAUTH_CLIENT_SCOPE_PATTERN.matcher(req.getUri());
         if (m.find()) {
             String scopeName = m.group(1);
@@ -521,9 +519,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         return response;
     }
 
-    public HttpResponse handleGetAllScopes(HttpRequest req) {
+    public FullHttpResponse handleGetAllScopes(HttpRequest req) {
         ScopeService scopeService = getScopeService();
-        HttpResponse response = null;
+        FullHttpResponse response = null;
         try {
             String jsonString = scopeService.getScopes(req);
             response = Response.createOkResponse(jsonString);
@@ -534,8 +532,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         return response;
     }
 
-    public HttpResponse handleGetScope(HttpRequest req) {
-        HttpResponse response = null;
+    public FullHttpResponse handleGetScope(HttpRequest req) {
+        FullHttpResponse response = null;
         Matcher m = OAUTH_CLIENT_SCOPE_PATTERN.matcher(req.getUri());
         if (m.find()) {
             String scopeName = m.group(1);
@@ -553,8 +551,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         return response;
     }
 
-    public HttpResponse handleDeleteScope(HttpRequest req) {
-        HttpResponse response = null;
+    public FullHttpResponse handleDeleteScope(HttpRequest req) {
+        FullHttpResponse response = null;
         Matcher m = OAUTH_CLIENT_SCOPE_PATTERN.matcher(req.getUri());
         if (m.find()) {
             String scopeName = m.group(1);
@@ -576,9 +574,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         return new ScopeService();
     }
 
-    public HttpResponse handleUpdateClientApplication(HttpRequest req) {
-        HttpResponse response = null;
-        Matcher m = APPLICATION_PATTERN.matcher(req.getUri());
+    public FullHttpResponse handleUpdateClientApplication(FullHttpRequest req) {
+        FullHttpResponse response = null;
+        Matcher m = APPLICATION_PATTERN.matcher(req.uri());
         if (m.find()) {
             String clientId = m.group(1);
             try {
@@ -595,10 +593,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         return response;
     }
 
-    public HttpResponse handleGetAllClientApplications(HttpRequest req) {
+    public FullHttpResponse handleGetAllClientApplications(HttpRequest req) {
         List<ApplicationInfo> apps = filterClientApps(req, DBManagerFactory.getInstance().getAllApplications());
         ObjectMapper mapper = new ObjectMapper();
-        HttpResponse response = null;
+        FullHttpResponse response = null;
         try {
             String jsonString = mapper.writeValueAsString(apps);
             response = Response.createOkResponse(jsonString);
@@ -622,7 +620,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     public List<ApplicationInfo> filterClientApps(HttpRequest req, List<ApplicationInfo> apps) {
         List<ApplicationInfo> filteredApps = new ArrayList<ApplicationInfo>();
         QueryStringDecoder dec = new QueryStringDecoder(req.getUri());
-        Map<String, List<String>> params = dec.getParameters();
+        Map<String, List<String>> params = dec.parameters();
         if (params != null) {
             String status = QueryParameter.getFirstElement(params, "status");
             Integer statusInt = null;
@@ -645,10 +643,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         return filteredApps;
     }
 
-    public HttpResponse handleGetAccessTokens(HttpRequest req) {
-        HttpResponse response = null;
+    public FullHttpResponse handleGetAccessTokens(HttpRequest req) {
+        FullHttpResponse response = null;
         QueryStringDecoder dec = new QueryStringDecoder(req.getUri());
-        Map<String, List<String>> params = dec.getParameters();
+        Map<String, List<String>> params = dec.parameters();
         String clientId = QueryParameter.getFirstElement(params, QueryParameter.CLIENT_ID);
         String userId = QueryParameter.getFirstElement(params, QueryParameter.USER_ID);
         if (clientId == null || clientId.isEmpty()) {
@@ -669,31 +667,30 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         return response;
     }
 
-    public ResponseListener createResponseListener(BasicFilter filter, Map<String, String> errors, final Channel channel, final HttpRequest request) {
-        ResponseListener responseListener = new ResponseListener(filter, errors) {
+    public ResponseListener createResponseListener(BasicFilter filter, Map<String, String> errors, final Channel channel, final FullHttpRequest request) {
+        return new ResponseListener(filter, errors) {
             @Override
-            public void responseReceived(HttpMessage response) {
+            public void responseReceived(FullHttpMessage response) {
                 HttpMessage newResponse = response;
-                if (response instanceof HttpResponse) {
+                if (response instanceof FullHttpResponse) {
                     if (getFilter() != null) {
-                        newResponse = getFilter().execute((HttpResponse) response);
+                        newResponse = getFilter().execute((FullHttpResponse) response);
                     }
                 }
-                LifecycleEventHandlers.invokeResponseEventHandlers(request, (HttpResponse) newResponse);
-                ChannelFuture future = channel.write(newResponse);
+                LifecycleEventHandlers.invokeResponseEventHandlers(request, (FullHttpResponse) newResponse);
+                ChannelFuture future = channel.writeAndFlush(newResponse);
                 if (!HttpHeaders.isKeepAlive(request)) {
                     future.addListener(ChannelFutureListener.CLOSE);
                 }
             }
         };
-        return responseListener;
     }
 
-    public HttpRequest mapRequest(HttpRequest request, MappingEndpoint mapping, MappingConfig config, AccessToken validToken)
+    public FullHttpRequest mapRequest(FullHttpRequest request, MappingEndpoint mapping, MappingConfig config, AccessToken validToken)
             throws MappingException, UpstreamException {
         BaseMapper mapper = new BaseMapper();
         request.headers().set(HttpHeaders.Names.HOST, mapping.getBackendHost());
-        HttpRequest req = mapper.map(request, mapping.getInternalEndpoint());
+        FullHttpRequest req = mapper.map(request, mapping.getInternalEndpoint());
         if (mapping.getAction() != null) {
             BasicAction action = config.getAction(mapping.getAction());
             req = action.execute(req, validToken, mapping);
@@ -709,29 +706,29 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         return filter;
     }
 
-    public void writeResponseToChannel(Channel channel, HttpRequest request, HttpResponse response) {
+    public void writeResponseToChannel(Channel channel, FullHttpRequest request, FullHttpResponse response) {
         LifecycleEventHandlers.invokeResponseEventHandlers(request, response);
-        ChannelFuture future = channel.write(response);
+        ChannelFuture future = channel.writeAndFlush(response);
         future.addListener(ChannelFutureListener.CLOSE);
     }
 
     public void setConnectTimeout(final Channel channel) {
-        channel.getConfig().setConnectTimeoutMillis(ServerConfig.getConnectTimeout());
-        channel.getConfig().setOption("soLinger", -1);
+        channel.config().setConnectTimeoutMillis(ServerConfig.getConnectTimeout());
+        channel.config().setOption(ChannelOption.TCP_NODELAY.SO_LINGER, -1);
     }
 
     public void reloadMappingConfig(final Channel channel) {
-        HttpResponse response = null;
+        FullHttpResponse response = null;
         try {
             ConfigLoader.reloadConfigs();
-            response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
         } catch (MappingException e) {
-            response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
-            ChannelBuffer content = ChannelBuffers.copiedBuffer(e.getMessage().getBytes(CharsetUtil.UTF_8));
+            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
+            ByteBuf content = Unpooled.copiedBuffer(e.getMessage().getBytes(CharsetUtil.UTF_8));
             response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "application/json");
-            response.setContent(content);
+            response.replace(content);
         }
-        ChannelFuture future = channel.write(response);
+        ChannelFuture future = channel.writeAndFlush(response);
         future.addListener(ChannelFutureListener.CLOSE);
     }
 
@@ -751,24 +748,22 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     }
 
     public void getLoadedMappings(Channel channel) {
-        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "application/json");
         Map<String, MappingConfig> mappings = ConfigLoader.getLoadedMappings();
         Gson gson = new Gson();
         String jsonObj = gson.toJson(mappings);
-        response.setContent(ChannelBuffers.copiedBuffer(jsonObj.getBytes(CharsetUtil.UTF_8)));
-        ChannelFuture future = channel.write(response);
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer(jsonObj.getBytes(CharsetUtil.UTF_8)));
+        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "application/json");
+        ChannelFuture future = channel.writeAndFlush(response);
         future.addListener(ChannelFutureListener.CLOSE);
     }
 
     public void getLoadedGlobalErrors(Channel channel) {
-        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "application/json");
         Map<Integer, String> mappings = ConfigLoader.getLoadedGlobalErrors();
         Gson gson = new Gson();
         String jsonObj = gson.toJson(mappings);
-        response.setContent(ChannelBuffers.copiedBuffer(jsonObj.getBytes(CharsetUtil.UTF_8)));
-        ChannelFuture future = channel.write(response);
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.copiedBuffer(jsonObj.getBytes(CharsetUtil.UTF_8)));
+        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "application/json");
+        ChannelFuture future = channel.writeAndFlush(response);
         future.addListener(ChannelFutureListener.CLOSE);
 
     }

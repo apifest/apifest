@@ -17,12 +17,12 @@
 package com.apifest.example;
 
 import com.apifest.api.AccessToken;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.util.CharsetUtil;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,14 +44,14 @@ public class AddSenderIdInBodyAction extends BasicAction {
      * @see com.apifest.api.BasicAction#execute(org.jboss.netty.handler.codec.http.HttpRequest, java.lang.String, org.jboss.netty.handler.codec.http.HttpResponse)
      */
     @Override
-    public HttpRequest execute(HttpRequest req, String internalURI, AccessToken tokenValidationResponse) throws MappingException {
+    public FullHttpRequest execute(FullHttpRequest req, String internalURI, AccessToken tokenValidationResponse) throws MappingException {
         JsonParser parser = new JsonParser();
-        JsonObject json= parser.parse(new String(req.getContent().toString(CharsetUtil.UTF_8))).getAsJsonObject();
+        JsonObject json= parser.parse(new String(req.content().toString(CharsetUtil.UTF_8))).getAsJsonObject();
         log.info("request body: " + json);
         json.addProperty("senderId", "1232");
         byte[] newContent = json.toString().getBytes(CharsetUtil.UTF_8);
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(newContent);
-        req.setContent(buf);
+        ByteBuf buf = Unpooled.copiedBuffer(newContent);
+        req.replace(buf);
         HttpHeaders.setContentLength(req, newContent.length);
         return req;
     }

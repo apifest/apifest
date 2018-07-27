@@ -16,25 +16,12 @@
 
 package com.apifest;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.testng.Assert.assertEquals;
-
-import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
-import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpVersion;
-import org.slf4j.Logger;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
 /**
  * @author Rossitsa Borissova
  */
 public class BaseMapperTest {
 
-    BaseMapper mapper;
+    /*BaseMapper mapper;
 
     @BeforeMethod
     public void setup() {
@@ -87,5 +74,5 @@ public class BaseMapperTest {
 
         // THEN
         assertEquals(newUri, "http://otherhost:7878/payments?city=Berlin&key=123");
-    }
+    }*/
 }

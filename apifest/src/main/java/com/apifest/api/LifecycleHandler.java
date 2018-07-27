@@ -16,8 +16,8 @@
 
 package com.apifest.api;
 
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
 
 /**
  * Handles request on token lifecycle.
@@ -31,5 +31,5 @@ public interface LifecycleHandler {
      * @param request incoming request
      * @param response outgoing response
      */
-    public void handle(HttpRequest request, HttpResponse response);
+    public void handle(FullHttpRequest request, FullHttpResponse response);
 }

@@ -16,7 +16,7 @@
 
 package com.apifest.oauth20;
 
-import org.jboss.netty.util.CharsetUtil;
+import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

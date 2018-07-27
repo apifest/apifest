@@ -16,32 +16,12 @@
 
 package com.apifest.example;
 
-import static org.mockito.BDDMockito.willReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.testng.Assert.assertEquals;
-
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpVersion;
-import org.jboss.netty.util.CharsetUtil;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
 /**
  * @author Rossitsa Borissova
  */
 public class AddSenderIdInBodyActionTest {
 
-    AddSenderIdInBodyAction action;
+  /*  AddSenderIdInBodyAction action;
     HttpRequest req;
 
     @BeforeMethod
@@ -52,7 +32,7 @@ public class AddSenderIdInBodyActionTest {
         String content = "{}";
         req.setContent(ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8)));
         req.headers().add(HttpHeaders.Names.CONTENT_LENGTH, content.getBytes(CharsetUtil.UTF_8).length);
-    }
+    }*/
 
     /*@Test
     public void when_execute_add_senderId_in_request_body() throws Exception {

@@ -16,42 +16,6 @@
 
 package com.apifest.oauth20;
 
-import com.apifest.HttpRequestHandler;
-import com.apifest.ServerConfig;
-import com.apifest.api.AccessToken;
-import com.apifest.api.UserDetails;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.http.HttpStatus;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.handler.codec.http.DefaultHttpHeaders;
-import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.HttpVersion;
-import org.jboss.netty.util.CharsetUtil;
-import org.slf4j.Logger;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.mockito.BDDMockito.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.*;
-
-
 /**
  * @author Rossitsa Borissova
  */

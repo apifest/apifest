@@ -16,7 +16,7 @@
 
 package com.apifest.api;
 
-import org.jboss.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.FullHttpResponse;
 
 /**
  * Exception thrown when the upstream should be broken (no hit of the backend) and a response should be returned directly.
@@ -27,18 +27,18 @@ public class UpstreamException  extends Exception {
 
     private static final long serialVersionUID = 1447022954843271887L;
 
-    private HttpResponse response;
+    private FullHttpResponse response;
 
-    public UpstreamException(HttpResponse response) {
+    public UpstreamException(FullHttpResponse response) {
         this.response = response;
     }
 
     /**
      * Returns the response that will be returned when this exception is thrown.
      *
-     * @return {@link HttpResponse} custom response
+     * @return {@link FullHttpResponse} custom response
      */
-    public HttpResponse getResponse() {
+    public FullHttpResponse getResponse() {
         return response;
     }
 

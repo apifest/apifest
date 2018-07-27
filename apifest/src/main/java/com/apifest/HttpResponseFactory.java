@@ -16,15 +16,15 @@
 
 package com.apifest;
 
-
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.HttpVersion;
-import org.jboss.netty.util.CharsetUtil;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
+import io.netty.util.CharsetUtil;
 
 /**
  * Creates HTTP response with appropriate HTTP status and message.
@@ -41,15 +41,15 @@ public class HttpResponseFactory {
      *
      * @return HTTP response created
      */
-    public static HttpResponse createISEResponse() {
-        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR);
-        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
-        String errorMessage = ConfigLoader.getLoadedGlobalErrors().get(HttpResponseStatus.INTERNAL_SERVER_ERROR.getCode());
+    public static FullHttpResponse createISEResponse() {
+
+        String errorMessage = ConfigLoader.getLoadedGlobalErrors().get(HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
         if (errorMessage == null) {
             errorMessage = "";
         }
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(errorMessage.getBytes(CharsetUtil.UTF_8));
-        response.setContent(buf);
+        ByteBuf buf = Unpooled.copiedBuffer(errorMessage.getBytes(CharsetUtil.UTF_8));
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.INTERNAL_SERVER_ERROR, buf);
+        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
         response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         return response;
     }
@@ -57,19 +57,17 @@ public class HttpResponseFactory {
     /**
      * Creates HTTP response with HTTP status 401 and the message passed.
      *
-     * @param message
-     *            message returned in the response
+     * @param message message returned in the response
      * @return HTTP response created
      */
-    public static HttpResponse createUnauthorizedResponse(String message) {
-        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
-        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
-        String errorMessage = ConfigLoader.getLoadedGlobalErrors().get(HttpResponseStatus.UNAUTHORIZED.getCode());
+    public static FullHttpResponse createUnauthorizedResponse(String message) {
+        String errorMessage = ConfigLoader.getLoadedGlobalErrors().get(HttpResponseStatus.UNAUTHORIZED.code());
         if (errorMessage == null) {
             errorMessage = message;
         }
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(errorMessage.getBytes(CharsetUtil.UTF_8));
-        response.setContent(buf);
+        ByteBuf buf = Unpooled.copiedBuffer(errorMessage.getBytes(CharsetUtil.UTF_8));
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED, buf);
+        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
         response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         return response;
     }
@@ -79,16 +77,15 @@ public class HttpResponseFactory {
      *
      * @return HTTP response created
      */
-    public static HttpResponse createNotFoundResponse() {
-        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND);
-        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
+    public static FullHttpResponse createNotFoundResponse() {
 
-        String errorMessage = ConfigLoader.getLoadedGlobalErrors().get(HttpResponseStatus.NOT_FOUND.getCode());
+        String errorMessage = ConfigLoader.getLoadedGlobalErrors().get(HttpResponseStatus.NOT_FOUND.code());
         if (errorMessage == null) {
             errorMessage = HttpResponseFactory.NOT_FOUND_CONTENT;
         }
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(errorMessage.getBytes(CharsetUtil.UTF_8));
-        response.setContent(buf);
+        ByteBuf buf = Unpooled.copiedBuffer(errorMessage.getBytes(CharsetUtil.UTF_8));
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND, buf);
+        response.headers().set(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
         response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         return response;
     }
@@ -99,11 +96,10 @@ public class HttpResponseFactory {
      * @param message message returned in the response
      * @return HTTP response created
      */
-    public static HttpResponse createOKResponse(String message) {
-        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+    public static FullHttpResponse createOKResponse(String message) {
+        ByteBuf buf = Unpooled.copiedBuffer(message.getBytes(CharsetUtil.UTF_8));
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, buf);
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes(CharsetUtil.UTF_8));
-        response.setContent(buf);
         response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         return response;
     }
@@ -112,14 +108,13 @@ public class HttpResponseFactory {
      * Create HTTP response with a given HTTP status and message.
      *
      * @param httpStatus HTTP response status
-     * @param message response message
+     * @param message    response message
      * @return HTTP response created
      */
-    public static HttpResponse createResponse(HttpResponseStatus httpStatus, String message) {
-        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, httpStatus);
+    public static FullHttpResponse createResponse(HttpResponseStatus httpStatus, String message) {
+        ByteBuf buf = Unpooled.copiedBuffer(message.getBytes(CharsetUtil.UTF_8));
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, httpStatus, buf);
         response.headers().set(HttpHeaders.Names.CONTENT_TYPE, APPLICATION_JSON);
-        ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes(CharsetUtil.UTF_8));
-        response.setContent(buf);
         response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         return response;
     }

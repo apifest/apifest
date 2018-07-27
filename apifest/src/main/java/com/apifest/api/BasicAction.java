@@ -17,13 +17,11 @@
 package com.apifest.api;
 
 import com.apifest.api.AccessToken;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.util.CharsetUtil;
-
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpRequest;
 
 
 /**
@@ -48,7 +46,7 @@ public abstract class BasicAction {
      * @throws MappingException if something goes wrong with request mapping
      * @throws UpstreamException if the upstream should be stopped and a response should be returned directly
      */
-    public HttpRequest execute(HttpRequest req, String internalURI, AccessToken validToken)
+    public FullHttpRequest execute(FullHttpRequest req, String internalURI, AccessToken validToken)
             throws MappingException, UpstreamException {
         return req;
     }
@@ -62,7 +60,7 @@ public abstract class BasicAction {
      * @throws MappingException if something goes wrong with request mapping
      * @throws UpstreamException if the upstream should be stopped and a response should be returned directly
      */
-    public HttpRequest execute(HttpRequest req, AccessToken validToken, MappingEndpoint mappingEndpoint)
+    public FullHttpRequest execute(FullHttpRequest req, AccessToken validToken, MappingEndpoint mappingEndpoint)
             throws MappingException, UpstreamException {
         return execute(req, req.getUri(), validToken);
     }

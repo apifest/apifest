@@ -16,37 +16,12 @@
 
 package com.apifest.oauth20;
 
-import com.apifest.HttpRequestHandler;
-import com.apifest.ServerConfig;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.HttpVersion;
-import org.jboss.netty.util.CharsetUtil;
-import org.slf4j.Logger;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import static org.mockito.BDDMockito.willReturn;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
-
 /**
  * @author Rossitsa Borissova
  */
 public class ScopeServiceTest {
 
-    ScopeService service;
+    /*ScopeService service;
 
     @BeforeMethod
     public void setup() {
@@ -949,5 +924,5 @@ public class ScopeServiceTest {
         verify(ScopeValidator.getInstance(), times(paramsCount)).validate(anyString(), anyString());
 
         MockScopeValidator.deinstall();
-    }
+    }*/
 }

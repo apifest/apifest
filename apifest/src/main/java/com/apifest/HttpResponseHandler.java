@@ -16,69 +16,67 @@
 
 package com.apifest;
 
-import java.net.ConnectException;
-
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.util.AttributeKey;
+import io.netty.util.CharsetUtil;
 import org.apache.http.HttpStatus;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.ConnectException;
 
 /**
  * Handler for backend responses.
  *
  * @author Rossitsa Borissova
  */
-public class HttpResponseHandler extends SimpleChannelUpstreamHandler {
+public class HttpResponseHandler extends ChannelInboundHandlerAdapter {
 
+    public static final AttributeKey<ResponseListener> responseListenerAttachmentKey = AttributeKey.newInstance("responseListenerAttachmentKey");
     protected Logger log = LoggerFactory.getLogger(HttpResponseHandler.class);
     private static final int  HTTP_STATUS_300 = 300;
 
     @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
-        HttpResponse response = null;
+    public void channelRead(ChannelHandlerContext ctx, Object e) {
+        FullHttpResponse response = null;
         Integer statusCode = null;
-        if(e.getMessage() instanceof HttpResponse){
-            response = (HttpResponse) e.getMessage();
-            statusCode = response.getStatus().getCode();
+        System.out.println(e.getClass().getCanonicalName());
+
+        if(e instanceof FullHttpResponse){
+            response = (FullHttpResponse) e;
+            statusCode = response.status().code();
         }
-        Channel channel = ctx.getChannel();
+        Channel channel = ctx.channel();
         // do not close the channel if 100 Continue
         if ((statusCode == null) || (statusCode != null && statusCode.intValue() != HttpStatus.SC_CONTINUE)) {
             channel.close();
         }
-        if(ctx.getAttachment() instanceof TokenValidationListener) {
-            TokenValidationListener listener = (TokenValidationListener) ctx.getAttachment();
-            listener.responseReceived(response);
-        } else {
-            ResponseListener listener = (ResponseListener) ctx.getAttachment();
-            // check listener errors map
-            if (statusCode != null && statusCode >= HTTP_STATUS_300 && (listener.getErrorMessage(statusCode) != null)) {
-                String content = listener.getErrorMessage(statusCode);
-                if (content != null) {
-                    response.headers().set(HttpHeaders.Names.CONTENT_TYPE, HttpResponseFactory.APPLICATION_JSON);
-                    response.setContent(ChannelBuffers.copiedBuffer(content.getBytes(CharsetUtil.UTF_8)));
-                    response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, content.getBytes(CharsetUtil.UTF_8).length);
-                }
+
+        ResponseListener listener = channel.attr(responseListenerAttachmentKey).get();
+        // check listener errors map
+        if (statusCode != null && statusCode >= HTTP_STATUS_300 && (listener.getErrorMessage(statusCode) != null)) {
+            String content = listener.getErrorMessage(statusCode);
+            if (content != null) {
+                response.headers().set(HttpHeaderNames.CONTENT_TYPE, HttpResponseFactory.APPLICATION_JSON);
+                response.replace(Unpooled.copiedBuffer(content.getBytes(CharsetUtil.UTF_8)));
+                response.headers().set(HttpHeaderNames.CONTENT_LENGTH, content.getBytes(CharsetUtil.UTF_8).length);
             }
-            listener.responseReceived(response);
         }
+        listener.responseReceived(response);
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) throws Exception {
         if (e.getCause() instanceof ConnectException) {
-            log.error("Cannot connect to {}", ctx.getChannel().getRemoteAddress());
+            log.error("Cannot connect to {}", ctx.channel().remoteAddress());
         }
         log.error("response handler error: {}", e);
-        ctx.sendUpstream(e);
+        ctx.fireExceptionCaught(e);
     }
 }
 

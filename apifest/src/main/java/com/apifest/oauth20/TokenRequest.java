@@ -17,11 +17,12 @@
 package com.apifest.oauth20;
 
 import com.apifest.ServerConfig;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.util.CharsetUtil;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.util.CharsetUtil;
 
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -60,8 +61,8 @@ public class TokenRequest {
 
     private String userId;
 
-    public TokenRequest(HttpRequest request) {
-        String content = request.getContent().toString(CharsetUtil.UTF_8);
+    public TokenRequest(FullHttpRequest request) {
+        String content = request.content().toString(CharsetUtil.UTF_8);
         List<NameValuePair> values = URLEncodedUtils.parse(content, Charset.forName("UTF-8"));
         Map<String, String> params = new HashMap<String, String>();
         for (NameValuePair pair : values) {

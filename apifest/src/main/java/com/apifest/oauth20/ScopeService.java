@@ -17,15 +17,15 @@
 package com.apifest.oauth20;
 
 import com.apifest.ServerConfig;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.QueryStringDecoder;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.jboss.netty.buffer.ChannelBufferInputStream;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,13 +64,13 @@ public class ScopeService {
      * @param req http request
      * @return String message that will be returned in the response
      */
-    public String registerScope(HttpRequest req) throws OAuthException {
+    public String registerScope(FullHttpRequest req) throws OAuthException {
         String contentType = (req.headers() != null) ? req.headers().get(HttpHeaders.Names.CONTENT_TYPE) : null;
         String responseMsg = "";
         // check Content-Type
         if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
             try {
-                Scope scope = InputValidator.validate(new ChannelBufferInputStream(req.getContent()), Scope.class);
+                Scope scope = InputValidator.validate(req.content().toString(), Scope.class);
                 if (scope.valid()) {
                     if (!Scope.validScopeName(scope.getScope())) {
                         log.error("scope name is not valid");
@@ -121,7 +121,7 @@ public class ScopeService {
      */
     public String getScopes(HttpRequest req) throws OAuthException {
         QueryStringDecoder dec = new QueryStringDecoder(req.getUri());
-        Map<String, List<String>> queryParams = dec.getParameters();
+        Map<String, List<String>> queryParams = dec.parameters();
         if(queryParams.containsKey("client_id")) {
             return getScopes(queryParams.get("client_id").get(0));
         }
@@ -236,13 +236,13 @@ public class ScopeService {
      * @param req http request
      * @return String message that will be returned in the response
      */
-    public String updateScope(HttpRequest req, String scopeName) throws OAuthException {
+    public String updateScope(FullHttpRequest req, String scopeName) throws OAuthException {
         String contentType = (req.headers() != null) ? req.headers().get(HttpHeaders.Names.CONTENT_TYPE) : null;
         String responseMsg = "";
         // check Content-Type
         if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
             try {
-                Scope scope = InputValidator.validate(new ChannelBufferInputStream(req.getContent()), Scope.class);
+                Scope scope = InputValidator.validate(req.content().toString(), Scope.class);
                 if (scope.validForUpdate()) {
                     Scope foundScope = DBManagerFactory.getInstance().findScope(scopeName);
                     if (foundScope == null) {

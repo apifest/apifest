@@ -15,24 +15,12 @@
  */
 package com.apifest.oauth20;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.util.CharsetUtil;
-import org.testng.annotations.Test;
-
-import static org.mockito.BDDMockito.willReturn;
-import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-
 /**
  * @author Rossitsa Borissova
  */
 public class RevokeTokenRequestTest {
 
-    @Test
+   /* @Test
     public void when_revoke_token_request_content_create_revoke_token_request_object() throws Exception {
         // GIVEN
         HttpRequest req = mock(HttpRequest.class);
@@ -149,5 +137,5 @@ public class RevokeTokenRequestTest {
         // THEN
         assertNull(revokeTokenReq.getAccessToken());
         assertNull(revokeTokenReq.getClientId());
-    }
+    }*/
 }

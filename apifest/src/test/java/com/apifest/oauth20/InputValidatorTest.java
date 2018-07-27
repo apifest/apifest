@@ -15,22 +15,13 @@
  */
 package com.apifest.oauth20;
 
-import org.jboss.netty.util.CharsetUtil;
-import org.testng.annotations.Test;
-
-import java.io.ByteArrayInputStream;
-
-import static org.mockito.BDDMockito.willDoNothing;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.verify;
-
 /**
  * @author Rossitsa Borissova
  *
  */
 public class InputValidatorTest {
 
-
+/*
     @Test
     public void when_scope_input_invoke_validate_method_of_scope_validator_class() throws Exception {
         // GIVEN
@@ -72,5 +63,5 @@ public class InputValidatorTest {
         // WHEN
         String testString = "{\"client_id\":\"123456\"}";
         InputValidator.validate(new ByteArrayInputStream(testString.getBytes(CharsetUtil.UTF_8)), ClientCredentials.class);
-    }
+    }*/
 }

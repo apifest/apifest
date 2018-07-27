@@ -16,14 +16,16 @@
 
 package com.apifest.oauth20;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.HttpVersion;
-import org.jboss.netty.util.CharsetUtil;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.DefaultHttpResponse;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
+import io.netty.util.CharsetUtil;
 
 /**
  * Contains all supported responses and response messages.
@@ -61,35 +63,34 @@ public final class Response {
     public static final String APPLICATION_JSON = "application/json";
 
 
-    public static HttpResponse createBadRequestResponse() {
+    public static FullHttpResponse createBadRequestResponse() {
         return createBadRequestResponse(null);
     }
 
-    public static HttpResponse createBadRequestResponse(String message) {
+    public static FullHttpResponse createBadRequestResponse(String message) {
         return createResponse(HttpResponseStatus.BAD_REQUEST, message);
     }
 
-    public static HttpResponse createNotFoundResponse() {
+    public static FullHttpResponse createNotFoundResponse() {
         return createResponse(HttpResponseStatus.NOT_FOUND, Response.NOT_FOUND_CONTENT);
     }
 
-    public static HttpResponse createOkResponse(String jsonString) {
+    public static FullHttpResponse createOkResponse(String jsonString) {
         return createResponse(HttpResponseStatus.OK, jsonString);
     }
 
-    public static HttpResponse createOAuthExceptionResponse(OAuthException ex) {
+    public static FullHttpResponse createOAuthExceptionResponse(OAuthException ex) {
         return createResponse(ex.getHttpStatus(), ex.getMessage());
     }
 
-    public static HttpResponse createUnauthorizedResponse() {
+    public static FullHttpResponse createUnauthorizedResponse() {
         return createResponse(HttpResponseStatus.UNAUTHORIZED, Response.INVALID_ACCESS_TOKEN);
     }
 
-    public static HttpResponse createResponse(HttpResponseStatus status, String message) {
-        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, status);
+    public static FullHttpResponse createResponse(HttpResponseStatus status, String message) {
+        ByteBuf buf = Unpooled.copiedBuffer(message.getBytes(CharsetUtil.UTF_8));
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, buf);
         if (message != null) {
-            ChannelBuffer buf = ChannelBuffers.copiedBuffer(message.getBytes(CharsetUtil.UTF_8));
-            response.setContent(buf);
             response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, buf.array().length);
         } else {
             response.headers().set(HttpHeaders.Names.CONTENT_LENGTH, 0);

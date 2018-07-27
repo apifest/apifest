@@ -16,7 +16,7 @@
 
 package com.apifest.api;
 
-import org.jboss.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpRequest;
 
 /**
  * Interface for custom grant_type handler.

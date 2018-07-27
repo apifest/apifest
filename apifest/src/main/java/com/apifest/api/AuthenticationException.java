@@ -16,7 +16,8 @@
 
 package com.apifest.api;
 
-import org.jboss.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpResponse;
 
 /**
  * Exception thrown when something goes wrong with authentication.
@@ -31,13 +32,13 @@ public class AuthenticationException extends Exception {
 
     // an HTTP response that should be returned as a result of issue access token
     // for instance, if the user authentication requires more user details
-    private HttpResponse response;
+    private FullHttpResponse response;
 
     public AuthenticationException(String message) {
         this.message = message;
     }
 
-    public AuthenticationException(HttpResponse response) {
+    public AuthenticationException(FullHttpResponse response) {
         this.response = response;
     }
 
@@ -51,7 +52,7 @@ public class AuthenticationException extends Exception {
      *
      * @return {@link HttpResponse} response
      */
-    public HttpResponse getResponse() {
+    public FullHttpResponse getResponse() {
         return response;
     }
 

@@ -16,25 +16,26 @@
 
 package com.apifest;
 
-import java.net.InetSocketAddress;
-import java.util.concurrent.Executors;
-
-import com.apifest.oauth20.AuthorizationServer;
-import org.jboss.netty.bootstrap.ClientBootstrap;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFactory;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelFutureListener;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
-import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
-import org.jboss.netty.handler.codec.http.HttpClientCodec;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpClientCodec;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
 
 /**
  * Client that re-sends the requests to the backend and handles the responses.
@@ -45,30 +46,28 @@ public final class MappingClient {
 
     private static final int MAX_CONTENT_LEN = 10 * 1024 * 1024;
 
-    private ClientBootstrap bootstrap;
     private static volatile MappingClient client;
 
     protected Logger log = LoggerFactory.getLogger(MappingClient.class);
+    Bootstrap b = new Bootstrap();
 
     private MappingClient() {
-        ChannelFactory factory = new NioClientSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool());
-        bootstrap = new ClientBootstrap(factory);
-        bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
-
-            @Override
-            public ChannelPipeline getPipeline() {
-                ChannelPipeline pipeline = Channels.pipeline();
-                pipeline.addLast("codec", new HttpClientCodec());
-                pipeline.addLast("aggregator", new HttpChunkAggregator(MAX_CONTENT_LEN));
-                pipeline.addLast("handler", new HttpResponseHandler());
-                return pipeline;
-            }
-        });
-
-        bootstrap.setOption("child.tcpNoDelay", true);
-        bootstrap.setOption("child.keepAlive", true);
-        bootstrap.setOption("child.soLinger", -1);
-        bootstrap.setOption("child.connectTimeoutMillis", ServerConfig.getConnectTimeout());
+        EventLoopGroup group = new NioEventLoopGroup();
+        b.group(group)
+                .channel(NioSocketChannel.class)
+                .handler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    public void initChannel(SocketChannel ch) throws Exception {
+                        ChannelPipeline p = ch.pipeline();
+                        p.addLast("codec", new HttpClientCodec());
+                        p.addLast("aggregator", new HttpObjectAggregator(MAX_CONTENT_LEN));
+                        p.addLast("handler", new HttpResponseHandler());
+                    }
+                });
+        b.option(ChannelOption.TCP_NODELAY, true);
+        b.option(ChannelOption.SO_KEEPALIVE, true);
+        b.option(ChannelOption.SO_LINGER, -1);
+        b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, ServerConfig.getConnectTimeout());
     }
 
     public synchronized static MappingClient getClient() {
@@ -86,30 +85,30 @@ public final class MappingClient {
      * @param port backend port
      * @param responseListener listener that will handles the backend response
      */
-    public void send(final HttpRequest request, String host, int port, final ResponseListener responseListener) {
-        ChannelFuture future = bootstrap.connect(new InetSocketAddress(host, port));
+    public void send(final FullHttpRequest request, String host, int port, final ResponseListener responseListener) {
+        ChannelFuture future = b.connect(new InetSocketAddress(host, port));
         future.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) {
-                final Channel channel = future.getChannel();
-                channel.getConfig().setConnectTimeoutMillis(ServerConfig.getConnectTimeout());
-                if (channel.isConnected()) {
-                    channel.getPipeline().getContext("handler").setAttachment(responseListener);
+                final Channel channel = future.channel();
+                channel.config().setConnectTimeoutMillis(ServerConfig.getConnectTimeout());
+                if (channel.isWritable()) {
+                    channel.attr(HttpResponseHandler.responseListenerAttachmentKey).set(responseListener);
                     if (future.isSuccess() && channel.isOpen()) {
-                        channel.write(request);
+                        channel.writeAndFlush(request);
                         LifecycleEventHandlers.invokeRequestEventHandlers(request, null);
                     } else {
                         // if cannot connect
                         channel.disconnect();
                         channel.close();
-                        HttpResponse response = HttpResponseFactory.createISEResponse();
+                        FullHttpResponse response = HttpResponseFactory.createISEResponse();
                         // HttpResponse response = HttpResponseFactory.createNotFoundResponse();
                         responseListener.responseReceived(response);
                     }
                 } else {
                     channel.disconnect();
                     channel.close();
-                    HttpResponse response = HttpResponseFactory.createISEResponse();
+                    FullHttpResponse response = HttpResponseFactory.createISEResponse();
                     // HttpResponse response = HttpResponseFactory.createNotFoundResponse();
                     responseListener.responseReceived(response);
                 }

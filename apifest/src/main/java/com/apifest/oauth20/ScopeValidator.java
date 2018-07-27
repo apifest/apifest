@@ -15,7 +15,7 @@
  */
 package com.apifest.oauth20;
 
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpResponseStatus;
 
 /**
  * Validates an input for scope services.

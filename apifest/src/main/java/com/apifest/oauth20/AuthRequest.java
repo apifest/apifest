@@ -16,9 +16,9 @@
 
 package com.apifest.oauth20;
 
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.QueryStringDecoder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -50,9 +50,9 @@ public class AuthRequest {
     private String userId;
 
     public AuthRequest(HttpRequest request) {
-        if (request.getUri() != null) {
+        if (request.uri() != null) {
             QueryStringDecoder dec = new QueryStringDecoder(request.getUri());
-            Map<String, List<String>> params = dec.getParameters();
+            Map<String, List<String>> params = dec.parameters();
             this.clientId = QueryParameter.getFirstElement(params, CLIENT_ID);
             this.responseType = QueryParameter.getFirstElement(params, RESPONSE_TYPE);
             this.redirectUri = QueryParameter.getFirstElement(params, REDIRECT_URI);

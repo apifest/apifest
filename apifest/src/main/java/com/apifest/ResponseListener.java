@@ -16,11 +16,10 @@
 
 package com.apifest;
 
-import java.util.Map;
-
-import org.jboss.netty.handler.codec.http.HttpMessage;
-
 import com.apifest.api.BasicFilter;
+import io.netty.handler.codec.http.FullHttpMessage;
+
+import java.util.Map;
 
 /**
  * Interface for listeners that handle the response received.
@@ -42,7 +41,7 @@ public abstract class ResponseListener {
      *
      * @param response response received from the backend
      */
-    abstract void responseReceived(HttpMessage response);
+    abstract void responseReceived(FullHttpMessage response);
 
     public BasicFilter getFilter() {
         return filter;

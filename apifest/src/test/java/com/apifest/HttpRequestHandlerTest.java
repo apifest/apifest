@@ -16,31 +16,6 @@
 
 package com.apifest;
 
-import static org.mockito.BDDMockito.willReturn;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
-import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpVersion;
-import org.slf4j.Logger;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
-
-import com.apifest.api.MappingAction;
-import com.apifest.api.MappingEndpoint;
-import com.apifest.example.ReplaceCustomerIdAction;
-
 /**
  * @author Rossitsa Borissova
  */

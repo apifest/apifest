@@ -18,9 +18,10 @@ package com.apifest.oauth20;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.util.CharsetUtil;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.util.CharsetUtil;
 
 /**
  * Represents request when DELETE to /oauth20/tokens.
@@ -33,8 +34,8 @@ public class RevokeUserTokensRequest {
 
     private String userId;
 
-    public RevokeUserTokensRequest(HttpRequest request) {
-        String content = request.getContent().toString(CharsetUtil.UTF_8);
+    public RevokeUserTokensRequest(FullHttpRequest request) {
+        String content = request.content().toString(CharsetUtil.UTF_8);
         JsonParser parser = new JsonParser();
         try {
             JsonObject jsonObj= parser.parse(content).getAsJsonObject();

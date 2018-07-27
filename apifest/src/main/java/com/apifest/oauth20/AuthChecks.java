@@ -16,9 +16,9 @@
 
 package com.apifest.oauth20;
 
+import io.netty.handler.codec.http.HttpRequest;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
