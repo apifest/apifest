@@ -39,6 +39,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelOption;
@@ -65,6 +66,7 @@ import java.util.regex.Pattern;
  *
  * @author Rossitsa Borissova
  */
+@ChannelHandler.Sharable
 public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
 
     public static final String RELOAD_URI = "/apifest-reload";
@@ -93,8 +95,6 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
 
     public static Logger log = LoggerFactory.getLogger(HttpRequestHandler.class);
     public static Logger accessTokensLog = LoggerFactory.getLogger("accessTokens");
-
-    private MappingClient client = MappingClient.getClient();
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object e) {
@@ -235,7 +235,7 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
                             if (mappedReq == null) {
                                 throw new UpstreamException(HttpResponseFactory.createISEResponse());
                             }
-                            client.send(mappedReq, endpoint.getBackendHost(), Integer.valueOf(endpoint.getBackendPort()), responseListener);
+                            MappingServer.client.send(mappedReq, endpoint.getBackendHost(), Integer.valueOf(endpoint.getBackendPort()), responseListener);
                         } catch (MappingException mappingException) {
                             log.error("cannot map request", mappingException);
                             LifecycleEventHandlers.invokeExceptionHandler(mappingException, request);
@@ -261,7 +261,7 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
 
 
                         FullHttpRequest mappedReq = mapRequest(req, mapping, config, null);
-                        client.send(mappedReq, mapping.getBackendHost(), Integer.valueOf(mapping.getBackendPort()), responseListener);
+                        MappingServer.client.send(mappedReq, mapping.getBackendHost(), Integer.valueOf(mapping.getBackendPort()), responseListener);
                     } catch (MappingException e2) {
                         log.error("cannot map request", e2);
                         LifecycleEventHandlers.invokeExceptionHandler(e2, req);
@@ -679,7 +679,7 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
                 }
                 LifecycleEventHandlers.invokeResponseEventHandlers(request, (FullHttpResponse) newResponse);
                 ChannelFuture future = channel.writeAndFlush(newResponse);
-                if (!HttpHeaders.isKeepAlive(request)) {
+                if (!HttpUtil.isKeepAlive(request)) {
                     future.addListener(ChannelFutureListener.CLOSE);
                 }
             }
@@ -689,7 +689,7 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
     public FullHttpRequest mapRequest(FullHttpRequest request, MappingEndpoint mapping, MappingConfig config, AccessToken validToken)
             throws MappingException, UpstreamException {
         BaseMapper mapper = new BaseMapper();
-        request.headers().set(HttpHeaders.Names.HOST, mapping.getBackendHost());
+        request.headers().set(HttpHeaderNames.HOST, mapping.getBackendHost());
         FullHttpRequest req = mapper.map(request, mapping.getInternalEndpoint());
         if (mapping.getAction() != null) {
             BasicAction action = config.getAction(mapping.getAction());

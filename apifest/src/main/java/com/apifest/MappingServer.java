@@ -47,6 +47,8 @@ public final class MappingServer {
 
     private static final int MAX_CONTENT_LEN = 10 * 1024 * 1024;
 
+    public static MappingClient client;
+
     private MappingServer() {
     }
 
@@ -65,7 +67,7 @@ public final class MappingServer {
         }
 
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        EventLoopGroup workerGroup = new NioEventLoopGroup(8);
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(bossGroup, workerGroup)
@@ -82,10 +84,10 @@ public final class MappingServer {
                         }
                     });
 
-            bootstrap.option(ChannelOption.TCP_NODELAY, true);
-            bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
-            bootstrap.option(ChannelOption.SO_LINGER, -1);
-            bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, ServerConfig.getConnectTimeout());
+            bootstrap.childOption(ChannelOption.TCP_NODELAY, true);
+            bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
+            bootstrap.childOption(ChannelOption.SO_LINGER, -1);
+            bootstrap.childOption(ChannelOption.CONNECT_TIMEOUT_MILLIS, ServerConfig.getConnectTimeout());
 
             if (ServerConfig.getMappingsPath() != null && !ServerConfig.getMappingsPath().isEmpty()) {
                 try {
@@ -108,6 +110,8 @@ public final class MappingServer {
                 }
             }
             log.info("ApiFest Mapping Server started at " + ServerConfig.getHost() + ":" + ServerConfig.getPort());
+
+            client = MappingClient.getClient(workerGroup);
 
             bootstrap.bind(new InetSocketAddress(ServerConfig.getHost(), ServerConfig.getPort())).channel().closeFuture().sync();
         } catch (Exception e) {

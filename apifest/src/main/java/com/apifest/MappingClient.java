@@ -24,18 +24,17 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.util.Map;
 
 /**
  * Client that re-sends the requests to the backend and handles the responses.
@@ -51,8 +50,7 @@ public final class MappingClient {
     protected Logger log = LoggerFactory.getLogger(MappingClient.class);
     Bootstrap b = new Bootstrap();
 
-    private MappingClient() {
-        EventLoopGroup group = new NioEventLoopGroup();
+    private MappingClient(EventLoopGroup group) {
         b.group(group)
                 .channel(NioSocketChannel.class)
                 .handler(new ChannelInitializer<SocketChannel>() {
@@ -70,9 +68,9 @@ public final class MappingClient {
         b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, ServerConfig.getConnectTimeout());
     }
 
-    public synchronized static MappingClient getClient() {
+    public synchronized static MappingClient getClient(EventLoopGroup group) {
         if (client == null) {
-            client = new MappingClient();
+            client = new MappingClient(group);
         }
         return client;
     }
@@ -86,7 +84,7 @@ public final class MappingClient {
      * @param responseListener listener that will handles the backend response
      */
     public void send(final FullHttpRequest request, String host, int port, final ResponseListener responseListener) {
-        ChannelFuture future = b.connect(new InetSocketAddress(host, port));
+        ChannelFuture future = b.clone().connect(new InetSocketAddress(host, port));
         future.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) {
