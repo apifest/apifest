@@ -670,7 +670,7 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
     public ResponseListener createResponseListener(BasicFilter filter, Map<String, String> errors, final Channel channel, final FullHttpRequest request) {
         return new ResponseListener(filter, errors) {
             @Override
-            public void responseReceived(FullHttpMessage response) {
+            public void responseReceived(FullHttpMessage response, Channel clientChannel) {
                 HttpMessage newResponse = response;
                 if (response instanceof FullHttpResponse) {
                     if (getFilter() != null) {
@@ -679,6 +679,7 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
                 }
                 LifecycleEventHandlers.invokeResponseEventHandlers(request, (FullHttpResponse) newResponse);
                 ChannelFuture future = channel.writeAndFlush(newResponse);
+                clientChannel.attr(HttpResponseHandler.poolAttachmentKey).get().release(clientChannel);
                 if (!HttpUtil.isKeepAlive(request)) {
                     future.addListener(ChannelFutureListener.CLOSE);
                 }

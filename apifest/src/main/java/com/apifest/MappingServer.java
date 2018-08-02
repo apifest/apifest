@@ -43,6 +43,8 @@ import com.apifest.api.MappingException;
  */
 public final class MappingServer {
 
+    public static EventLoopGroup workerGroup;
+
     private static Logger log = LoggerFactory.getLogger(MappingServer.class);
 
     private static final int MAX_CONTENT_LEN = 10 * 1024 * 1024;
@@ -67,7 +69,7 @@ public final class MappingServer {
         }
 
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-        EventLoopGroup workerGroup = new NioEventLoopGroup(8);
+        workerGroup = new NioEventLoopGroup(128);
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(bossGroup, workerGroup)
@@ -111,7 +113,7 @@ public final class MappingServer {
             }
             log.info("ApiFest Mapping Server started at " + ServerConfig.getHost() + ":" + ServerConfig.getPort());
 
-            client = MappingClient.getClient(workerGroup);
+            client = MappingClient.getClient();
 
             bootstrap.bind(new InetSocketAddress(ServerConfig.getHost(), ServerConfig.getPort())).channel().closeFuture().sync();
         } catch (Exception e) {

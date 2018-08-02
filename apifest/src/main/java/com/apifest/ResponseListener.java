@@ -17,6 +17,7 @@
 package com.apifest;
 
 import com.apifest.api.BasicFilter;
+import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpMessage;
 
 import java.util.Map;
@@ -41,7 +42,7 @@ public abstract class ResponseListener {
      *
      * @param response response received from the backend
      */
-    abstract void responseReceived(FullHttpMessage response);
+    abstract void responseReceived(FullHttpMessage response, Channel clientChannel);
 
     public BasicFilter getFilter() {
         return filter;

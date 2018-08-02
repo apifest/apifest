@@ -21,8 +21,10 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.pool.ChannelPool;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.AttributeKey;
@@ -43,6 +45,7 @@ import java.util.Map;
 public class HttpResponseHandler extends ChannelInboundHandlerAdapter {
 
     public static final AttributeKey<ResponseListener> responseListenerAttachmentKey = AttributeKey.newInstance("responseListenerAttachmentKey");
+    public static final AttributeKey<ChannelPool> poolAttachmentKey = AttributeKey.newInstance("pool");
     protected Logger log = LoggerFactory.getLogger(HttpResponseHandler.class);
     private static final int HTTP_STATUS_300 = 300;
 
@@ -56,8 +59,8 @@ public class HttpResponseHandler extends ChannelInboundHandlerAdapter {
             statusCode = response.status().code();
         }
         Channel channel = ctx.channel();
-        // do not close the channel if 100 Continue
-        if ((statusCode == null) || (statusCode != null && statusCode.intValue() != HttpStatus.SC_CONTINUE)) {
+        // do not close the channel if 100 Continue or the client connection is keep-alive
+        if (((statusCode == null) || (statusCode != null && statusCode.intValue() != HttpStatus.SC_CONTINUE)) && !HttpUtil.isKeepAlive(response)) {
             channel.close();
         }
 
@@ -71,7 +74,7 @@ public class HttpResponseHandler extends ChannelInboundHandlerAdapter {
                 response.headers().set(HttpHeaderNames.CONTENT_LENGTH, content.getBytes(CharsetUtil.UTF_8).length);
             }
         }
-        listener.responseReceived(response);
+        listener.responseReceived(response, channel);
     }
 
     @Override
