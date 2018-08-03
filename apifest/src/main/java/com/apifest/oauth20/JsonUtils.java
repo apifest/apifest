@@ -35,11 +35,11 @@ import java.util.Map;
 public final class JsonUtils {
 
     private static Logger log = LoggerFactory.getLogger(JsonUtils.class);
+    private static ObjectMapper mapper = new ObjectMapper();
 
     public static String convertMapToJSON(Map<String, String> list) {
         String result = null;
         try {
-            ObjectMapper mapper = new ObjectMapper();
             result = mapper.writeValueAsString(list);
         } catch (JsonGenerationException e) {
             log.error("Cannot convert list to JSON format", e);
@@ -52,12 +52,10 @@ public final class JsonUtils {
     }
 
     public static Map<String, String> convertStringToMap(String json) {
-        ObjectMapper mapper = new ObjectMapper();
         Map<String, String> details = null;
         try {
             if (json != null) {
-                JavaType listType = mapper.getTypeFactory().constructMapLikeType(Map.class, String.class, String.class);
-                details = mapper.readValue(json, listType);
+                details = mapper.readValue(json, Map.class);
             }
         } catch (JsonParseException e) {
             log.error("Cannot convert json to map", e);
