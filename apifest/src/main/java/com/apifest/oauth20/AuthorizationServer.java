@@ -63,7 +63,7 @@ public class AuthorizationServer {
         if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
             ApplicationInfo appInfo;
             try {
-                appInfo = InputValidator.validate(req.content().toString(), ApplicationInfo.class);
+                appInfo = InputValidator.validate(req.content().toString(CharsetUtil.UTF_8), ApplicationInfo.class);
                 if (appInfo.valid()) {
                     String[] scopeList = appInfo.getScope().split(" ");
                     for (String s : scopeList) {
@@ -175,7 +175,7 @@ public class AuthorizationServer {
                 } else {
                     // invalidate the auth code
                     db.updateAuthCodeValidStatus(authCode.getCode(), false);
-                    accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD,authCode.getScope()),
+                    accessToken = AccessTokenBuilder.createAccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD, authCode.getScope()),
                             authCode.getScope(), getExpiresIn(TokenRequest.REFRESH_TOKEN, authCode.getScope()));
                     accessToken.setUserId(authCode.getUserId());
                     accessToken.setClientId(authCode.getClientId());
@@ -200,7 +200,7 @@ public class AuthorizationServer {
                         validScope = accessToken.getScope();
                     }
                     db.updateAccessTokenValidStatus(accessToken.getToken(), false);
-                    AccessToken newAccessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD,
+                    AccessToken newAccessToken = AccessTokenBuilder.createAccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD,
                             validScope), validScope, accessToken.getRefreshToken(), accessToken.getRefreshExpiresIn());
                     newAccessToken.setUserId(accessToken.getUserId());
                     newAccessToken.setDetails(accessToken.getDetails());
@@ -222,7 +222,7 @@ public class AuthorizationServer {
                 throw new OAuthException(Response.SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
             }
 
-            accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.CLIENT_CREDENTIALS, scope),
+            accessToken = AccessTokenBuilder.createAccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.CLIENT_CREDENTIALS, scope),
                     scope, false, null);
             accessToken.setClientId(tokenRequest.getClientId());
             Map<String, String> applicationDetails = clientCredentials.getApplicationDetails();
@@ -241,7 +241,7 @@ public class AuthorizationServer {
             try {
                 UserDetails userDetails = authenticateUser(tokenRequest.getUsername(), tokenRequest.getPassword(), req);
                 if (userDetails != null && userDetails.getUserId() != null) {
-                    accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD, scope), scope,
+                    accessToken = AccessTokenBuilder.createAccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD, scope), scope,
                             getExpiresIn(TokenRequest.REFRESH_TOKEN, scope));
                     accessToken.setUserId(userDetails.getUserId());
                     accessToken.setDetails(userDetails.getDetails());
@@ -268,7 +268,7 @@ public class AuthorizationServer {
                 throw new OAuthException(Response.SCOPE_NOK_MESSAGE, HttpResponseStatus.BAD_REQUEST);
             }
             try {
-                accessToken = new AccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD, scope), scope,
+                accessToken = AccessTokenBuilder.createAccessToken(TOKEN_TYPE_BEARER, getExpiresIn(TokenRequest.PASSWORD, scope), scope,
                         getExpiresIn(TokenRequest.REFRESH_TOKEN, scope));
                 accessToken.setClientId(tokenRequest.getClientId());
                 UserDetails userDetails = callCustomGrantTypeHandler(req);
@@ -448,7 +448,7 @@ public class AuthorizationServer {
             }
             ApplicationInfo appInfo;
             try {
-                appInfo = InputValidator.validate(req.content().toString(), ApplicationInfo.class);
+                appInfo = InputValidator.validate(req.content().toString(CharsetUtil.UTF_8), ApplicationInfo.class);
                 if (appInfo.validForUpdate()) {
                     if (appInfo.getScope() != null) {
                         String[] scopeList = appInfo.getScope().split(" ");

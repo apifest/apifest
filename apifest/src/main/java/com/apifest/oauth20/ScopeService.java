@@ -22,6 +22,9 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.util.CharsetUtil;
+
+import org.apache.http.util.CharsetUtils;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -30,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -70,7 +74,7 @@ public class ScopeService {
         // check Content-Type
         if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
             try {
-                Scope scope = InputValidator.validate(req.content().toString(), Scope.class);
+                Scope scope = InputValidator.validate(req.content().toString(CharsetUtil.UTF_8), Scope.class);
                 if (scope.valid()) {
                     if (!Scope.validScopeName(scope.getScope())) {
                         log.error("scope name is not valid");
@@ -242,7 +246,7 @@ public class ScopeService {
         // check Content-Type
         if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
             try {
-                Scope scope = InputValidator.validate(req.content().toString(), Scope.class);
+                Scope scope = InputValidator.validate(req.content().toString(CharsetUtil.UTF_8), Scope.class);
                 if (scope.validForUpdate()) {
                     Scope foundScope = DBManagerFactory.getInstance().findScope(scopeName);
                     if (foundScope == null) {

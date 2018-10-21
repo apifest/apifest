@@ -9,6 +9,7 @@
 
     <modules>
         <module>apifest</module>
+        <module>apifest-api</module>
     </modules>
 
   <dependencies>

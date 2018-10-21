@@ -20,6 +20,7 @@
 package com.apifest.oauth20.persistence.redis;
 
 import com.apifest.api.AccessToken;
+import com.apifest.oauth20.AccessTokenBuilder;
 import com.apifest.oauth20.ApplicationInfo;
 import com.apifest.oauth20.AuthCode;
 import com.apifest.oauth20.ClientCredentials;
@@ -138,7 +139,7 @@ public class RedisDBManager implements DBManager {
         if (accessTokenList == null || accessTokenList.isEmpty()) {
             return null;
         }
-        return AccessToken.loadFromStringList(accessTokenList);
+        return AccessTokenBuilder.loadFromStringList(accessTokenList);
     }
 
     /*
@@ -165,7 +166,7 @@ public class RedisDBManager implements DBManager {
         if (accessTokenList == null || accessTokenList.isEmpty() || "false".equals(accessTokenList.get(5))) { //Is it valid?
             return null;
         }
-        return AccessToken.loadFromStringList(accessTokenList);
+        return AccessTokenBuilder.loadFromStringList(accessTokenList);
     }
 
     /*
@@ -319,7 +320,7 @@ public class RedisDBManager implements DBManager {
         }
         for (List<String> tokenList : result) {
             if (tokenList != null && !tokenList.isEmpty() && "true".equals(tokenList.get(5))) {
-                accessTokens.add(AccessToken.loadFromStringList(tokenList));
+                accessTokens.add(AccessTokenBuilder.loadFromStringList(tokenList));
             }
         }
         return accessTokens;
