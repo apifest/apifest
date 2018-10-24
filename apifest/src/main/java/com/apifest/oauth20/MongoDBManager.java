@@ -174,7 +174,7 @@ public class MongoDBManager implements DBManager {
                 BasicDBObject details = (BasicDBObject) mapLoaded.get("details");
                 mapLoaded.put("details", details.toString());
             }
-            return AccessToken.loadFromMap(mapLoaded);
+            return AccessTokenBuilder.loadFromMap(mapLoaded);
         } else {
             log.debug("No access token found");
             return null;
@@ -200,7 +200,7 @@ public class MongoDBManager implements DBManager {
                 BasicDBObject details = (BasicDBObject) mapLoaded.get("details");
                 mapLoaded.put("details", details.toString());
             }
-            AccessToken loadedAccessToken = AccessToken.loadFromMap(mapLoaded);
+            AccessToken loadedAccessToken = AccessTokenBuilder.loadFromMap(mapLoaded);
             log.debug(loadedAccessToken.getToken());
             return loadedAccessToken;
         } else {
@@ -450,7 +450,7 @@ public class MongoDBManager implements DBManager {
                 BasicDBObject details = (BasicDBObject) mapLoaded.get("details");
                 mapLoaded.put("details", details.toString());
             }
-            AccessToken loadedAccessToken = AccessToken.loadFromMap(mapLoaded);
+            AccessToken loadedAccessToken = AccessTokenBuilder.loadFromMap(mapLoaded);
             accessTokens.add(loadedAccessToken);
         }
         return accessTokens;

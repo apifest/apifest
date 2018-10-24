@@ -32,7 +32,7 @@ import static org.testng.Assert.*;
 /**
  * @author Rossitsa Borissova
  */
-public class AccessTokenTest {
+public class AccessTokenBuilderTest {
 
     @Test
     @SuppressWarnings("unchecked")
@@ -48,7 +48,7 @@ public class AccessTokenTest {
         map.put("created", 1365351985645l);
 
         // WHEN
-        AccessToken accessToken = AccessToken.loadFromMap(map);
+        AccessToken accessToken = AccessTokenBuilder.loadFromMap(map);
 
         // THEN
         assertEquals(accessToken.getClientId(), "767316324475102");
@@ -70,7 +70,7 @@ public class AccessTokenTest {
     @Test
     public void when_create_access_token_add_refresh_token() throws Exception {
         // WHEN
-        AccessToken accessToken = new AccessToken("Bearer", "599", "basic", "1800");
+        AccessToken accessToken = AccessTokenBuilder.createAccessToken("Bearer", "599", "basic", "1800");
 
         // THEN
         assertNotNull(accessToken.getRefreshToken());
@@ -80,7 +80,7 @@ public class AccessTokenTest {
     public void when_create_access_token_for_client_credentials_do_not_add_refresh_token()
             throws Exception {
         // WHEN
-        AccessToken accessToken = new AccessToken("Bearer", "599", "basic", false, "1800");
+        AccessToken accessToken = AccessTokenBuilder.createAccessToken("Bearer", "599", "basic", false, "1800");
 
         // THEN
         assert ("".equals(accessToken.getRefreshToken()));
@@ -90,7 +90,7 @@ public class AccessTokenTest {
     public void when_created_plus_expiresIn_greater_then_current_time_return_true()
             throws Exception {
         // GIVEN
-        AccessToken accessToken = spy(new AccessToken("Bearer", "899", "basic", false, "1800"));
+        AccessToken accessToken = spy(AccessTokenBuilder.createAccessToken("Bearer", "899", "basic", false, "1800"));
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date(System.currentTimeMillis()));
         cal.add(Calendar.MINUTE, -16);
@@ -108,7 +108,7 @@ public class AccessTokenTest {
     @Test
     public void when_created_plus_expiresIn_less_then_current_time_return_false() throws Exception {
         // GIVEN
-        AccessToken accessToken = spy(new AccessToken("Bearer", "899", "basic", false, "1800"));
+        AccessToken accessToken = spy(AccessTokenBuilder.createAccessToken("Bearer", "899", "basic", false, "1800"));
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date(System.currentTimeMillis()));
         cal.add(Calendar.MINUTE, -14);
@@ -126,7 +126,7 @@ public class AccessTokenTest {
     @Test
     public void when_refresh_token_duration_less_than_now_return_false() throws Exception {
         // GIVEN
-        AccessToken accessToken = spy(new AccessToken("Bearer", "300", "basic", true, "1800"));
+        AccessToken accessToken = spy(AccessTokenBuilder.createAccessToken("Bearer", "300", "basic", true, "1800"));
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date(System.currentTimeMillis()));
         cal.add(Calendar.MINUTE, -5);
@@ -143,7 +143,7 @@ public class AccessTokenTest {
     @Test
     public void when_refresh_token_duration_greater_than_now_return_true() throws Exception {
         // GIVEN
-        AccessToken accessToken = spy(new AccessToken("Bearer", "300", "basic", true, "600"));
+        AccessToken accessToken = spy(AccessTokenBuilder.createAccessToken("Bearer", "300", "basic", true, "600"));
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date(System.currentTimeMillis()));
         cal.add(Calendar.MINUTE, -11);
@@ -160,7 +160,7 @@ public class AccessTokenTest {
     @Test
     public void when_no_refresh_expires_in_set_it_to_expires_in() throws Exception {
         // WHEN
-        AccessToken accessToken = new AccessToken("Bearer", "300", "basic", null);
+        AccessToken accessToken = AccessTokenBuilder.createAccessToken("Bearer", "300", "basic", null);
 
         // THEN
        assertTrue(accessToken.getRefreshExpiresIn() == accessToken.getExpiresIn());
@@ -169,7 +169,7 @@ public class AccessTokenTest {
     @Test
     public void when_no_refresh_expires_in_with_create_refresh_token_true_set_it_to_expires_in() throws Exception {
         // WHEN
-        AccessToken accessToken = new AccessToken("Bearer", "300", "basic", true, null);
+        AccessToken accessToken = AccessTokenBuilder.createAccessToken("Bearer", "300", "basic", true, null);
 
         // THEN
        assertTrue(accessToken.getRefreshExpiresIn() == accessToken.getExpiresIn());
@@ -178,7 +178,7 @@ public class AccessTokenTest {
     @Test
     public void when_no_refresh_expires_in_with_predefined_refresh_token_true_set_it_to_expires_in() throws Exception {
         // WHEN
-        AccessToken accessToken = new AccessToken("Bearer", "300", "basic", "refreshtoken", null);
+        AccessToken accessToken = AccessTokenBuilder.createAccessToken("Bearer", "300", "basic", "refreshtoken", null);
 
         // THEN
        assertTrue(accessToken.getRefreshExpiresIn() == accessToken.getExpiresIn());
@@ -187,7 +187,7 @@ public class AccessTokenTest {
     @Test
     public void when_refresh_expires_in_empty_with_predefined_refresh_token_true_set_it_to_expires_in() throws Exception {
         // WHEN
-        AccessToken accessToken = new AccessToken("Bearer", "300", "basic", "refreshtoken", "");
+        AccessToken accessToken = AccessTokenBuilder.createAccessToken("Bearer", "300", "basic", "refreshtoken", "");
 
         // THEN
        assertTrue(accessToken.getRefreshExpiresIn() == accessToken.getExpiresIn());
@@ -196,7 +196,7 @@ public class AccessTokenTest {
     @Test
     public void when_refresh_expires_in_not_empty_with_predefined_refresh_token_true_use_that_value() throws Exception {
         // WHEN
-        AccessToken accessToken = new AccessToken("Bearer", "300", "basic", "refreshtoken", "1800");
+        AccessToken accessToken = AccessTokenBuilder.createAccessToken("Bearer", "300", "basic", "refreshtoken", "1800");
 
         // THEN
        assertTrue(accessToken.getRefreshExpiresIn() == "1800");
@@ -219,7 +219,7 @@ public class AccessTokenTest {
         map.put("created", "1421267589868");
 
         // WHEN
-        AccessToken accessToken = AccessToken.loadFromStringMap(map);
+        AccessToken accessToken = AccessTokenBuilder.loadFromStringMap(map);
 
         // THEN
         assertTrue(accessToken.getExpiresIn() == accessToken.getRefreshExpiresIn());
@@ -241,7 +241,7 @@ public class AccessTokenTest {
         map.put("created", 1421267589868L);
 
         // WHEN
-        AccessToken accessToken = AccessToken.loadFromMap(map);
+        AccessToken accessToken = AccessTokenBuilder.loadFromMap(map);
 
         // THEN
         assertTrue(accessToken.getExpiresIn() == accessToken.getRefreshExpiresIn());
@@ -250,7 +250,7 @@ public class AccessTokenTest {
     @Test
     public void when_client_credentials_token_do_not_add_refresh_expires_in() throws Exception {
         // WHEN
-        AccessToken accessToken = new AccessToken("Bearer", "1800", "scope", false, "600");
+        AccessToken accessToken = AccessTokenBuilder.createAccessToken("Bearer", "1800", "scope", false, "600");
 
         // THEN
         assertTrue(accessToken.getRefreshExpiresIn().isEmpty());
@@ -259,7 +259,7 @@ public class AccessTokenTest {
     @Test
     public void when_password_token_add_refresh_expires_in() throws Exception {
         // WHEN
-        AccessToken accessToken = new AccessToken("Bearer", "300", "scope", true, "600");
+        AccessToken accessToken = AccessTokenBuilder.createAccessToken("Bearer", "300", "scope", true, "600");
 
         // THEN
         assertTrue(accessToken.getRefreshExpiresIn().equals("600"));
