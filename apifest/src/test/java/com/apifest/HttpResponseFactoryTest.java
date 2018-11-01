@@ -16,19 +16,18 @@
 
 package com.apifest;
 
+import com.apifest.api.BasicAction;
+import com.apifest.api.MappingAction;
+import com.hazelcast.core.IMap;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import org.apache.http.HttpHeaders;
+import org.testng.annotations.Test;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
-
-import org.apache.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.testng.annotations.Test;
-
-import com.apifest.api.BasicAction;
-import com.apifest.api.MappingAction;
-import com.hazelcast.core.IMap;
 
 /**
  * @author Rossitsa Borissova
@@ -45,12 +44,12 @@ public class HttpResponseFactoryTest {
         mockNoGlobalErrors();
 
         // WHEN
-        HttpResponse response = HttpResponseFactory.createISEResponse();
+        FullHttpResponse response = HttpResponseFactory.createISEResponse();
 
         // THEN
         assertEquals(response.getStatus(), HttpResponseStatus.INTERNAL_SERVER_ERROR);
         assertEquals(response.headers().get(HttpHeaders.CONTENT_TYPE), HttpResponseFactory.APPLICATION_JSON);
-        String error = new String(response.getContent().array());
+        String error = new String(response.content().array());
         assertEquals(error, "");
     }
 
@@ -61,12 +60,12 @@ public class HttpResponseFactoryTest {
 
         // WHEN
         String errorMsg = "no access token";
-        HttpResponse response = HttpResponseFactory.createUnauthorizedResponse(errorMsg);
+        FullHttpResponse response = HttpResponseFactory.createUnauthorizedResponse(errorMsg);
 
         // THEN
         assertEquals(response.getStatus(), HttpResponseStatus.UNAUTHORIZED);
         assertEquals(response.headers().get(HttpHeaders.CONTENT_TYPE), HttpResponseFactory.APPLICATION_JSON);
-        String error = new String(response.getContent().array());
+        String error = new String(response.content().array());
         assertEquals(error, errorMsg);
     }
 
@@ -76,12 +75,12 @@ public class HttpResponseFactoryTest {
         mockNoGlobalErrors();
 
         // WHEN
-        HttpResponse response = HttpResponseFactory.createNotFoundResponse();
+        FullHttpResponse response = HttpResponseFactory.createNotFoundResponse();
 
         // THEN
         assertEquals(response.getStatus(), HttpResponseStatus.NOT_FOUND);
         assertEquals(response.headers().get(HttpHeaders.CONTENT_TYPE), HttpResponseFactory.APPLICATION_JSON);
-        String error = new String(response.getContent().array());
+        String error = new String(response.content().array());
         assertEquals(error, HttpResponseFactory.NOT_FOUND_CONTENT);
     }
 
@@ -92,12 +91,12 @@ public class HttpResponseFactoryTest {
 
         // WHEN
         String message = "OK message";
-        HttpResponse response = HttpResponseFactory.createOKResponse(message);
+        FullHttpResponse response = HttpResponseFactory.createOKResponse(message);
 
         // THEN
         assertEquals(response.getStatus(), HttpResponseStatus.OK);
         assertEquals(response.headers().get(HttpHeaders.CONTENT_TYPE), HttpResponseFactory.APPLICATION_JSON);
-        String responseMsg = new String(response.getContent().array());
+        String responseMsg = new String(response.content().array());
         assertEquals(responseMsg, message);
     }
 
@@ -107,12 +106,12 @@ public class HttpResponseFactoryTest {
         mockGlobalErrors();
 
         // WHEN
-        HttpResponse response = HttpResponseFactory.createISEResponse();
+        FullHttpResponse response = HttpResponseFactory.createISEResponse();
 
         // THEN
         assertEquals(response.getStatus(), HttpResponseStatus.INTERNAL_SERVER_ERROR);
         assertEquals(response.headers().get(HttpHeaders.CONTENT_TYPE), HttpResponseFactory.APPLICATION_JSON);
-        String error = new String(response.getContent().array());
+        String error = new String(response.content().array());
         assertEquals(error, customISEResponse);
     }
 
@@ -124,12 +123,12 @@ public class HttpResponseFactoryTest {
 
         // WHEN
         String errorMsg = "no access token";
-        HttpResponse response = HttpResponseFactory.createUnauthorizedResponse(errorMsg);
+        FullHttpResponse response = HttpResponseFactory.createUnauthorizedResponse(errorMsg);
 
         // THEN
         assertEquals(response.getStatus(), HttpResponseStatus.UNAUTHORIZED);
         assertEquals(response.headers().get(HttpHeaders.CONTENT_TYPE), HttpResponseFactory.APPLICATION_JSON);
-        String error = new String(response.getContent().array());
+        String error = new String(response.content().array());
         assertEquals(error, customUnauthorizedResponse);
     }
 
@@ -139,12 +138,12 @@ public class HttpResponseFactoryTest {
         mockGlobalErrors();
 
         // WHEN
-        HttpResponse response = HttpResponseFactory.createNotFoundResponse();
+        FullHttpResponse response = HttpResponseFactory.createNotFoundResponse();
 
         // THEN
         assertEquals(response.getStatus(), HttpResponseStatus.NOT_FOUND);
         assertEquals(response.headers().get(HttpHeaders.CONTENT_TYPE), HttpResponseFactory.APPLICATION_JSON);
-        String error = new String(response.getContent().array());
+        String error = new String(response.content().array());
         assertEquals(error, customNotFoundMessage );
     }
 

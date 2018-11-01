@@ -16,13 +16,12 @@
 
 package com.apifest.api;
 
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.util.CharsetUtil;
-
+import com.apifest.api.AccessToken;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpRequest;
 
 
 /**
@@ -42,12 +41,12 @@ public abstract class BasicAction {
      * Maps the request to the internal URI passed as a parameter. Modifies the request body/headers, if necessary.
      * @param req request received from client application
      * @param internalURI the internal URI to which the request should be mapped
-     * @param tokenValidationResponse access token validation response
+     * @param validToken access token validation response
      * @return the modified request
      * @throws MappingException if something goes wrong with request mapping
      * @throws UpstreamException if the upstream should be stopped and a response should be returned directly
      */
-    public HttpRequest execute(HttpRequest req, String internalURI, HttpResponse tokenValidationResponse)
+    public FullHttpRequest execute(FullHttpRequest req, String internalURI, AccessToken validToken)
             throws MappingException, UpstreamException {
         return req;
     }
@@ -55,30 +54,14 @@ public abstract class BasicAction {
     /**
      * Maps the request to the internal URI passed as a parameter. Modifies the request body/headers, if necessary.
      * @param req request received from client application
-     * @param tokenValidationResponse access token validation response
+     * @param validToken access token validation response
      * @param mappingEndpoint configuration for this endpoint from the mapping xml
      * @return the modified request
      * @throws MappingException if something goes wrong with request mapping
      * @throws UpstreamException if the upstream should be stopped and a response should be returned directly
      */
-    public HttpRequest execute(HttpRequest req, HttpResponse tokenValidationResponse, MappingEndpoint mappingEndpoint)
+    public FullHttpRequest execute(FullHttpRequest req, AccessToken validToken, MappingEndpoint mappingEndpoint)
             throws MappingException, UpstreamException {
-        return execute(req, req.getUri(), tokenValidationResponse);
-    }
-
-    /**
-     * Extracts userId from tokenValidationResponse.
-     * @param response the response received after access token is validate
-     * @return userId associated with a token
-     */
-    public static String getUserId(HttpResponse tokenValidationResponse) {
-        String userId = null;
-        if (tokenValidationResponse != null) {
-            JsonParser parser = new JsonParser();
-            JsonObject json= parser.parse(tokenValidationResponse.getContent().toString(CharsetUtil.UTF_8)).getAsJsonObject();
-            JsonElement userIdElement = json.get("userId");
-            userId = (userIdElement != null && !userIdElement.isJsonNull()) ? userIdElement.getAsString() : null;
-        }
-        return userId;
+        return execute(req, req.getUri(), validToken);
     }
 }

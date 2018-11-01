@@ -19,9 +19,10 @@ package com.apifest;
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.QueryStringDecoder;
-import org.jboss.netty.handler.codec.http.QueryStringEncoder;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.handler.codec.http.QueryStringEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +35,7 @@ public class BaseMapper {
 
     protected static Logger log = LoggerFactory.getLogger(BaseMapper.class);
 
-    public HttpRequest map(HttpRequest req, String internalURI) {
+    public FullHttpRequest map(FullHttpRequest req, String internalURI) {
         // pass all query params and headers
         String newUri = constructNewUri(req.getUri(), internalURI);
         req.setUri(newUri);
@@ -46,10 +47,10 @@ public class BaseMapper {
         QueryStringDecoder decoder = new QueryStringDecoder(uri);
         QueryStringDecoder internalUrldecoder = new QueryStringDecoder(newUri);
 
-        Map<String, List<String>> queryParams = decoder.getParameters();
-        Map<String, List<String>> internalQueryParams = internalUrldecoder.getParameters();
+        Map<String, List<String>> queryParams = decoder.parameters();
+        Map<String, List<String>> internalQueryParams = internalUrldecoder.parameters();
 
-        QueryStringEncoder encoder = new QueryStringEncoder(internalUrldecoder.getPath());
+        QueryStringEncoder encoder = new QueryStringEncoder(internalUrldecoder.path());
         for (String key : queryParams.keySet()) {
             for (String value : queryParams.get(key)) {
                 encoder.addParam(key, value);

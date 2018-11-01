@@ -16,25 +16,12 @@
 
 package com.apifest.example;
 
-import static org.mockito.Mockito.spy;
-import static org.testng.Assert.assertEquals;
-
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.HttpVersion;
-import org.jboss.netty.util.CharsetUtil;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
 /**
  * @author Rossitsa Borissova
  */
 public class RemoveBalanceFilterTest {
 
-    RemoveBalanceFilter filter;
+   /* RemoveBalanceFilter filter;
     HttpResponse response;
 
     @BeforeMethod
@@ -55,6 +42,6 @@ public class RemoveBalanceFilterTest {
 
         // THEN
         assertEquals(new String(res.getContent().array()), "{\"customerId\":\"1223\",\"email\":\"rossi.test@apifest.com\"}");
-    }
+    }*/
 
 }

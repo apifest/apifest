@@ -25,8 +25,10 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,15 +114,15 @@ public class LifecycleEventHandlers {
         return exceptionHandlers;
     }
 
-    protected static void invokeRequestEventHandlers(HttpRequest request, HttpResponse response) {
+    protected static void invokeRequestEventHandlers(FullHttpRequest request, FullHttpResponse response) {
         invokeHandlers(request, response, LifecycleEventHandlers.getRequestEventHandlers());
     }
 
-    protected static void invokeResponseEventHandlers(HttpRequest request, HttpResponse response) {
+    protected static void invokeResponseEventHandlers(FullHttpRequest request, FullHttpResponse response) {
         invokeHandlers(request, response, LifecycleEventHandlers.getResponseEventHandlers());
     }
 
-    protected static void invokeHandlers(HttpRequest request, HttpResponse response, List<Class<LifecycleHandler>> handlers) {
+    protected static void invokeHandlers(FullHttpRequest request, FullHttpResponse response, List<Class<LifecycleHandler>> handlers) {
         for (int i = 0; i < handlers.size(); i++) {
             try {
                 LifecycleHandler handler = handlers.get(i).newInstance();
