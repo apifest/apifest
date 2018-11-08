@@ -15,6 +15,12 @@
  */
 package com.apifest.oauth20;
 
+import static org.testng.Assert.assertEquals;
+
+import org.testng.annotations.Test;
+
+import io.netty.handler.codec.http.HttpResponseStatus;
+
 /**
  * @author Rossitsa Borissova
  *
@@ -22,7 +28,7 @@ package com.apifest.oauth20;
 public class ApplicationInfoValidatorTest {
 
 
-  /*  @Test
+   @Test
     public void when_status_is_not_an_integer_throw_exception() throws Exception {
         ApplicationInfoValidator validator = ApplicationInfoValidator.getInstance();
 
@@ -39,5 +45,5 @@ public class ApplicationInfoValidatorTest {
         // THEN
         assertEquals(errorMsg, String.format(Response.ERROR_NOT_INTEGER, ApplicationInfo.JSON_STATUS));
         assertEquals(status, HttpResponseStatus.BAD_REQUEST);
-    }*/
+    }
 }

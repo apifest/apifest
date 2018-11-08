@@ -51,7 +51,7 @@ public class AuthRequest {
 
     public AuthRequest(HttpRequest request) {
         if (request.uri() != null) {
-            QueryStringDecoder dec = new QueryStringDecoder(request.getUri());
+            QueryStringDecoder dec = new QueryStringDecoder(request.uri());
             Map<String, List<String>> params = dec.parameters();
             this.clientId = QueryParameter.getFirstElement(params, CLIENT_ID);
             this.responseType = QueryParameter.getFirstElement(params, RESPONSE_TYPE);
@@ -91,6 +91,14 @@ public class AuthRequest {
     }
 
     public void validate() throws OAuthException {
+        if(clientId == null || clientId.isEmpty()) {
+            throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, CLIENT_ID),
+                    HttpResponseStatus.BAD_REQUEST);
+        }
+        if(responseType == null || responseType.isEmpty()) {
+            throw new OAuthException(String.format(Response.MANDATORY_PARAM_MISSING, RESPONSE_TYPE),
+                    HttpResponseStatus.BAD_REQUEST);
+        }
         if (!RESPONSE_TYPE_CODE.equals(responseType)) {
             throw new OAuthException(Response.RESPONSE_TYPE_NOT_SUPPORTED,
                     HttpResponseStatus.BAD_REQUEST);

@@ -16,11 +16,24 @@
 
 package com.apifest.oauth20;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
+import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
+import org.slf4j.Logger;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import io.netty.handler.codec.http.HttpRequest;
+
 /**
  * @author Rossitsa Borissova
  */
+
 public class AuthRequestTest {
-/*
+
     @BeforeMethod
     public void setup() {
         OAuthException.log = mock(Logger.class);
@@ -52,7 +65,7 @@ public class AuthRequestTest {
         String clientId = "763273054098803";
         String state = "xyz";
         String scope = "basic";
-        given(request.getUri()).willReturn(
+        given(request.uri()).willReturn(
                 "http://example.com/authorize?response_type=" + responseType + "&client_id="
                         + clientId + "&state=" + state
                         + "&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom&scope=" + scope);
@@ -76,7 +89,7 @@ public class AuthRequestTest {
         String clientId = "763273054098803";
         String state = "xyz";
         String scope = "basic";
-        given(request.getUri()).willReturn(
+        given(request.uri()).willReturn(
                 "http://example.com/authorize?response_type=" + responseType + "&client_id="
                         + clientId + "&state=" + state
                         + "&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom&scope=" + scope);
@@ -103,7 +116,7 @@ public class AuthRequestTest {
         String clientId = "763273054098803";
         String state = "xyz";
         String scope = "basic";
-        given(request.getUri()).willReturn(
+        given(request.uri()).willReturn(
                 "http://example.com/authorize?response_type=" + responseType + "&client_id="
                         + clientId + "&state=" + state
                         + "&redirect_uri=%3A%2F%2Fclient%2Eexample%2Ecom&scope=" + scope);
@@ -120,5 +133,55 @@ public class AuthRequestTest {
 
         // THEN
         assertEquals(errorMsg, Response.INVALID_REDIRECT_URI);
-    }*/
+    }
+
+    @Test
+    public void when_validate_and_no_client_id_return_errror() throws Exception {
+        // GIVEN
+        HttpRequest request = mock(HttpRequest.class);
+        String responseType = "unsupported";
+        String state = "xyz";
+        String scope = "basic";
+        given(request.uri()).willReturn(
+                "http://example.com/authorize?response_type=" + responseType + "&state=" + state
+                        + "&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom&scope=" + scope);
+
+        AuthRequest authReq = spy(new AuthRequest(request));
+
+        // WHEN
+        String errorMsg = null;
+        try {
+            authReq.validate();
+        } catch (OAuthException e) {
+            errorMsg = e.getMessage();
+        }
+
+        // THEN
+        assertEquals(errorMsg, String.format(Response.MANDATORY_PARAM_MISSING, "client_id"));
+    }
+
+    @Test
+    public void when_validate_and_no_response_type_return_error() throws Exception {
+        // GIVEN
+        HttpRequest request = mock(HttpRequest.class);
+        String clientId = "763273054098803";
+        String state = "xyz";
+        String scope = "basic";
+        given(request.uri()).willReturn(
+                "http://example.com/authorize?&client_id=" + clientId + "&state=" + state
+                        + "&redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom&scope=" + scope);
+
+        AuthRequest authReq = spy(new AuthRequest(request));
+
+        // WHEN
+        String errorMsg = null;
+        try {
+            authReq.validate();
+        } catch (OAuthException e) {
+            errorMsg = e.getMessage();
+        }
+
+        // THEN
+        assertEquals(errorMsg, String.format(Response.MANDATORY_PARAM_MISSING, "response_type"));
+    }
 }

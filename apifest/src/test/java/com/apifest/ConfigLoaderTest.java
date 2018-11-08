@@ -36,6 +36,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import org.slf4j.Logger;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -56,7 +57,7 @@ import com.hazelcast.core.IMap;
  */
 public class ConfigLoaderTest {
 
-    @BeforeTest
+    @BeforeMethod
     public void setup() throws Exception {
         String mappingPath = getClass().getClassLoader().getResource("test_mapping.xml").getPath();
         ServerConfig.mappingsPath = mappingPath.replace("/test_mapping.xml", "");

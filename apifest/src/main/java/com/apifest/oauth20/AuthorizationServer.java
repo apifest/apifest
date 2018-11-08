@@ -16,6 +16,17 @@
 
 package com.apifest.oauth20;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.regex.Pattern;
+
+import org.apache.commons.codec.binary.Base64;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.apifest.HttpRequestHandler;
 import com.apifest.ServerConfig;
 import com.apifest.api.AccessToken;
@@ -23,22 +34,13 @@ import com.apifest.api.AuthenticationException;
 import com.apifest.api.ICustomGrantTypeHandler;
 import com.apifest.api.IUserAuthentication;
 import com.apifest.api.UserDetails;
+
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringEncoder;
 import io.netty.util.CharsetUtil;
-import org.apache.commons.codec.binary.Base64;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 /**
  * Main class for authorization.
@@ -58,7 +60,7 @@ public class AuthorizationServer {
 
     public ClientCredentials issueClientCredentials(FullHttpRequest req) throws OAuthException {
         ClientCredentials creds = null;
-        String contentType = req.headers().get(HttpHeaders.Names.CONTENT_TYPE);
+        String contentType = req.headers().get(HttpHeaderNames.CONTENT_TYPE);
 
         if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
             ApplicationInfo appInfo;
@@ -122,6 +124,7 @@ public class AuthorizationServer {
     public String issueAuthorizationCode(HttpRequest req) throws OAuthException {
         AuthRequest authRequest = new AuthRequest(req);
         log.debug("received client_id:" + authRequest.getClientId());
+        // check whether mandatory params are passed
         ClientCredentials activeClientCredentials = getActiveClientCredentials(authRequest.getClientId());
         if (activeClientCredentials == null) {
             throw new OAuthException(Response.INVALID_CLIENT_ID, HttpResponseStatus.BAD_REQUEST);
@@ -256,7 +259,7 @@ public class AuthorizationServer {
                 // for instance, if the user authentication requires more user details as a subsequent step
                 if (e.getResponse() != null) {
                     String responseContent = e.getResponse().content().toString(CharsetUtil.UTF_8);
-                    throw new OAuthException(e, responseContent, e.getResponse().getStatus());
+                    throw new OAuthException(e, responseContent, e.getResponse().status());
                 } else {
                     log.error("Cannot authenticate user", e);
                     throw new OAuthException(e, Response.CANNOT_AUTHENTICATE_USER, HttpResponseStatus.UNAUTHORIZED); // NOSONAR
@@ -326,7 +329,7 @@ public class AuthorizationServer {
 
     public static String [] getBasicAuthorizationClientCredentials(HttpRequest req) {
         // extract Basic Authorization header
-        String authHeader = req.headers().get(HttpHeaders.Names.AUTHORIZATION);
+        String authHeader = req.headers().get(HttpHeaderNames.AUTHORIZATION);
         String [] clientCredentials = new String [2];
         if (authHeader != null && authHeader.contains(BASIC)) {
             String value = authHeader.replace(BASIC, "");
@@ -348,6 +351,7 @@ public class AuthorizationServer {
     }
 
     public AccessToken isValidToken(String token) {
+        // TODO: add token cache that expires each minute
         AccessToken accessToken = db.findAccessToken(token);
         if (accessToken != null && accessToken.isValid()) {
             if (accessToken.tokenExpired()) {
@@ -437,7 +441,7 @@ public class AuthorizationServer {
     }
 
     public boolean updateClientApp(FullHttpRequest req, String clientId) throws OAuthException {
-        String contentType = req.headers().get(HttpHeaders.Names.CONTENT_TYPE);
+        String contentType = req.headers().get(HttpHeaderNames.CONTENT_TYPE);
         if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
 //            String clientId = getBasicAuthorizationClientId(req);
 //            if (clientId == null) {

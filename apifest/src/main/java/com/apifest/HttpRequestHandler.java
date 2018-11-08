@@ -77,6 +77,7 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
     public static final String INVALID_ACCESS_TOKEN_SCOPE = "{\"error\":\"access token scope not valid\"}";
     public static final String INVALID_ACCESS_TOKEN = "{\"error\":\"access token not valid\"}";
     public static final String INVALID_ACCESS_TOKEN_TYPE = "{\"error\":\"access token type not valid\"}";
+    public static final String RATE_LIMIT_REACHED = "{\"error\":\"rate limit reached\"}";
 
     public static final String OAUTH_TOKEN_VALIDATE_URI = "/oauth20/tokens/validate";
 
@@ -185,7 +186,7 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
             if (mapping != null) {
                 if (mapping.getAuthType() != null) {
                     String accessToken = null;
-                    List<String> authorizationHeaders = req.headers().getAll(HttpHeaders.Names.AUTHORIZATION);
+                    List<String> authorizationHeaders = req.headers().getAll(HttpHeaderNames.AUTHORIZATION);
                     for (String header : authorizationHeaders) {
                         accessToken = AccessTokenValidator.extractAccessToken(header);
                         if (accessToken != null) {
@@ -215,9 +216,16 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
                     final MappingConfig conf = config;
 
                     AccessToken validToken = auth.isValidToken(accessToken);
-
                     if (validToken == null || validToken != null && !validToken.isValid()) {
                         writeResponseToChannel(channel, request, HttpResponseFactory.createUnauthorizedResponse(INVALID_ACCESS_TOKEN));
+                        return;
+                    } else {
+                        AccessTokenCounter.getInstance().increment(validToken.getClientId(), 1L);
+                    }
+                    boolean rateOK = RateLimitChecker.isRateOK(validToken.getClientId());
+                    if (!rateOK) {
+                        writeResponseToChannel(channel, request, HttpResponseFactory.createResponse(HttpResponseStatus.BAD_REQUEST,
+                                RATE_LIMIT_REACHED));
                         return;
                     }
                     boolean scopeOk = AccessTokenValidator.validateTokenScope(validToken, endpoint.getScope());
@@ -726,7 +734,7 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
         } catch (MappingException e) {
             response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
             ByteBuf content = Unpooled.copiedBuffer(e.getMessage().getBytes(CharsetUtil.UTF_8));
-            response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "application/json");
+            response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json");
             response.replace(content);
         }
         ChannelFuture future = channel.writeAndFlush(response);
