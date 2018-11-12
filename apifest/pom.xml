@@ -101,6 +101,11 @@
       <version>2.2.4</version>
     </dependency>
     <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>16.0.1</version>
+    </dependency>
+    <dependency>
       <groupId>com.hazelcast</groupId>
       <artifactId>hazelcast</artifactId>
       <version>3.2.3</version>

@@ -112,11 +112,10 @@ public final class MappingServer {
                 }
             }
             client = MappingClient.getClient();
-            bootstrap.bind(new InetSocketAddress(ServerConfig.getHost(), ServerConfig.getPort())).channel().closeFuture().sync();
-
             log.info("start reseter");
             CountReseter reseter = new CountReseter();
             reseter.resetCounters();
+            bootstrap.bind(new InetSocketAddress(ServerConfig.getHost(), ServerConfig.getPort())).channel().closeFuture().sync();
             log.info("ApiFest Mapping Server started at " + ServerConfig.getHost() + ":" + ServerConfig.getPort());
         } catch (Exception e) {
             log.error(e.getMessage());

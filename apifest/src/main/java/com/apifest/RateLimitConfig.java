@@ -1,18 +1,60 @@
 package com.apifest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.apifest.oauth20.ClientCredentials;
+import com.apifest.oauth20.DBManagerFactory;
+import com.apifest.oauth20.RateLimit;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+
 public class RateLimitConfig {
 
-    public void load() {
+    public static final long DEFAULT_CACHE_SIZE = 1024;
 
+    // use cache for rateLimit; on client update -> invalidate the cache
+    private LoadingCache<String, RateLimit> cache = CacheBuilder.newBuilder().maximumSize(DEFAULT_CACHE_SIZE).build(new RateLimiLoader());
+
+    private static volatile RateLimitConfig instance = null;
+    private static Object lock =  new Object();
+
+    private static Logger logger = LoggerFactory.getLogger(RateLimitConfig.class);
+
+    private RateLimitConfig() {
     }
 
-    public void reload() {
-        // read the rate limit config from Redis(DB) and load it in Hazelcast
-        // the rate limit will be per node, i.e. if a rate limit should be 60reqs/min for a client and there are
-        // three nodes then the rate limit config will be 20 reqs/min.
+    public static RateLimitConfig getInstance() {
+        RateLimitConfig local = instance;
+        if(local == null) {
+            synchronized (lock) {
+                local = instance;
+                if (local == null) {
+                    local = new RateLimitConfig();
+                    instance = local;
+                }
+            }
+        }
+        return local;
     }
 
-    public Long getLimitByClientId(String clientId) {
-        return 5L;
+    private static class RateLimiLoader extends CacheLoader<String, RateLimit> {
+
+        @Override
+        public RateLimit load(String clientId) throws Exception {
+            logger.info("load RateLimit for clientId {}", clientId);
+            ClientCredentials client = DBManagerFactory.getInstance().findClientCredentials(clientId);
+            return (client == null || client.getRateLimit() == null) ? new RateLimit() : client.getRateLimit();
+        }
+    }
+
+    public void reload(String clientId) {
+        logger.info("invalidate cache for clientId {}", clientId);
+        cache.invalidate(clientId);
+    }
+
+    public RateLimit getLimitByClientId(String clientId) {
+        return cache.getUnchecked(clientId);
     }
 }

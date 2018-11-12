@@ -19,3 +19,4 @@ custom.grant_type=
 custom.grant_type.class=
 hazelcast.password=
 cassandra.contanctPoints=
+rateLimit.reset.time_in_seconds=

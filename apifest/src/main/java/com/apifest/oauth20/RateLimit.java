@@ -14,24 +14,31 @@ public class RateLimit implements Serializable {
     private static final long serialVersionUID = -5642263289815851515L;
 
     @JsonProperty("requests")
-    private Integer requests;
+    private Long requests;
 
     @JsonProperty("per_seconds")
-    private Integer perSeconds;
+    private Long perSeconds;
 
-    public Integer getRequests() {
+    public Long getRequests() {
         return requests;
     }
 
-    public void setRequests(Integer requests) {
+    public void setRequests(Long requests) {
         this.requests = requests;
     }
 
-    public Integer getPerSeconds() {
+    public Long getPerSeconds() {
         return perSeconds;
     }
 
-    public void setPerSeconds(Integer perSeconds) {
+    public void setPerSeconds(Long perSeconds) {
         this.perSeconds = perSeconds;
+    }
+
+    public boolean isEmpty() {
+        if (requests == null || perSeconds == null) {
+            return true;
+        }
+        return false;
     }
 }

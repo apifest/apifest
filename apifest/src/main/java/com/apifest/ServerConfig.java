@@ -80,6 +80,7 @@ public final class ServerConfig {
     private static String hazelcastClusterPassword;
 
     private static String cassandraContactPoints;
+    protected static Integer rateLimitResetTimeinSec;
 
     private ServerConfig() {
     }
@@ -186,6 +187,13 @@ public final class ServerConfig {
         hazelcastClusterPassword = props.getProperty("hazelcast.password", "dev-pass");
 
         cassandraContactPoints = props.getProperty("cassandra.contanctPoints");
+
+        String rateLimitResetTimeString = props.getProperty("rateLimit.reset.time_in_seconds");
+        if (rateLimitResetTimeString == null || rateLimitResetTimeString.isEmpty()) {
+            log.warn("rateLimit.reset.time_in_seconds property is not defined in properties file");
+        } else {
+            rateLimitResetTimeinSec = Integer.valueOf(rateLimitResetTimeString);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -355,6 +363,10 @@ public final class ServerConfig {
 
     public static String getCassandraContactPoints() {
         return cassandraContactPoints;
+    }
+
+    public static Integer getRateLimitResetTimeinSec() {
+        return rateLimitResetTimeinSec;
     }
 
 }
