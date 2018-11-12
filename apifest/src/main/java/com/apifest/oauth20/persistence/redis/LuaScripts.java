@@ -40,7 +40,8 @@ public class LuaScripts {
             + "local created = ARGV[8]; "
             + "local scope = ARGV[9]; "
             + "local details = ARGV[10]; "
-            + "redis.call('HMSET','cc:'.._id, '_id',_id,'secret',secret,'name',name,'uri',uri,'descr',descr,'type',type,'status',status,'created',created,'scope',scope,'details',details);";
+            + "local rate_limit = ARGV[11]"
+            + "redis.call('HMSET','cc:'.._id, '_id',_id,'secret',secret,'name',name,'uri',uri,'descr',descr,'type',type,'status',status,'created',created,'scope',scope,'details',details, 'rate_limit', rate_limit);";
 
     private static final String STORE_SCOPE_SCRIPT = ""
             + "local id = ARGV[1]; "
@@ -72,7 +73,7 @@ public class LuaScripts {
             + "if redis.call('EXISTS','cc:'..id) == 0 then "
             + "  return nil; "
             + "end "
-            + "return redis.call('HMGET', 'cc:'..id,'_id','secret','name','uri','descr','type','status','created','scope','details');";
+            + "return redis.call('HMGET', 'cc:'..id,'_id','secret','name','uri','descr','type','status','created','scope','details','rate_limit');";
 
     private static final String UPDATE_APPLICATION_SCRIPT = ""
             + "local id = ARGV[1]; "

@@ -26,6 +26,7 @@ import com.apifest.oauth20.AuthCode;
 import com.apifest.oauth20.ClientCredentials;
 import com.apifest.oauth20.DBManager;
 import com.apifest.oauth20.JsonUtils;
+import com.apifest.oauth20.RateLimit;
 import com.apifest.oauth20.Scope;
 
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ public class RedisDBManager implements DBManager {
      */
     @Override
     public void storeClientCredentials(ClientCredentials clientCreds) {
-        List<String> parameters = new ArrayList<String>(10);
+        List<String> parameters = new ArrayList<String>(11);
         parameters.add(clientCreds.getId());
         parameters.add(clientCreds.getSecret());
         parameters.add(clientCreds.getName());
@@ -64,6 +65,7 @@ public class RedisDBManager implements DBManager {
         parameters.add(String.valueOf(clientCreds.getCreated()));
         parameters.add(String.valueOf(clientCreds.getScope()));
         parameters.add(JsonUtils.convertMapToJSON(clientCreds.getApplicationDetails()));
+        parameters.add(JsonUtils.convertRateLimitToJSON(clientCreds.getRateLimit()));
         LuaScripts.runScript(ScriptType.STORE_CLIENT_CREDENTIALS, Collections.<String>emptyList(), parameters);
     }
 
@@ -248,7 +250,8 @@ public class RedisDBManager implements DBManager {
      * @see com.apifest.DBManager#updateClientAppScope(java.lang.String)
      */
     @Override
-    public boolean updateClientApp(String clientId, String scope, String description, Integer status, Map<String, String> applicationDetails) {
+    public boolean updateClientApp(String clientId, String scope, String description, Integer status, Map<String, String> applicationDetails,
+            RateLimit rateLimit) {
         List<String> parameters = new ArrayList<String>(9);
         parameters.add(clientId);
         if (scope != null && scope.length() > 0) {
@@ -266,6 +269,10 @@ public class RedisDBManager implements DBManager {
         if(applicationDetails != null) {
             parameters.add("details");
             parameters.add(JsonUtils.convertMapToJSON(applicationDetails));
+        }
+        if(rateLimit != null) {
+            parameters.add("rate_limit");
+            parameters.add(JsonUtils.convertRateLimitToJSON(rateLimit));
         }
         LuaScripts.runScript(ScriptType.UPDATE_APPLICATION, Collections.<String>emptyList(), parameters);
         return true;

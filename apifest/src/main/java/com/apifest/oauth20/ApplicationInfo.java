@@ -35,7 +35,8 @@ import java.util.Map;
  *
  * @author Rossitsa Borissova
  */
-@JsonPropertyOrder({ "name", "description", "client_id", "client_secret", "scope", "registered", "redirect_uri", "status", "application_details" })
+@JsonPropertyOrder({ "name", "description", "client_id", "client_secret", "scope", "registered", "redirect_uri", "status", "application_details",
+    "rate_limit"})
 @JsonSerialize(include = Inclusion.NON_EMPTY)
 public class ApplicationInfo implements Serializable {
 
@@ -71,6 +72,9 @@ public class ApplicationInfo implements Serializable {
 
     @JsonProperty("client_secret")
     private String secret = "";
+
+    @JsonProperty("rate_limit")
+    private RateLimit rateLimit = null;
 
     public String getRegistered() {
         return (registered != null) ? registered.toString() : "";
@@ -144,6 +148,14 @@ public class ApplicationInfo implements Serializable {
         this.applicationDetails = applicationDetails;
     }
 
+    public RateLimit getRateLimit() {
+        return rateLimit;
+    }
+
+    public void setRateLimit(RateLimit rateLimit) {
+        this.rateLimit = rateLimit;
+    }
+
     public boolean valid() {
         boolean valid = false;
         if (name != null && name.length() > 0 && scope != null && scope.length() > 0 &&
@@ -185,23 +197,26 @@ public class ApplicationInfo implements Serializable {
         if (map.get("applicationDetails") != null) {
             appInfo.applicationDetails = JsonUtils.convertStringToMap(map.get("applicationDetails").toString());
         }
+        if (map.get("rateLimit") != null) {
+            appInfo.rateLimit = JsonUtils.convertStringToRateLimit(map.get("rateLimit").toString());
+        }
         return appInfo;
     }
 
-    public static ApplicationInfo loadFromStringMap(Map<String, String> map) {
-        ApplicationInfo appInfo = new ApplicationInfo();
-        appInfo.name = map.get("name");
-        appInfo.id = map.get("_id");
-        appInfo.secret = map.get("secret");
-        appInfo.redirectUri = map.get("uri");
-        appInfo.description = map.get("descr");
-        // appInfo.type = Integer.valueOf(map.get("type"));
-        appInfo.status = Integer.valueOf(map.get("status"));
-        appInfo.registered = new Date(Long.valueOf(map.get("created")));
-        appInfo.scope = map.get("scope");
-        appInfo.applicationDetails = JsonUtils.convertStringToMap(map.get("details"));
-        return appInfo;
-    }
+//    public static ApplicationInfo loadFromStringMap(Map<String, String> map) {
+//        ApplicationInfo appInfo = new ApplicationInfo();
+//        appInfo.name = map.get("name");
+//        appInfo.id = map.get("_id");
+//        appInfo.secret = map.get("secret");
+//        appInfo.redirectUri = map.get("uri");
+//        appInfo.description = map.get("descr");
+//        // appInfo.type = Integer.valueOf(map.get("type"));
+//        appInfo.status = Integer.valueOf(map.get("status"));
+//        appInfo.registered = new Date(Long.valueOf(map.get("created")));
+//        appInfo.scope = map.get("scope");
+//        appInfo.applicationDetails = JsonUtils.convertStringToMap(map.get("details"));
+//        return appInfo;
+//    }
 
     public static ApplicationInfo loadFromClientCredentials(ClientCredentials creds) {
         ApplicationInfo appInfo = null;
@@ -216,6 +231,7 @@ public class ApplicationInfo implements Serializable {
             appInfo.setRegistered(new Date(creds.getCreated()));
             appInfo.setStatus(creds.getStatus());
             appInfo.setApplicationDetails(creds.getApplicationDetails());
+            appInfo.setRateLimit(creds.getRateLimit());
         }
         return appInfo;
     }

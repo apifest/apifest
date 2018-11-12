@@ -22,6 +22,7 @@ import com.apifest.oauth20.ApplicationInfo;
 import com.apifest.oauth20.AuthCode;
 import com.apifest.oauth20.ClientCredentials;
 import com.apifest.oauth20.DBManager;
+import com.apifest.oauth20.RateLimit;
 import com.apifest.oauth20.Scope;
 import com.hazelcast.config.*;
 import com.hazelcast.config.MapConfig.EvictionPolicy;
@@ -315,7 +316,8 @@ public class HazelcastDBManager implements DBManager {
      * @see com.apifest.DBManager#updateClientAppScope(java.lang.String)
      */
     @Override
-    public boolean updateClientApp(String clientId, String scope, String description, Integer status, Map<String, String> applicationDetails) {
+    public boolean updateClientApp(String clientId, String scope, String description, Integer status, Map<String, String> applicationDetails,
+            RateLimit rateLimit) {
         PersistentClientCredentials clientCredentials = getClientCredentialsContainer().get(clientId);
         if (scope != null && scope.length() > 0) {
             clientCredentials.setScope(scope);
@@ -328,6 +330,9 @@ public class HazelcastDBManager implements DBManager {
         }
         if (applicationDetails != null) {
             clientCredentials.setApplicationDetails(applicationDetails);
+        }
+        if (rateLimit != null) {
+            clientCredentials.setRateLimit(rateLimit);
         }
         getClientCredentialsContainer().put(clientId, clientCredentials);
         return true;

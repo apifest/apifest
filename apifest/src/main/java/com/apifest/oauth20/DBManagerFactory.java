@@ -37,6 +37,7 @@ public class DBManagerFactory {
     public synchronized static DBManager getInstance() {
         if (dbManager == null) {
             if (REDIS_DB.equalsIgnoreCase(ServerConfig.getDatabase())) {
+                System.out.println("sentinels: " + ServerConfig.getRedisSentinels());
                 dbManager = new RedisDBManager();
             } else if (MONGO_DB.equalsIgnoreCase(ServerConfig.getDatabase())) {
                 dbManager = new MongoDBManager();

@@ -51,7 +51,7 @@ public class ClientCredentialsTest {
     @Test
     public void when_construct_generate_client_id_and_client_secret() throws Exception {
         // WHEN
-        ClientCredentials creds = new ClientCredentials("Demo", "basic", "descr", "http://example.com", null);
+        ClientCredentials creds = new ClientCredentials("Demo", "basic", "descr", "http://example.com", null, null);
 
         // THEN
         assertNotNull(creds.getId());
@@ -61,7 +61,7 @@ public class ClientCredentialsTest {
     @Test
     public void when_construct_set_date() throws Exception {
         // WHEN
-        ClientCredentials creds = new ClientCredentials("Demo", "basic", "descr", "http://example.com", null);
+        ClientCredentials creds = new ClientCredentials("Demo", "basic", "descr", "http://example.com", null, null);
 
         // THEN
         assertNotNull(creds.getCreated());

@@ -73,6 +73,7 @@ public class PersistenceTransformations {
             clientCredentials.setType(persistentClientCredentials.getType());
             clientCredentials.setCreated(persistentClientCredentials.getCreated());
             clientCredentials.setApplicationDetails(persistentClientCredentials.getApplicationDetails());
+            clientCredentials.setRateLimit(persistentClientCredentials.getRateLimit());
         }
         return clientCredentials;
     }
@@ -89,6 +90,7 @@ public class PersistenceTransformations {
         persistentClientCredentials.setType(clientCredentials.getType());
         persistentClientCredentials.setCreated(clientCredentials.getCreated());
         persistentClientCredentials.setApplicationDetails(clientCredentials.getApplicationDetails());
+        persistentClientCredentials.setRateLimit(clientCredentials.getRateLimit());
         return persistentClientCredentials;
     }
 
@@ -179,6 +181,7 @@ public class PersistenceTransformations {
         applicationInfo.setStatus(clientCredentials.getStatus());
         applicationInfo.setRegistered(new Date(clientCredentials.getCreated()));
         applicationInfo.setApplicationDetails(clientCredentials.getApplicationDetails());
+        applicationInfo.setRateLimit(clientCredentials.getRateLimit());
         return applicationInfo;
     }
 

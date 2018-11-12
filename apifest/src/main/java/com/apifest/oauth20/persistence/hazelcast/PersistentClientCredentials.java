@@ -19,6 +19,8 @@ package com.apifest.oauth20.persistence.hazelcast;
 import java.io.Serializable;
 import java.util.Map;
 
+import com.apifest.oauth20.RateLimit;
+
 /**
  *
  *
@@ -51,6 +53,8 @@ public class PersistentClientCredentials implements Serializable {
     private int status;
 
     private Map<String, String> applicationDetails = null;
+
+    private RateLimit rateLimit = null;
 
     public String getId() {
         return id;
@@ -130,6 +134,14 @@ public class PersistentClientCredentials implements Serializable {
 
     public void setApplicationDetails(Map<String, String> applicationDetails) {
         this.applicationDetails = applicationDetails;
+    }
+
+    public RateLimit getRateLimit() {
+        return rateLimit;
+    }
+
+    public void setRateLimit(RateLimit rateLimit) {
+        this.rateLimit = rateLimit;
     }
 
 }

@@ -137,9 +137,12 @@ public interface DBManager {
      * @param scope the scope of the client app
      * @param description the description of the client app
      * @param status the status of the client app
+     * @param applicationDetails the details about the client app
+     * @param rateLimit the rate limit for the client app
      * @return <code>true</code> if the update is successful, <code>false</code> otherwise
      */
-    boolean updateClientApp(String clientId, String scope, String description, Integer status, Map<String, String> applicationDetails);
+    boolean updateClientApp(String clientId, String scope, String description, Integer status, Map<String, String> applicationDetails,
+            RateLimit rateLimit);
 
     /**
      * Lists all client applications stored in the DB.

@@ -24,6 +24,7 @@ public class CountReseter {
             }
         };
 
+       // should be configurable?
        scheduler.scheduleAtFixedRate(reseter, 0L, 1, TimeUnit.MINUTES);
     }
 }

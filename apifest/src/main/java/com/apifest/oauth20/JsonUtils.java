@@ -67,4 +67,35 @@ public final class JsonUtils {
         return details;
     }
 
+    public static String convertRateLimitToJSON(RateLimit rateLimit) {
+        String result = null;
+        try {
+            result = mapper.writeValueAsString(rateLimit);
+        } catch (JsonGenerationException e) {
+            log.error("Cannot convert list to JSON format", e);
+        } catch (JsonMappingException e) {
+            log.error("Cannot convert list to JSON format", e);
+        } catch (IOException e) {
+            log.error("Cannot convert list to JSON format", e);
+        }
+        return result;
+    }
+
+    // TODO: pass the Object to which the json should be converted to
+    public static RateLimit convertStringToRateLimit(String json) {
+        RateLimit rateLimit = null;
+        try {
+            if (json != null) {
+                rateLimit = mapper.readValue(json, RateLimit.class);
+            }
+        } catch (JsonParseException e) {
+            log.error("Cannot convert json to map", e);
+        } catch (JsonMappingException e) {
+            log.error("Cannot convert json to map", e);
+        } catch (IOException e) {
+            log.error("Cannot convert json to map", e);
+        }
+        return rateLimit;
+    }
+
 }

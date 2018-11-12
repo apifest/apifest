@@ -71,12 +71,16 @@ public class ClientCredentials implements Serializable {
     @JsonIgnore
     private Map<String, String> applicationDetails = null;
 
-    public ClientCredentials(String appName, String scope, String description, String uri, Map<String, String> applicationDetails) {
-        this(appName, scope, description, uri, generateClientId(), generateClientSecret(), applicationDetails);
+    @JsonIgnore
+    private RateLimit rateLimit = null;
+
+    public ClientCredentials(String appName, String scope, String description, String uri, Map<String, String> applicationDetails, RateLimit rateLimit) {
+        this(appName, scope, description, uri, generateClientId(), generateClientSecret(), applicationDetails, rateLimit);
     }
 
+    // TODO: add a BUilder
     public ClientCredentials(String appName, String scope, String description, String uri, String clientId, String clientSecret,
-                             Map<String, String> applicationDetails) {
+                             Map<String, String> applicationDetails, RateLimit rateLimit) {
         this.name = appName;
         this.scope = scope;
         this.descr = (description != null) ? description : "";
@@ -86,6 +90,7 @@ public class ClientCredentials implements Serializable {
         this.created = (new Date()).getTime();
         this.status = INACTIVE_STATUS;
         this.applicationDetails = applicationDetails;
+        this.rateLimit = rateLimit;
     }
 
     public ClientCredentials() {
@@ -172,6 +177,14 @@ public class ClientCredentials implements Serializable {
         this.applicationDetails = applicationDetails;
     }
 
+    public RateLimit getRateLimit() {
+        return rateLimit;
+    }
+
+    public void setRateLimit(RateLimit rateLimit) {
+        this.rateLimit = rateLimit;
+    }
+
     private static String generateClientId() {
         return RandomGenerator.generateShortRandomString();
     }
@@ -201,6 +214,9 @@ public class ClientCredentials implements Serializable {
         if (map.get("applicationDetails") != null) {
             creds.applicationDetails = JsonUtils.convertStringToMap(map.get("applicationDetails").toString());
         }
+        if (map.get("rateLimit") != null) {
+            creds.rateLimit = JsonUtils.convertStringToRateLimit(map.get("rateLimit").toString());
+        }
         return creds;
     }
 
@@ -216,7 +232,9 @@ public class ClientCredentials implements Serializable {
         creds.created = Long.valueOf(map.get("created"));
         creds.scope = map.get("scope");
         // TODO: check whether details is the name of the field
+        // TODO: add check whether details exist
         creds.applicationDetails = JsonUtils.convertStringToMap(map.get("details"));
+        creds.rateLimit = JsonUtils.convertStringToRateLimit(map.get("rateLimit"));
         return creds;
     }
 
@@ -233,6 +251,7 @@ public class ClientCredentials implements Serializable {
         creds.scope = list.get(8);
         // TODO: check whether details is the name of the field
         creds.applicationDetails = JsonUtils.convertStringToMap(list.get(9));
+        creds.rateLimit = JsonUtils.convertStringToRateLimit(list.get(10));
         return creds;
     }
 

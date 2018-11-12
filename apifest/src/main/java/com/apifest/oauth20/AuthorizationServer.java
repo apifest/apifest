@@ -82,7 +82,7 @@ public class AuthorizationServer {
                             // if a client app with this client_id already registered
                             if (db.findClientCredentials(appInfo.getId()) == null) {
                                 creds = new ClientCredentials(appInfo.getName(), appInfo.getScope(), appInfo.getDescription(),
-                                        appInfo.getRedirectUri(), appInfo.getId(), appInfo.getSecret(), appInfo.getApplicationDetails());
+                                        appInfo.getRedirectUri(), appInfo.getId(), appInfo.getSecret(), appInfo.getApplicationDetails(), appInfo.getRateLimit());
                             } else {
                                 throw new OAuthException(Response.ALREADY_REGISTERED_APP, HttpResponseStatus.BAD_REQUEST);
                             }
@@ -91,7 +91,7 @@ public class AuthorizationServer {
                         }
                     } else {
                         creds = new ClientCredentials(appInfo.getName(), appInfo.getScope(), appInfo.getDescription(),
-                                appInfo.getRedirectUri(), appInfo.getApplicationDetails());
+                                appInfo.getRedirectUri(), appInfo.getApplicationDetails(), appInfo.getRateLimit());
                     }
                     db.storeClientCredentials(creds);
                 } else {
@@ -463,7 +463,7 @@ public class AuthorizationServer {
                         }
                     }
                     db.updateClientApp(clientId, appInfo.getScope(), appInfo.getDescription(), appInfo.getStatus(),
-                                       appInfo.getApplicationDetails());
+                                       appInfo.getApplicationDetails(), appInfo.getRateLimit());
                 } else {
                     throw new OAuthException(Response.UPDATE_APP_MANDATORY_PARAM_MISSING, HttpResponseStatus.BAD_REQUEST);
                 }

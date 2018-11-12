@@ -5,6 +5,8 @@ import com.apifest.oauth20.ApplicationInfo;
 import com.apifest.oauth20.AuthCode;
 import com.apifest.oauth20.ClientCredentials;
 import com.apifest.oauth20.DBManager;
+import com.apifest.oauth20.JsonUtils;
+import com.apifest.oauth20.RateLimit;
 import com.apifest.oauth20.Scope;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
@@ -585,6 +587,7 @@ public class CassandraDBManager implements DBManager {
                 app.setType(row.getInt("type"));
                 app.setStatus(row.getInt("status"));
                 app.setApplicationDetails(row.getMap("details", String.class, String.class));
+                app.setRateLimit(JsonUtils.convertStringToRateLimit(row.getString("rate_limit")));
                 return app;
             }
         } catch (NoHostAvailableException e) {
@@ -614,7 +617,8 @@ public class CassandraDBManager implements DBManager {
                 .value("descr", clientCreds.getDescr())
                 .value("type", clientCreds.getType())
                 .value("status", clientCreds.getStatus())
-                .value("details", clientCreds.getApplicationDetails());
+                .value("details", clientCreds.getApplicationDetails())
+                .value("rate_limit", clientCreds.getApplicationDetails());
         try {
             session.execute(stmt);
         } catch (NoHostAvailableException e) {
@@ -633,7 +637,8 @@ public class CassandraDBManager implements DBManager {
 
 
     @Override
-    public boolean updateClientApp(String clientId, String scope, String description, Integer status, Map<String, String> applicationDetails) {
+    public boolean updateClientApp(String clientId, String scope, String description, Integer status, Map<String, String> applicationDetails,
+            RateLimit rateLimit) {
         Update update = QueryBuilder.update(KEYSPACE_NAME, CLIENTS_TABLE_NAME);
         Update.Assignments assignments = update.with();
         if (scope != null && scope.length() > 0) {
@@ -647,6 +652,9 @@ public class CassandraDBManager implements DBManager {
         }
         if (applicationDetails != null && applicationDetails.size() > 0) {
             assignments.and(QueryBuilder.set("details", applicationDetails));
+        }
+        if (rateLimit != null) {
+            assignments.and(QueryBuilder.set("rate_limit", rateLimit));
         }
         Update.Where stmt = assignments.where(QueryBuilder.eq("client_id", clientId));
         try {
@@ -686,6 +694,7 @@ public class CassandraDBManager implements DBManager {
                 app.setDescription(row.getString("descr"));
                 app.setStatus(row.getInt("status"));
                 app.setApplicationDetails(row.getMap("details", String.class, String.class));
+                app.setRateLimit(JsonUtils.convertStringToRateLimit(row.getString("rate_limit")));
                 list.add(app);
             }
         } catch (NoHostAvailableException e) {

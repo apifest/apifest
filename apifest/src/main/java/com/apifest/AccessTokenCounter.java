@@ -32,7 +32,7 @@ public class AccessTokenCounter implements Counter {
     }
 
     private AccessTokenCounter() {
-        counters = new ConcurrentHashMap();
+        counters = new ConcurrentHashMap<Object, AtomicLong>();
     }
 
     @Override
@@ -42,15 +42,8 @@ public class AccessTokenCounter implements Counter {
 
     @Override
     public Long increment(Object clientId, Long value) {
-        // we will store the data for a clientId
-        AtomicLong count = counters.get(clientId);
-        if (count == null) {
-            count = new AtomicLong();
-            counters.put(clientId, count);
-        }
-        // increment count per client per minute, get the minute of the timestamp and if there is a record for that minute increment the count,
-        // delete the previous record
-        System.out.println("increment count for clientId: " + clientId.toString());
+        AtomicLong count = counters.computeIfAbsent(clientId, k -> new AtomicLong());
+        logger.info("increment count for clientId: {}", clientId.toString());
         count.getAndAdd(value);
         return count.get();
     }
@@ -64,4 +57,5 @@ public class AccessTokenCounter implements Counter {
         }
         logger.info("reset all counters");
     }
+
 }
