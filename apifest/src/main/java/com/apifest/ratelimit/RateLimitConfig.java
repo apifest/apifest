@@ -1,11 +1,11 @@
-package com.apifest;
+package com.apifest.ratelimit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.apifest.oauth20.ClientCredentials;
-import com.apifest.oauth20.DBManagerFactory;
 import com.apifest.oauth20.RateLimit;
+import com.apifest.oauth20.persistence.DBManagerFactory;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -14,7 +14,6 @@ public class RateLimitConfig {
 
     public static final long DEFAULT_CACHE_SIZE = 1024;
 
-    // use cache for rateLimit; on client update -> invalidate the cache
     private LoadingCache<String, RateLimit> cache = CacheBuilder.newBuilder().maximumSize(DEFAULT_CACHE_SIZE).build(new RateLimiLoader());
 
     private static volatile RateLimitConfig instance = null;

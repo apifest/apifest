@@ -85,6 +85,10 @@ public class HazelcastConfigInstance {
         return configInstance;
     }
 
+    public HazelcastInstance getHazelcastInstance() {
+        return hzInstance;
+    }
+
     public IMap<String, com.apifest.MappingConfig> getMappingConfigs() {
         return hzInstance.getMap(HZ_MAPPINGS_MAP_NAME);
     }

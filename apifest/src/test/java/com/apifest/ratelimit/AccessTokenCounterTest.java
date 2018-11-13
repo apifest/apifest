@@ -1,8 +1,12 @@
-package com.apifest;
+package com.apifest.ratelimit;
 
 import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Test;
+
+import com.apifest.ServerConfig;
+import com.apifest.ratelimit.AccessTokenCounter;
+import com.apifest.ratelimit.CountReseter;
 
 public class AccessTokenCounterTest {
 

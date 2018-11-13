@@ -16,14 +16,15 @@
 
 package com.apifest.oauth20.persistence.hazelcast;
 
+import com.apifest.HazelcastConfigInstance;
 import com.apifest.ServerConfig;
 import com.apifest.api.AccessToken;
 import com.apifest.oauth20.ApplicationInfo;
 import com.apifest.oauth20.AuthCode;
 import com.apifest.oauth20.ClientCredentials;
-import com.apifest.oauth20.DBManager;
 import com.apifest.oauth20.RateLimit;
 import com.apifest.oauth20.Scope;
+import com.apifest.oauth20.persistence.DBManager;
 import com.hazelcast.config.*;
 import com.hazelcast.config.MapConfig.EvictionPolicy;
 import com.hazelcast.config.MaxSizeConfig.MaxSizePolicy;
@@ -67,11 +68,12 @@ public class HazelcastDBManager implements DBManager {
 
     static {
         // REVISIT: Hazelcast configuration
-        Config config = createConfiguration();
-        GroupConfig groupConfig = new GroupConfig("apifest-oauth20", ServerConfig.getHazelcastClusterPassword());
-        config.setGroupConfig(groupConfig);
-        config.setMapConfigs(createMapConfigs());
-        hazelcastClient = Hazelcast.newHazelcastInstance(config);
+//        Config config = createConfiguration();
+//        GroupConfig groupConfig = new GroupConfig("apifest-oauth20", ServerConfig.getHazelcastClusterPassword());
+//        config.setGroupConfig(groupConfig);
+//        config.setMapConfigs(createMapConfigs());
+//        hazelcastClient = Hazelcast.newHazelcastInstance(config);
+        hazelcastClient = HazelcastConfigInstance.instance().getHazelcastInstance();
         hazelcastClient.getMap(APIFEST_AUTH_CODE).addIndex("codeURI", false);
         hazelcastClient.getMap(APIFEST_ACCESS_TOKEN).addIndex("refreshTokenByClient", false);
         hazelcastClient.getMap(APIFEST_ACCESS_TOKEN).addIndex("accessTokenByUserIdAndClient", false);

@@ -17,6 +17,9 @@
 package com.apifest.oauth20;
 
 import com.apifest.ServerConfig;
+import com.apifest.oauth20.persistence.DBManager;
+import com.apifest.oauth20.persistence.DBManagerFactory;
+
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;

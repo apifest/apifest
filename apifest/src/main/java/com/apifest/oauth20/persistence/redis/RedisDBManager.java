@@ -24,10 +24,10 @@ import com.apifest.oauth20.AccessTokenBuilder;
 import com.apifest.oauth20.ApplicationInfo;
 import com.apifest.oauth20.AuthCode;
 import com.apifest.oauth20.ClientCredentials;
-import com.apifest.oauth20.DBManager;
 import com.apifest.oauth20.JsonUtils;
 import com.apifest.oauth20.RateLimit;
 import com.apifest.oauth20.Scope;
+import com.apifest.oauth20.persistence.DBManager;
 
 import java.util.ArrayList;
 import java.util.Collections;

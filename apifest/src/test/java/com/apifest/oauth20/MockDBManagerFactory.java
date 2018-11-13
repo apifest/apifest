@@ -18,6 +18,9 @@ package com.apifest.oauth20;
 
 import static org.mockito.Mockito.mock;
 
+import com.apifest.oauth20.persistence.DBManager;
+import com.apifest.oauth20.persistence.DBManagerFactory;
+
 /**
  * @author Rossitsa Borissova
  */

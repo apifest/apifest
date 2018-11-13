@@ -35,6 +35,7 @@ import org.testng.annotations.Test;
 import com.apifest.HttpRequestHandler;
 import com.apifest.ServerConfig;
 import com.apifest.api.AccessToken;
+import com.apifest.oauth20.persistence.DBManager;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

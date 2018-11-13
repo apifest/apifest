@@ -1,6 +1,5 @@
-package com.apifest;
+package com.apifest.ratelimit;
 
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -50,11 +49,7 @@ public class AccessTokenCounter implements Counter {
 
     @Override
     public void resetAllCounters() {
-        // TODO: is that OK?
-        for (Entry<Object, AtomicLong> counter :  counters.entrySet()) {
-            logger.info("reset counter for clientId {}", counter.getKey());
-            counters.put(counter.getKey(), new AtomicLong());
-        }
+        counters = new ConcurrentHashMap<>();
         logger.info("reset all counters");
     }
 

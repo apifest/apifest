@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.apifest.api.MappingException;
+import com.apifest.ratelimit.CountReseter;
 
 /**
  * Class responsible for ApiFest Mapping Server.
@@ -112,7 +113,6 @@ public final class MappingServer {
                 }
             }
             client = MappingClient.getClient();
-            log.info("start reseter");
             CountReseter reseter = new CountReseter();
             reseter.resetCounters();
             bootstrap.bind(new InetSocketAddress(ServerConfig.getHost(), ServerConfig.getPort())).channel().closeFuture().sync();

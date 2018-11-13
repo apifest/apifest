@@ -79,59 +79,6 @@ public class AccessToken implements Serializable {
     @JsonProperty("refresh_expires_in")
     private String refreshExpiresIn = "";
 
-
-//    /**
-//     * Creates access token along with its refresh token.
-//     *
-//     * @param tokenType
-//     * @param expiresIn
-//     * @param scope
-//     */
-//    public AccessToken(String tokenType, String expiresIn, String scope, String refreshExpiresIn) {
-//        this(tokenType, expiresIn, scope, true, refreshExpiresIn);
-//    }
-//
-//    /**
-//     * Creates access token. Used for generation of client_credentials type tokens with no refreshToken.
-//     *
-//     * @param tokenType
-//     * @param expiresIn
-//     * @param scope
-//     * @param createRefreshToken
-//     */
-//    public AccessToken(String tokenType, String expiresIn, String scope, boolean createRefreshToken, String refreshExpiresIn) {
-//        this.token = RandomGenerator.generateRandomString();
-//        if (createRefreshToken) {
-//            this.refreshToken = RandomGenerator.generateRandomString();
-//            this.refreshExpiresIn = (refreshExpiresIn != null && !refreshExpiresIn.isEmpty())? refreshExpiresIn : expiresIn;
-//        }
-//        this.expiresIn = expiresIn;
-//        this.type = tokenType;
-//        this.scope = scope;
-//        this.valid = true;
-//        this.created = (new Date()).getTime();
-//    }
-//
-//    /**
-//     * Creates access token with already generated refresh token.
-//     *
-//     * @param tokenType
-//     * @param expiresIn
-//     * @param scope
-//     * @param createRefreshToken
-//     * @param refreshToken
-//     */
-//    public AccessToken(String tokenType, String expiresIn, String scope, String refreshToken, String refreshExpiresIn) {
-//        this.token = RandomGenerator.generateRandomString();
-//        this.expiresIn = expiresIn;
-//        this.type = tokenType;
-//        this.scope = scope;
-//        this.valid = true;
-//        this.created = (new Date()).getTime();
-//        this.refreshToken = refreshToken;
-//        this.refreshExpiresIn = (refreshExpiresIn != null && !refreshExpiresIn.isEmpty()) ? refreshExpiresIn : expiresIn;
-//    }
-
     public AccessToken(String token, String tokenType, String expiresIn, String scope, String refreshToken, String refreshExpiresIn) {
         this.token = token;
         this.expiresIn = expiresIn;
@@ -249,60 +196,6 @@ public class AccessToken implements Serializable {
     public void setRefreshExpiresIn(String refreshExpiresIn) {
         this.refreshExpiresIn = refreshExpiresIn;
     }
-
-//    public static AccessToken loadFromMap(Map<String, Object> map) {
-//        AccessToken accessToken = new AccessToken();
-//        accessToken.token = (String) map.get("token");
-//        accessToken.refreshToken = (String) map.get("refreshToken");
-//        accessToken.expiresIn = (String) map.get("expiresIn");
-//        accessToken.type = (String) map.get("type");
-//        accessToken.scope = (String) map.get("scope");
-//        accessToken.valid = (Boolean) map.get("valid");
-//        accessToken.clientId = (String) map.get("clientId");
-//        accessToken.codeId = (String) map.get("codeId");
-//        accessToken.userId = (String) map.get("userId");
-//        accessToken.created = (Long) map.get("created");
-//        accessToken.details = JsonUtils.convertStringToMap((String) map.get("details"));
-//        accessToken.applicationDetails = JsonUtils.convertStringToMap((String) map.get("applicationDetails"));
-//        accessToken.refreshExpiresIn = (String) ((map.get("refreshExpiresIn") != null ? map.get("refreshExpiresIn") : accessToken.expiresIn));
-//        return accessToken;
-//    }
-//
-//    public static AccessToken loadFromStringMap(Map<String, String> map) {
-//        AccessToken accessToken = new AccessToken();
-//        accessToken.token = map.get("token");
-//        accessToken.refreshToken = map.get("refreshToken");
-//        accessToken.expiresIn = map.get("expiresIn");
-//        accessToken.type = map.get("type");
-//        accessToken.scope = map.get("scope");
-//        accessToken.valid = Boolean.parseBoolean(map.get("valid"));
-//        accessToken.clientId = map.get("clientId");
-//        accessToken.codeId = map.get("codeId");
-//        accessToken.userId = map.get("userId");
-//        accessToken.created = Long.parseLong(map.get("created"));
-//        accessToken.details = JsonUtils.convertStringToMap(map.get("details"));
-//        accessToken.applicationDetails = JsonUtils.convertStringToMap(map.get("applicationDetails"));
-//        accessToken.refreshExpiresIn = map.get("refreshExpiresIn") != null ? map.get("refreshExpiresIn") : accessToken.expiresIn;
-//        return accessToken;
-//    }
-//
-//    public static AccessToken loadFromStringList(List<String> list) {
-//        AccessToken accessToken = new AccessToken();
-//        accessToken.token = list.get(0);
-//        accessToken.refreshToken = list.get(1);;
-//        accessToken.expiresIn = list.get(2);
-//        accessToken.type = list.get(3);
-//        accessToken.scope = list.get(4);
-//        accessToken.valid = Boolean.parseBoolean(list.get(5));
-//        accessToken.clientId = list.get(6);
-//        accessToken.codeId = list.get(7);
-//        accessToken.userId = list.get(8);
-//        accessToken.created = Long.parseLong(list.get(9));
-//        accessToken.details = JsonUtils.convertStringToMap(list.get(10));
-//        accessToken.refreshExpiresIn = list.get(11) != null ? list.get(11) : accessToken.expiresIn;
-//        accessToken.applicationDetails = JsonUtils.convertStringToMap(list.get(12));
-//        return accessToken;
-//    }
 
     public boolean tokenExpired() {
         // expires_in is in seconds

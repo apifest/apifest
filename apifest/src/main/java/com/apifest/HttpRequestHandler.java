@@ -24,14 +24,17 @@ import com.apifest.api.LifecycleHandler;
 import com.apifest.api.MappingEndpoint;
 import com.apifest.api.MappingException;
 import com.apifest.api.UpstreamException;
+import com.apifest.oauth20.AccessTokenValidator;
 import com.apifest.oauth20.ApplicationInfo;
 import com.apifest.oauth20.AuthorizationServer;
 import com.apifest.oauth20.ClientCredentials;
-import com.apifest.oauth20.DBManagerFactory;
 import com.apifest.oauth20.OAuthException;
 import com.apifest.oauth20.QueryParameter;
 import com.apifest.oauth20.Response;
 import com.apifest.oauth20.ScopeService;
+import com.apifest.oauth20.persistence.DBManagerFactory;
+import com.apifest.ratelimit.AccessTokenCounter;
+import com.apifest.ratelimit.RateLimitChecker;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.netty.buffer.ByteBuf;
@@ -739,21 +742,6 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
         }
         ChannelFuture future = channel.writeAndFlush(response);
         future.addListener(ChannelFutureListener.CLOSE);
-    }
-
-    public HttpRequest createTokenValidateRequest(String accessToken) {
-        QueryStringEncoder enc = new QueryStringEncoder(OAUTH_TOKEN_VALIDATE_URI);
-        enc.addParam("token", accessToken);
-        String uri = OAUTH_TOKEN_VALIDATE_URI;
-        try {
-            uri = enc.toUri().toString();
-        } catch (URISyntaxException e) {
-            log.error("cannot build token validation URI", e);
-        }
-        HttpRequest request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri);
-        request.headers().add(HttpHeaders.Names.HOST, ServerConfig.tokenValidateHost);
-        // REVISIT: propagate all custom headers?
-        return request;
     }
 
     public void getLoadedMappings(Channel channel) {

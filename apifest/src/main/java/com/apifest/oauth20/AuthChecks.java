@@ -22,6 +22,9 @@ import org.apache.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.apifest.oauth20.persistence.DBManager;
+import com.apifest.oauth20.persistence.DBManagerFactory;
+
 /**
  * Performs authentication checks.
  *

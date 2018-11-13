@@ -17,11 +17,12 @@
 /**
  * @author Apostol Terziev
  */
-package com.apifest.oauth20;
+package com.apifest.oauth20.persistence;
 
 import com.apifest.ServerConfig;
 import com.apifest.oauth20.persistence.cassandra.CassandraDBManager;
 import com.apifest.oauth20.persistence.hazelcast.HazelcastDBManager;
+import com.apifest.oauth20.persistence.mongo.MongoDBManager;
 import com.apifest.oauth20.persistence.redis.RedisDBManager;
 
 public class DBManagerFactory {

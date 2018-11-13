@@ -74,6 +74,10 @@ public class ClientCredentials implements Serializable {
     @JsonIgnore
     private RateLimit rateLimit = null;
 
+    public ClientCredentials(String appName, String scope, String description, String uri, Map<String, String> applicationDetails) {
+        this(appName, scope, description, uri, generateClientId(), generateClientSecret(), applicationDetails, null);
+    }
+
     public ClientCredentials(String appName, String scope, String description, String uri, Map<String, String> applicationDetails, RateLimit rateLimit) {
         this(appName, scope, description, uri, generateClientId(), generateClientSecret(), applicationDetails, rateLimit);
     }

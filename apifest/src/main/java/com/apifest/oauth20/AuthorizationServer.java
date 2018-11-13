@@ -28,13 +28,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.apifest.HttpRequestHandler;
-import com.apifest.RateLimitConfig;
 import com.apifest.ServerConfig;
 import com.apifest.api.AccessToken;
 import com.apifest.api.AuthenticationException;
 import com.apifest.api.ICustomGrantTypeHandler;
 import com.apifest.api.IUserAuthentication;
 import com.apifest.api.UserDetails;
+import com.apifest.oauth20.persistence.DBManager;
+import com.apifest.oauth20.persistence.DBManagerFactory;
+import com.apifest.ratelimit.RateLimitConfig;
 
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;

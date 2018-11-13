@@ -16,8 +16,8 @@
 
 package com.apifest;
 
-import com.apifest.oauth20.DBManagerFactory;
 import com.apifest.oauth20.ResourceBundleImpl;
+import com.apifest.oauth20.persistence.DBManagerFactory;
 import com.apifest.api.ICustomGrantTypeHandler;
 import com.apifest.api.IUserAuthentication;
 import org.slf4j.Logger;
@@ -55,8 +55,6 @@ public final class ServerConfig {
     public static String host;
     public static Integer port;
     public static String mappingsPath;
-    public static String tokenValidateHost;
-    public static Integer tokenValidatePort;
     public static Integer connectTimeout;
     public static String customJarPath;
     public static String apifestNodes;
@@ -80,7 +78,7 @@ public final class ServerConfig {
     private static String hazelcastClusterPassword;
 
     private static String cassandraContactPoints;
-    protected static Integer rateLimitResetTimeinSec;
+    public static Integer rateLimitResetTimeinSec;
 
     private ServerConfig() {
     }
@@ -143,18 +141,6 @@ public final class ServerConfig {
         }
 
         globalErrors = props.getProperty("apifest.global-errors");
-
-        tokenValidateHost = props.getProperty("token.validate.host");
-        if (tokenValidateHost == null || tokenValidateHost.isEmpty()) {
-            log.warn("token.validate.host property is not defined in properties file");
-        }
-
-        String tokenValidatePortString = props.getProperty("token.validate.port");
-        if (tokenValidatePortString == null || tokenValidatePortString.isEmpty()) {
-            log.warn("token.validate.port property is not defined in properties file");
-        } else {
-            tokenValidatePort = Integer.valueOf(props.getProperty("token.validate.port"));
-        }
 
         String connectTimeoutString = props.getProperty("connect.timeout");
         if (connectTimeoutString == null || connectTimeoutString.isEmpty()) {
@@ -298,14 +284,6 @@ public final class ServerConfig {
 
     public static String getMappingsPath() {
         return mappingsPath;
-    }
-
-    public static String getTokenValidateHost() {
-        return tokenValidateHost;
-    }
-
-    public static Integer getTokenValidatePort() {
-        return tokenValidatePort;
     }
 
     public static Integer getConnectTimeout() {

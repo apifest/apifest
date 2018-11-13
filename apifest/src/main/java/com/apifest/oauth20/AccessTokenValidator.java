@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.apifest;
+package com.apifest.oauth20;
 
 import java.util.Arrays;
 import java.util.List;
@@ -40,7 +40,7 @@ public class AccessTokenValidator {
 
     protected static Logger log = LoggerFactory.getLogger(AccessTokenValidator.class);
 
-    protected static boolean validateTokenScope(AccessToken validToken, String endpointScope) {
+    public static boolean validateTokenScope(AccessToken validToken, String endpointScope) {
         String tokenScope = validToken.getScope();
         if (tokenScope == null) {
             return false;
@@ -61,7 +61,7 @@ public class AccessTokenValidator {
         return false;
     }
 
-    protected static String extractAccessToken(String header) {
+    public static String extractAccessToken(String header) {
         Matcher m = AUTH_BEARER_PATTERN.matcher(header);
         if (m.find()) {
             return m.group(2);

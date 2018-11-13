@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.apifest;
+package com.apifest.oauth20;
 
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
@@ -23,6 +23,8 @@ import static org.testng.Assert.*;
 import org.slf4j.Logger;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.apifest.oauth20.AccessTokenValidator;
 
 /**
  * @author Rossitsa Borissova

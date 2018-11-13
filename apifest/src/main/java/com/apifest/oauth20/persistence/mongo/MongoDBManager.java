@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-package com.apifest.oauth20;
+package com.apifest.oauth20.persistence.mongo;
 
 import com.apifest.api.AccessToken;
+import com.apifest.oauth20.AccessTokenBuilder;
+import com.apifest.oauth20.ApplicationInfo;
+import com.apifest.oauth20.AuthCode;
+import com.apifest.oauth20.ClientCredentials;
+import com.apifest.oauth20.RateLimit;
+import com.apifest.oauth20.Scope;
+import com.apifest.oauth20.persistence.DBManager;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

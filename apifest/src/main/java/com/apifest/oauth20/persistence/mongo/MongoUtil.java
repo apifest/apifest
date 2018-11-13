@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.apifest.oauth20;
+package com.apifest.oauth20.persistence.mongo;
 
 import com.apifest.ServerConfig;
 import com.mongodb.DB;

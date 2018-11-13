@@ -1,4 +1,4 @@
-package com.apifest;
+package com.apifest.ratelimit;
 
 public interface Counter {
     Long getCount(Object counterKey);
