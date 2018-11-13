@@ -42,7 +42,6 @@ public class AccessTokenCounter implements Counter {
     @Override
     public Long increment(Object clientId, Long value) {
         AtomicLong count = counters.computeIfAbsent(clientId, k -> new AtomicLong());
-        logger.info("increment count for clientId: {}", clientId.toString());
         count.getAndAdd(value);
         return count.get();
     }
@@ -50,7 +49,6 @@ public class AccessTokenCounter implements Counter {
     @Override
     public void resetAllCounters() {
         counters = new ConcurrentHashMap<>();
-        logger.info("reset all counters");
     }
 
 }

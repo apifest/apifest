@@ -11,8 +11,6 @@ import com.apifest.ServerConfig;
 
 public class CountReseter {
 
-    private static Logger logger = LoggerFactory.getLogger(CountReseter.class);
-
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
 
@@ -21,7 +19,6 @@ public class CountReseter {
 
             @Override
             public void run() {
-                logger.info("run.............");
                 AccessTokenCounter.getInstance().resetAllCounters();
             }
         };

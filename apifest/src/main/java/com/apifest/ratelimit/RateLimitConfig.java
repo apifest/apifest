@@ -42,7 +42,6 @@ public class RateLimitConfig {
 
         @Override
         public RateLimit load(String clientId) throws Exception {
-            logger.info("load RateLimit for clientId {}", clientId);
             ClientCredentials client = DBManagerFactory.getInstance().findClientCredentials(clientId);
             return (client == null || client.getRateLimit() == null) ? new RateLimit() : client.getRateLimit();
         }
