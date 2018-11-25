@@ -227,7 +227,7 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
                     }
                     boolean rateOK = RateLimitChecker.isRateOK(validToken.getClientId());
                     if (!rateOK) {
-                        writeResponseToChannel(channel, request, HttpResponseFactory.createResponse(HttpResponseStatus.BAD_REQUEST,
+                        writeResponseToChannel(channel, request, HttpResponseFactory.createResponse(HttpResponseStatus.TOO_MANY_REQUESTS,
                                 RATE_LIMIT_REACHED));
                         return;
                     }
@@ -721,7 +721,9 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
     public void writeResponseToChannel(Channel channel, FullHttpRequest request, FullHttpResponse response) {
         LifecycleEventHandlers.invokeResponseEventHandlers(request, response);
         ChannelFuture future = channel.writeAndFlush(response);
-        future.addListener(ChannelFutureListener.CLOSE);
+        if(!HttpUtil.isKeepAlive(request)) {
+            future.addListener(ChannelFutureListener.CLOSE);
+        }
     }
 
     public void setConnectTimeout(final Channel channel) {
