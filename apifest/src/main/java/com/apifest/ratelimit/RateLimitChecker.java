@@ -15,10 +15,8 @@ public class RateLimitChecker {
     public static boolean isRateOK(String clientId) {
         RateLimit rateLimit = RateLimitConfig.getInstance().getLimitByClientId(clientId);
         if (!rateLimit.isEmpty()) {
-            logger.info("rateLimit for clientId {} is {}", clientId, rateLimit.getRequests());
             Long limit = rateLimit.getRequests();
             Long currentCount = AccessTokenCounter.getInstance().getCount(clientId);
-            logger.info("currentCount for clientId {} is {}", clientId, currentCount);
             if (currentCount.compareTo(limit) <= 0) {
                 return true;
             } else {

@@ -78,7 +78,7 @@ public final class ServerConfig {
     private static String hazelcastClusterPassword;
 
     private static String cassandraContactPoints;
-    public static Integer rateLimitResetTimeinSec;
+    public static Integer rateLimitResetTimeinSec = 60;
 
     private ServerConfig() {
     }

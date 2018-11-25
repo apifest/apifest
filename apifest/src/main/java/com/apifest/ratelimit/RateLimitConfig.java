@@ -10,11 +10,15 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
+import java.util.concurrent.TimeUnit;
+
 public class RateLimitConfig {
 
     public static final long DEFAULT_CACHE_SIZE = 1024;
 
-    private LoadingCache<String, RateLimit> cache = CacheBuilder.newBuilder().maximumSize(DEFAULT_CACHE_SIZE).build(new RateLimiLoader());
+    private LoadingCache<String, RateLimit> cache = CacheBuilder.newBuilder().maximumSize(DEFAULT_CACHE_SIZE)
+            .expireAfterWrite(1, TimeUnit.MINUTES)
+            .build(new RateLimiLoader());
 
     private static volatile RateLimitConfig instance = null;
     private static Object lock =  new Object();
