@@ -180,6 +180,40 @@ public final class ServerConfig {
         } else {
             rateLimitResetTimeinSec = Integer.valueOf(rateLimitResetTimeString);
         }
+        loadCustomAuthentication();
+    }
+
+    public static void loadCustomAuthentication() {
+        if (customJar == null || customJar.isEmpty()) {
+            log.warn("Set value for user_authenticate_jar in properties file, otherwise user authentication will always pass successfully");
+        } else {
+            loadCustomProperties();
+            if (userAuthClass != null && userAuthClass.length() > 0) {
+                try {
+                    userAuthenticationClass = loadCustomUserAuthentication(userAuthClass);
+                } catch (ClassNotFoundException e) {
+                    log.error("cannot load user.authenticate.class, check property value", e);
+                }
+            }
+            if (customGrantType != null && customGrantType.length() > 0) {
+                if (customGrantTypeClass == null || customGrantTypeClass.length() == 0) {
+                    log.error("no custom.grant_type.class set for custom.grant_type={}", customGrantType);
+                } else {
+                    try {
+                        customGrantTypeHandler = loadCustomGrantTypeClass(customGrantTypeClass);
+                    } catch (ClassNotFoundException e) {
+                        log.error("cannot load custom.grant_type.class, check property value", e);
+                    }
+
+                }
+            }
+
+            try {
+                LifecycleEventHandlers.loadLifecycleHandlers(getJarClassLoader(), customJar);
+            } catch (MalformedURLException e) {
+                log.warn("cannot load custom jar");
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
