@@ -16,15 +16,12 @@
 
 package com.apifest.oauth20;
 
-import com.apifest.ServerConfig;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.QueryStringDecoder;
-import io.netty.util.CharsetUtil;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.http.util.CharsetUtils;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -32,12 +29,14 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import com.apifest.ServerConfig;
+
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.util.CharsetUtil;
 
 /**
  * Responsible for storing and loading OAuth20 scopes.
@@ -69,7 +68,7 @@ public class ScopeService {
      * @return String message that will be returned in the response
      */
     public String registerScope(FullHttpRequest req) throws OAuthException {
-        String contentType = (req.headers() != null) ? req.headers().get(HttpHeaders.Names.CONTENT_TYPE) : null;
+        String contentType = (req.headers() != null) ? req.headers().get(HttpHeaderNames.CONTENT_TYPE) : null;
         String responseMsg = "";
         // check Content-Type
         if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
@@ -124,7 +123,7 @@ public class ScopeService {
      * Otherwise, all available scopes will be returned in JSON format.
      */
     public String getScopes(HttpRequest req) throws OAuthException {
-        QueryStringDecoder dec = new QueryStringDecoder(req.getUri());
+        QueryStringDecoder dec = new QueryStringDecoder(req.uri());
         Map<String, List<String>> queryParams = dec.parameters();
         if(queryParams.containsKey("client_id")) {
             return getScopes(queryParams.get("client_id").get(0));
@@ -241,7 +240,7 @@ public class ScopeService {
      * @return String message that will be returned in the response
      */
     public String updateScope(FullHttpRequest req, String scopeName) throws OAuthException {
-        String contentType = (req.headers() != null) ? req.headers().get(HttpHeaders.Names.CONTENT_TYPE) : null;
+        String contentType = (req.headers() != null) ? req.headers().get(HttpHeaderNames.CONTENT_TYPE) : null;
         String responseMsg = "";
         // check Content-Type
         if (contentType != null && contentType.contains(Response.APPLICATION_JSON)) {
