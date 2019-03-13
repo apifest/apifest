@@ -16,7 +16,9 @@
 
 package com.apifest.api;
 
-import org.jboss.netty.handler.codec.http.HttpResponse;
+
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpResponse;
 
 /**
  * Parent class for all response filters. Filters are executed after a response from the backend
@@ -27,5 +29,5 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
  */
 public abstract class BasicFilter {
 
-    public abstract HttpResponse execute(HttpResponse response);
+    public abstract HttpResponse execute(FullHttpResponse response);
 }

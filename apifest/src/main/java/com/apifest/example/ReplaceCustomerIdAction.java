@@ -16,10 +16,11 @@
 
 package com.apifest.example;
 
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
+import com.apifest.api.AccessToken;
 
 import com.apifest.api.BasicAction;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpRequest;
 
 /**
  * Action that replaces {customerId} with actual customer id value.
@@ -31,8 +32,8 @@ public class ReplaceCustomerIdAction extends BasicAction {
     protected static final String CUSTOMER_ID = "{customerId}";
 
     @Override
-    public HttpRequest execute(HttpRequest req, String internalURI, HttpResponse tokenValidationResponse) {
-        String newURI = internalURI.replace(CUSTOMER_ID, BasicAction.getUserId(tokenValidationResponse));
+    public FullHttpRequest execute(FullHttpRequest req, String internalURI, AccessToken validToken) {
+        String newURI = internalURI.replace(CUSTOMER_ID, validToken.getUserId());
         req.setUri(newURI);
         return req;
     }

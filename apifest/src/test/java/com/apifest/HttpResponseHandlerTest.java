@@ -16,34 +16,12 @@
 
 package com.apifest;
 
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
-
-import java.util.Map;
-
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.HttpVersion;
-import org.slf4j.Logger;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import com.hazelcast.core.IMap;
-
 /**
  * @author Rossitsa Borissova
  */
 public class HttpResponseHandlerTest {
 
-    HttpResponse response = null;
+    /*HttpResponse response = null;
     HttpResponseHandler handler = null;
     ChannelHandlerContext ctx;
     MessageEvent e;
@@ -144,5 +122,5 @@ public class HttpResponseHandlerTest {
 
         // THEN
         assertNotEquals(new String(response.getContent().array()), "{\"message\":\"resource created\"}");
-    }
+    }*/
 }

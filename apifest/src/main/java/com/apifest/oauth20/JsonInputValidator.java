@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014, ApiFest project
+ * Copyright 2013-2015, ApiFest project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.apifest;
-
-import org.jboss.netty.handler.codec.http.HttpMessage;
+package com.apifest.oauth20;
 
 /**
- * Interface for listeners that handle the response received from OAuth20 Server upon token validation.
+ * Validates JSON input.
  *
  * @author Rossitsa Borissova
+ *
  */
-public abstract class TokenValidationListener {
+public interface JsonInputValidator {
 
-    /**
-     * Handles the received response.
-     *
-     * @param response response received from OAuth20 Server
-     */
-    abstract void responseReceived(HttpMessage response);
+    public void validate(String name, String value) throws OAuthException;
 }

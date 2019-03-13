@@ -16,10 +16,11 @@
 
 package com.apifest.example;
 
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.util.CharsetUtil;
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpResponse;
+import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,14 +38,14 @@ public class RemoveBalanceFilter extends BasicFilter {
     public static Logger log = LoggerFactory.getLogger(RemoveBalanceFilter.class);
 
     @Override
-    public HttpResponse execute(HttpResponse response) {
+    public HttpResponse execute(FullHttpResponse response) {
         JsonParser parser = new JsonParser();
-        JsonObject json= parser.parse(response.getContent().toString(CharsetUtil.UTF_8)).getAsJsonObject();
+        JsonObject json= parser.parse(response.content().toString(CharsetUtil.UTF_8)).getAsJsonObject();
         log.info("response body: " + json.toString());
         json.remove("balance");
         log.info("modified response body: " + json.toString());
         byte[] newContent = json.toString().getBytes(CharsetUtil.UTF_8);
-        response.setContent(ChannelBuffers.copiedBuffer(newContent));
+        response.replace(Unpooled.copiedBuffer(newContent));
         HttpHeaders.setContentLength(response, newContent.length);
         return response;
     }

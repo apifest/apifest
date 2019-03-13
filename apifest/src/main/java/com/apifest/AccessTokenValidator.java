@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.apifest.api.AccessToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,8 +40,8 @@ public class AccessTokenValidator {
 
     protected static Logger log = LoggerFactory.getLogger(AccessTokenValidator.class);
 
-    protected static boolean validateTokenScope(String tokenContent, String endpointScope) {
-        String tokenScope = extractTokenScope(tokenContent);
+    protected static boolean validateTokenScope(AccessToken validToken, String endpointScope) {
+        String tokenScope = validToken.getScope();
         if (tokenScope == null) {
             return false;
         }
@@ -58,18 +59,6 @@ public class AccessTokenValidator {
             }
         }
         return false;
-    }
-
-    protected static String extractTokenScope(String tokenContent) {
-        String scope = null;
-        JsonParser parser = new JsonParser();
-        JsonObject jsonObject = parser.parse(tokenContent).getAsJsonObject();
-        JsonElement scopeElement = jsonObject.get("scope");
-        String rs = (scopeElement != null && !scopeElement.isJsonNull()) ? scopeElement.getAsString() : null;
-        if (rs != null && !rs.toString().equals("null")) {
-            scope = rs;
-        }
-        return scope;
     }
 
     protected static String extractAccessToken(String header) {
