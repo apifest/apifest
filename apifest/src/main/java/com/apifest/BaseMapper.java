@@ -50,7 +50,7 @@ public class BaseMapper {
         Map<String, List<String>> queryParams = decoder.parameters();
         Map<String, List<String>> internalQueryParams = internalUrldecoder.parameters();
 
-        QueryStringEncoder encoder = new QueryStringEncoder(internalUrldecoder.path());
+        QueryStringEncoder encoder = new QueryStringEncoder(internalUrldecoder.rawPath());
         for (String key : queryParams.keySet()) {
             for (String value : queryParams.get(key)) {
                 encoder.addParam(key, value);
