@@ -29,7 +29,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public final class RedisConnector {
-    private static final int MAX_CONNECTIONS = 30;
+    private static final int MAX_CONNECTIONS = 300;
     public static final byte WHEN_EXHAUSTED_FAIL = 0;
     private static Set<String> sentinels;
     private static JedisSentinelPool pool;
