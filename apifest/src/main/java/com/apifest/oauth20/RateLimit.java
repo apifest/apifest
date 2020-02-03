@@ -2,6 +2,7 @@ package com.apifest.oauth20;
 
 import java.io.Serializable;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
@@ -35,6 +36,7 @@ public class RateLimit implements Serializable {
         this.perSeconds = perSeconds;
     }
 
+    @JsonIgnore
     public boolean isEmpty() {
         if (requests == null || perSeconds == null) {
             return true;
