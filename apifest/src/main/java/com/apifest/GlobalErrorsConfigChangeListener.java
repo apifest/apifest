@@ -15,6 +15,7 @@
  */
 package com.apifest;
 
+import com.hazelcast.map.MapEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,4 +66,18 @@ public class GlobalErrorsConfigChangeListener implements EntryListener<Integer, 
         ConfigLoader.removeError(event.getKey());
     }
 
+    @Override
+    public void entryExpired(EntryEvent<Integer, String> event) {
+
+    }
+
+    @Override
+    public void mapCleared(MapEvent event) {
+
+    }
+
+    @Override
+    public void mapEvicted(MapEvent event) {
+
+    }
 }

@@ -35,6 +35,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+import com.hazelcast.map.IMap;
 import org.slf4j.Logger;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
@@ -50,7 +51,6 @@ import com.apifest.api.Mapping.EndpointsWrapper;
 import com.apifest.example.AddSenderIdInBodyAction;
 import com.apifest.example.RemoveBalanceFilter;
 import com.apifest.example.ReplaceCustomerIdAction;
-import com.hazelcast.core.IMap;
 
 /**
  * @author Rossitsa Borissova
@@ -67,7 +67,7 @@ public class ConfigLoaderTest {
         HazelcastConfigInstance.configInstance = mock(HazelcastConfigInstance.class);
 
         @SuppressWarnings("unchecked")
-        IMap<String, com.apifest.MappingConfig> mappingsMap = mock(IMap.class);
+        IMap<String, MappingConfig> mappingsMap = mock(IMap.class);
 
         MappingConfig config = mock(MappingConfig.class);
         doReturn(mock(BasicAction.class)).when(config).getAction(any(MappingAction.class));

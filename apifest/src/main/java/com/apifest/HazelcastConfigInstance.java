@@ -23,25 +23,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.hazelcast.config.*;
+import com.hazelcast.map.IMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.hazelcast.config.Config;
-import com.hazelcast.config.ExecutorConfig;
-import com.hazelcast.config.GroupConfig;
-import com.hazelcast.config.InMemoryFormat;
-import com.hazelcast.config.InterfacesConfig;
-import com.hazelcast.config.JoinConfig;
-import com.hazelcast.config.MapConfig;
-import com.hazelcast.config.MapConfig.EvictionPolicy;
-import com.hazelcast.config.MaxSizeConfig;
-import com.hazelcast.config.MaxSizeConfig.MaxSizePolicy;
-import com.hazelcast.config.MulticastConfig;
-import com.hazelcast.config.NetworkConfig;
-import com.hazelcast.config.TcpIpConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IMap;
 
 /**
  * Responsible for creating Hazelcast node in JVM. Reads the configuration for Hazelcast maps used to store mapping
@@ -65,7 +53,10 @@ public class HazelcastConfigInstance {
 
     private void load() {
         Config cfg = createConfiguration();
-        cfg.setGroupConfig(new GroupConfig("apifest-map", ServerConfig.getHazelcastPassword()));
+        PartitionGroupConfig groupConfig = new PartitionGroupConfig();
+        MemberGroupConfig memberConfig = new MemberGroupConfig();
+        groupConfig.addMemberGroupConfig(memberConfig);
+        cfg.setPartitionGroupConfig(groupConfig);
         hzInstance = Hazelcast.newHazelcastInstance(cfg);
         log.debug("Hazelcast instance created");
         MappingConfigChangeListener listener = new MappingConfigChangeListener();
@@ -164,10 +155,14 @@ public class HazelcastConfigInstance {
         mapConfig.setAsyncBackupCount(0);
         mapConfig.setTimeToLiveSeconds(0);
         mapConfig.setMaxIdleSeconds(0);
-        mapConfig.setEvictionPolicy(EvictionPolicy.NONE);
-        mapConfig.setMaxSizeConfig(new MaxSizeConfig(0, MaxSizePolicy.PER_NODE));
-        mapConfig.setEvictionPercentage(0);
-        mapConfig.setMergePolicy("com.hazelcast.map.merge.PutIfAbsentMapMergePolicy");
+        EvictionConfig evictionConfig = new EvictionConfig();
+        evictionConfig.setEvictionPolicy(EvictionPolicy.NONE);
+        evictionConfig.setMaxSizePolicy(MaxSizePolicy.PER_NODE);
+        evictionConfig.setSize(0);
+        mapConfig.setEvictionConfig(evictionConfig);
+        MergePolicyConfig mergePolicyConfig = new MergePolicyConfig();
+        mergePolicyConfig.setPolicy("com.hazelcast.spi.merge.PutIfAbsentMergePolicy");
+        mapConfig.setMergePolicyConfig(mergePolicyConfig);
         Map<String, MapConfig> configs = new HashMap<String, MapConfig>();
         configs.put(mapConfig.getName(), mapConfig);
         return configs;

@@ -18,7 +18,7 @@ package com.apifest;
 
 import com.apifest.api.BasicAction;
 import com.apifest.api.MappingAction;
-import com.hazelcast.core.IMap;
+import com.hazelcast.map.IMap;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.apache.http.HttpHeaders;

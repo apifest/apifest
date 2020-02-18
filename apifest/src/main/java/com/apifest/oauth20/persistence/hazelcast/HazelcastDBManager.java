@@ -26,14 +26,11 @@ import com.apifest.oauth20.RateLimit;
 import com.apifest.oauth20.Scope;
 import com.apifest.oauth20.persistence.DBManager;
 import com.hazelcast.config.*;
-import com.hazelcast.config.MapConfig.EvictionPolicy;
-import com.hazelcast.config.MaxSizeConfig.MaxSizePolicy;
-import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IMap;
-import com.hazelcast.query.EntryObject;
+import com.hazelcast.map.IMap;
 import com.hazelcast.query.Predicate;
 import com.hazelcast.query.PredicateBuilder;
+import com.hazelcast.query.Predicates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,17 +64,12 @@ public class HazelcastDBManager implements DBManager {
     private static final int MAX_POOL_SIZE = 64;
 
     static {
-        // REVISIT: Hazelcast configuration
-//        Config config = createConfiguration();
-//        GroupConfig groupConfig = new GroupConfig("apifest-oauth20", ServerConfig.getHazelcastClusterPassword());
-//        config.setGroupConfig(groupConfig);
-//        config.setMapConfigs(createMapConfigs());
-//        hazelcastClient = Hazelcast.newHazelcastInstance(config);
         hazelcastClient = HazelcastConfigInstance.instance().getHazelcastInstance();
-        hazelcastClient.getMap(APIFEST_AUTH_CODE).addIndex("codeURI", false);
+        IndexConfig ic = new IndexConfig();
+       /* hazelcastClient.getMap(APIFEST_AUTH_CODE).addIndex("codeURI", false);
         hazelcastClient.getMap(APIFEST_ACCESS_TOKEN).addIndex("refreshTokenByClient", false);
         hazelcastClient.getMap(APIFEST_ACCESS_TOKEN).addIndex("accessTokenByUserIdAndClient", false);
-        hazelcastClient.getMap(APIFEST_ACCESS_TOKEN).addIndex("userId", false);
+        hazelcastClient.getMap(APIFEST_ACCESS_TOKEN).addIndex("userId", false);*/
     }
 
     private static Map<String, MapConfig> createMapConfigs() {
@@ -97,10 +89,14 @@ public class HazelcastDBManager implements DBManager {
         MapConfig mapConfig = new MapConfig(mapName);
         mapConfig.setInMemoryFormat(InMemoryFormat.OBJECT);
         mapConfig.setBackupCount(1);
-        mapConfig.setEvictionPolicy(EvictionPolicy.NONE);
-        mapConfig.setMaxSizeConfig(new MaxSizeConfig(0, MaxSizePolicy.PER_NODE));
-        mapConfig.setEvictionPercentage(0);
-        mapConfig.setMergePolicy("com.hazelcast.map.merge.PutIfAbsentMapMergePolicy");
+        EvictionConfig evictionConfig = new EvictionConfig();
+        evictionConfig.setEvictionPolicy(EvictionPolicy.NONE);
+        evictionConfig.setMaxSizePolicy(MaxSizePolicy.PER_NODE);
+        evictionConfig.setSize(0);
+        mapConfig.setEvictionConfig(evictionConfig);
+        MergePolicyConfig mergePolicyConfig = new MergePolicyConfig();
+        mergePolicyConfig.setPolicy("com.hazelcast.spi.merge.PutIfAbsentMergePolicy");
+        mapConfig.setMergePolicyConfig(mergePolicyConfig);
         return mapConfig;
     }
 
@@ -213,8 +209,8 @@ public class HazelcastDBManager implements DBManager {
     @Override
     @SuppressWarnings("unchecked")
     public AccessToken findAccessTokenByRefreshToken(String refreshToken, String clientId) {
-        EntryObject eo = new PredicateBuilder().getEntryObject();
-        Predicate<String, String> predicate = eo.get("refreshTokenByClient").equal(refreshToken + clientId);
+        PredicateBuilder.EntryObject eo = Predicates.newPredicateBuilder().getEntryObject();
+        Predicate<String, PersistentAccessToken> predicate = eo.get("refreshTokenByClient").equal(refreshToken + clientId);
         Collection<PersistentAccessToken> values = getAccessTokenContainer().values(predicate);
         if (values.isEmpty()) {
             return null;
@@ -251,8 +247,8 @@ public class HazelcastDBManager implements DBManager {
     @Override
     @SuppressWarnings("unchecked")
     public AuthCode findAuthCode(String authCode, String redirectUri) {
-        EntryObject eo = new PredicateBuilder().getEntryObject();
-        Predicate<String, String> predicate = eo.get("codeURI").equal(authCode + redirectUri + true);
+        PredicateBuilder.EntryObject eo = Predicates.newPredicateBuilder().getEntryObject();
+        Predicate<String, PersistentAuthCode> predicate = eo.get("codeURI").equal(authCode + redirectUri + true);
         Collection<PersistentAuthCode> values = getAuthCodeContainer().values(predicate);
         if (values.isEmpty()) {
             return null;
@@ -370,8 +366,8 @@ public class HazelcastDBManager implements DBManager {
     @SuppressWarnings("unchecked")
     public List<AccessToken> getAccessTokenByUserIdAndClientApp(String userId, String clientId) {
         List<AccessToken> accessTokens = new ArrayList<AccessToken>();
-        EntryObject eo = new PredicateBuilder().getEntryObject();
-        Predicate<String, String> predicate = eo.get("accessTokenByUserIdAndClient").equal(userId + clientId + true);
+        PredicateBuilder.EntryObject eo = Predicates.newPredicateBuilder().getEntryObject();
+        Predicate<String, PersistentAccessToken> predicate = eo.get("accessTokenByUserIdAndClient").equal(userId + clientId + true);
         Collection<PersistentAccessToken> values = getAccessTokenContainer().values(predicate);
         if (!values.isEmpty()) {
             for (PersistentAccessToken token : values) {
@@ -384,8 +380,8 @@ public class HazelcastDBManager implements DBManager {
     @Override
     @SuppressWarnings("unchecked")
     public void removeUserTokens(String userId) {
-        EntryObject eo = new PredicateBuilder().getEntryObject();
-        Predicate<String, String> predicate = eo.get("userId").equal("userId");
+        PredicateBuilder.EntryObject eo = Predicates.newPredicateBuilder().getEntryObject();
+        Predicate<String, PersistentAccessToken> predicate = eo.get("userId").equal("userId");
         IMap<String, PersistentAccessToken> container = getAccessTokenContainer();
         Set<String> keys = container.keySet(predicate);
         if (!keys.isEmpty()) {

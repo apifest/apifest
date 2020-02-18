@@ -31,6 +31,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import com.hazelcast.map.IMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +43,6 @@ import com.apifest.api.MappingEndpoint;
 import com.apifest.api.MappingError;
 import com.apifest.api.MappingException;
 import com.apifest.api.ResponseFilter;
-import com.hazelcast.core.IMap;
 
 /**
  * Loads/reloads all mapping and global errors configurations.

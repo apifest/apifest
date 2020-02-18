@@ -16,6 +16,7 @@
 
 package com.apifest;
 
+import com.hazelcast.map.MapEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,4 +66,18 @@ public class MappingConfigChangeListener implements EntryListener<String, Mappin
         ConfigLoader.removeMapping(event.getKey());
     }
 
+    @Override
+    public void entryExpired(EntryEvent<String, MappingConfig> event) {
+
+    }
+
+    @Override
+    public void mapCleared(MapEvent event) {
+
+    }
+
+    @Override
+    public void mapEvicted(MapEvent event) {
+
+    }
 }
