@@ -104,7 +104,7 @@ public class MappingConfig implements Serializable {
         Set<MappingPattern> patterns = getMappings().keySet();
         for (MappingPattern p : patterns) {
             Matcher m = p.getPattern().matcher(rawUri.trim());
-            if (m.find() && p.getMethod().equals(method)) {
+            if (m.matches() && p.getMethod().equals(method)) {
                 MappingEndpoint cur = getMappings().get(p);
                 String newUri = cur.getInternalEndpoint();
                 // replace variables with their values
