@@ -114,7 +114,8 @@ public class HttpRequestHandler extends ChannelInboundHandlerAdapter {
             try {
                 uriPath = new URI(rawUri).getRawPath();
             } catch (URISyntaxException e1) {
-                e1.printStackTrace();
+                writeResponseToChannel(channel, req, HttpResponseFactory.createISEResponse());
+                return;
             }
             HttpMethod method = req.getMethod();
             if (RELOAD_URI.equals(rawUri) && method.equals(HttpMethod.GET)) {
