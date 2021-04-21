@@ -79,6 +79,9 @@ public final class ServerConfig {
 
     private static String cassandraContactPoints;
     public static Integer rateLimitResetTimeinSec = 60;
+    private static boolean cacheDB = false;
+    private static Integer cacheRetention;
+    private static Integer cacheSize;
 
     private ServerConfig() {
     }
@@ -117,6 +120,9 @@ public final class ServerConfig {
         connectTimeout = DEFAULT_CONNECT_TIMEOUT;
         apifestNodes = DEFAULT_APIFEST_HOST;
         hazelcastPassword = DEFAULT_HAZELCAST_PASS;
+        cacheDB = false;
+        cacheRetention = 50_000;
+        cacheSize = 10_000;
     }
 
     public static void loadProperties(InputStream in) throws IOException {
@@ -179,6 +185,20 @@ public final class ServerConfig {
             log.warn("rateLimit.reset.time_in_seconds property is not defined in properties file");
         } else {
             rateLimitResetTimeinSec = Integer.valueOf(rateLimitResetTimeString);
+        }
+        String cacheDBString = props.getProperty("cacheDB");
+        if (cacheDBString != null && cacheDBString.equals("1")) {
+            cacheDB = true;
+        }
+
+        String cacheRetentionString = props.getProperty("cacheRetention");
+        if (cacheRetentionString != null && !cacheRetentionString.isEmpty()) {
+            cacheRetention = Integer.valueOf(cacheRetentionString);
+        }
+
+        String cacheSizeString = props.getProperty("cacheSize");
+        if (cacheSizeString != null && !cacheSizeString.isEmpty()) {
+            cacheSize = Integer.valueOf(cacheSizeString);
         }
         loadCustomAuthentication();
     }
@@ -381,4 +401,7 @@ public final class ServerConfig {
         return rateLimitResetTimeinSec;
     }
 
+    public static boolean shoudCacheDB() {
+        return cacheDB;
+    }
 }

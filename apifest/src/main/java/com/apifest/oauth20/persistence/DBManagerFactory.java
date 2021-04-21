@@ -48,6 +48,9 @@ public class DBManagerFactory {
                 dbManager = new HazelcastDBManager();
             }
         }
+        if (ServerConfig.shoudCacheDB()) {
+            dbManager = new CachedDBManager(dbManager);
+        }
         return dbManager;
     }
 

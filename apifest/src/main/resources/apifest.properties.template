@@ -17,3 +17,10 @@ custom.grant_type.class=
 hazelcast.password=
 cassandra.contanctPoints=
 rateLimit.reset.time_in_seconds=
+# Enables database caching. 1 enables, anything else or missing disables
+cacheDB=
+# Time in milliseconds the tokens will live in the cache. Even if they are used after this time has elapsed
+# the token will be evicted.
+cacheRetention=
+# Number of items that will fit in the cache
+cacheSize=
