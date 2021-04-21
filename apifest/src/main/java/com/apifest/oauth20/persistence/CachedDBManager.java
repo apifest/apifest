@@ -1,5 +1,7 @@
 package com.apifest.oauth20.persistence;
 
+import com.apifest.ConfigLoader;
+import com.apifest.ServerConfig;
 import com.apifest.api.AccessToken;
 import com.apifest.oauth20.*;
 import com.apifest.oauth20.persistence.DBManager;
@@ -24,8 +26,8 @@ public class CachedDBManager implements DBManager {
     public CachedDBManager(DBManager dbManager) {
         this.dbManager = dbManager;
         tokensCache = CacheBuilder.newBuilder()
-                .maximumSize(10_000)
-                .expireAfterWrite(30, TimeUnit.SECONDS)
+                .maximumSize(ServerConfig.getCacheSize())
+                .expireAfterWrite(ServerConfig.getCacheRetention(), TimeUnit.MILLISECONDS)
                 .build(new TokenCacheLoader());
     }
 

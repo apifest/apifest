@@ -404,4 +404,12 @@ public final class ServerConfig {
     public static boolean shoudCacheDB() {
         return cacheDB;
     }
+
+    public static int getCacheSize() {
+        return cacheSize;
+    }
+
+    public static int getCacheRetention() {
+        return cacheRetention;
+    }
 }
